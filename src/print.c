@@ -43,3 +43,26 @@ int p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
 	va_end(copy);
 	return ret;
 }
+
+int p_swprintf(wchar_t *buf, size_t size, const wchar_t *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	int ret = p_vswprintf(buf, size, fmt, args);
+	va_end(args);
+	return ret;
+}
+
+int p_vswprintf(wchar_t *buf, size_t size, const wchar_t *fmt, va_list args)
+{
+	va_list copy;
+	va_copy(copy, args);
+	int ret;
+#if defined(P_WIN)
+	ret = vswprintf_s(buf, size, fmt, args);
+#else
+	ret = vswprintf(buf, size, fmt, args);
+#endif
+	va_end(copy);
+	return ret;
+}
