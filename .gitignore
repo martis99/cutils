@@ -1,0 +1,11 @@
+*.sln
+*.vcxproj
+*.user
+*.lib
+*.pdb
+
+CMakeLists.txt
+Makefile
+
+.vs/
+bin/
