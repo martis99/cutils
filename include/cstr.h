@@ -4,7 +4,6 @@
 #include <wchar.h>
 
 unsigned int cstr_len(const char *str);
-unsigned int cstrn_len(const char *str, unsigned int max_len);
 int cstr_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len);
 int cstrn_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len, unsigned int len);
 void *cstr_cpy(char *dst, unsigned int dst_len, const char *src, unsigned int src_len);

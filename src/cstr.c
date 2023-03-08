@@ -5,20 +5,9 @@
 
 #include <string.h>
 
-#include <string.h>
-
 unsigned int cstr_len(const char *str)
 {
 	return (unsigned int)strlen(str);
-}
-
-unsigned int cstrn_len(const char *str, unsigned int max_len)
-{
-#if defined(P_WIN)
-	return (unsigned int)strnlen_s(str, max_len);
-#else
-	return (unsigned int)strnlen(str, max_len);
-#endif
 }
 
 int cstr_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len)
