@@ -5,6 +5,8 @@
 
 #include <string.h>
 
+#include <string.h>
+
 unsigned int cstr_len(const char *str)
 {
 	return (unsigned int)strlen(str);
@@ -32,6 +34,16 @@ int cstrn_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigne
 void *cstr_cpy(char *dst, unsigned int dst_len, const char *src, unsigned int src_len)
 {
 	return m_cpy(dst, dst_len, src, src_len * sizeof(char));
+}
+
+char *cstr_chr(const char *str, char c)
+{
+	return strchr(str, c);
+}
+
+char *cstr_str(const char *str, const char *s)
+{
+	return strstr(str, s);
 }
 
 int cstr_replace(const char *src, unsigned int src_len, char *dst, unsigned int dst_len, const char *from, unsigned int from_len, const char *to, unsigned int to_len)
