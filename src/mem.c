@@ -42,6 +42,11 @@ void *m_malloc(size_t size)
 	return memset(ptr, 0, size);
 }
 
+void *m_memset(void *dst, int val, size_t size)
+{
+	return memset(dst, val, size);
+}
+
 void *m_cpy(void *dst, size_t dst_size, const void *src, size_t src_size)
 {
 #if defined(P_WIN)

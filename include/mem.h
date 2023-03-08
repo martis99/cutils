@@ -13,6 +13,7 @@ void mem_init(mem_stats_t *stats);
 void *m_realloc(void *memory, size_t new_size, size_t old_size);
 void *m_calloc(size_t count, size_t size);
 void *m_malloc(size_t size);
+void *m_memset(void *dst, int val, size_t size);
 void *m_cpy(void *dst, size_t dst_size, const void *src, size_t src_size);
 int m_cmp(const void *l, const void *r, size_t size);
 void m_free(void *memory, size_t size);
