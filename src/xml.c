@@ -6,8 +6,8 @@
 
 static inline int xml_init_tag(xml_tag_t *tag)
 {
-	array_init(&tag->attrs, 2, sizeof(xml_attr_t));
-	array_init(&tag->childs, 2, sizeof(xml_tag_t));
+	array_init(&tag->attrs, 8, sizeof(xml_attr_t));
+	array_init(&tag->childs, 8, sizeof(xml_tag_t));
 	return 0;
 }
 
