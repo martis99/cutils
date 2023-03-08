@@ -3,7 +3,13 @@
 
 #include <stddef.h>
 
-void mem_init(size_t *mem_usage);
+typedef struct mem_stats_s {
+	size_t mem;
+	size_t max_mem;
+	unsigned int reallocs;
+} mem_stats_t;
+
+void mem_init(mem_stats_t *stats);
 void *m_realloc(void *memory, size_t new_size, size_t old_size);
 void *m_calloc(size_t count, size_t size);
 void *m_malloc(size_t size);

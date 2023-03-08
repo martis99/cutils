@@ -5,29 +5,36 @@
 #include <memory.h>
 #include <stdlib.h>
 
-static size_t *s_mem_usage;
+static mem_stats_t *s_mem_stats;
 
-void mem_init(size_t *mem_usage)
+void mem_init(mem_stats_t *stats)
 {
-	s_mem_usage = mem_usage;
+	s_mem_stats = stats;
 }
+
+#define MAX(a, b) (a) > (b) ? (a) : (b)
 
 void *m_realloc(void *memory, size_t new_size, size_t old_size)
 {
-	*s_mem_usage -= old_size;
-	*s_mem_usage += new_size;
+	s_mem_stats->mem -= old_size;
+	s_mem_stats->mem += new_size;
+	s_mem_stats->max_mem = MAX(s_mem_stats->mem, s_mem_stats->max_mem);
+	s_mem_stats->reallocs++;
 	return realloc(memory, new_size);
 }
 
 void *m_calloc(size_t count, size_t size)
 {
-	*s_mem_usage += count * size;
+	s_mem_stats->mem += count * size;
+	s_mem_stats->max_mem = MAX(s_mem_stats->mem, s_mem_stats->max_mem);
 	return calloc(count, size);
 }
 
 void *m_malloc(size_t size)
 {
-	*s_mem_usage += size;
+	s_mem_stats->mem += size;
+	s_mem_stats->max_mem = MAX(s_mem_stats->mem, s_mem_stats->max_mem);
+
 	void *ptr = malloc(size);
 	if (ptr == NULL) {
 		return NULL;
@@ -52,6 +59,6 @@ int m_cmp(const void *l, const void *r, size_t size)
 
 void m_free(void *memory, size_t size)
 {
-	*s_mem_usage -= size;
+	s_mem_stats->mem -= size;
 	free(memory);
 }
