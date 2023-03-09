@@ -202,31 +202,31 @@ int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_
 	path_t child_path = *path;
 	path_child(&child_path, "*.*", 3);
 
-	if ((find = FindFirstFileA(child_path.path, &file)) == INVALID_HANDLE_VALUE) {
+	if ((find = FindFirstFileA(child_path.path, (LPWIN32_FIND_DATAA)&file)) == INVALID_HANDLE_VALUE) {
 		return 1;
 	}
 	child_path.len = path->len;
 
 	do {
-		if (strcmp(file.cFileName, ".") == 0 || strcmp(file.cFileName, "..") == 0) {
+		if (strcmp((char *)file.cFileName, ".") == 0 || strcmp((char *)file.cFileName, "..") == 0) {
 			continue;
 		}
 
 		files_foreach_cb cb = file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? on_folder : on_file;
 		if (cb) {
-			if (path_child(&child_path, file.cFileName, cstr_len(file.cFileName))) {
+			if (path_child(&child_path, (char *)file.cFileName, cstr_len((char *)file.cFileName))) {
 				child_path.len = path->len;
 				continue;
 			}
 
-			int ret = cb(&child_path, file.cFileName, priv);
+			int ret = cb(&child_path, (char *)file.cFileName, priv);
 
 			child_path.len = path->len;
 			if (ret < 0) {
 				return ret;
 			}
 		}
-	} while (FindNextFileA(find, &file));
+	} while (FindNextFileA(find, (LPWIN32_FIND_DATAA)&file));
 
 	FindClose(find);
 
