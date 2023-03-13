@@ -12,17 +12,17 @@ unsigned int cstr_len(const char *str)
 
 int cstr_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len)
 {
-	return str1_len == str2_len && m_cmp(str1, str2, str1_len * sizeof(char)) == 0;
+	return str1_len == str2_len && m_memcmp(str1, str2, str1_len * sizeof(char)) == 0;
 }
 
 int cstrn_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len, unsigned int len)
 {
-	return str1_len >= len && str2_len >= len && m_cmp(str1, str2, len * sizeof(char)) == 0;
+	return str1_len >= len && str2_len >= len && m_memcmp(str1, str2, len * sizeof(char)) == 0;
 }
 
 void *cstr_cpy(char *dst, unsigned int dst_len, const char *src, unsigned int src_len)
 {
-	return m_cpy(dst, dst_len, src, src_len * sizeof(char));
+	return m_memcpy(dst, dst_len, src, src_len * sizeof(char));
 }
 
 char *cstr_chr(const char *str, char c)

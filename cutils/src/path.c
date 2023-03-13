@@ -10,7 +10,7 @@ int path_init(path_t *path, const char *dir, unsigned int len)
 		return 1;
 	}
 
-	m_cpy(path->path, len, dir, len);
+	m_memcpy(path->path, len, dir, len);
 	path->len = (unsigned int)len;
 
 	path->path[path->len] = '\0';
@@ -27,7 +27,7 @@ int path_child_s(path_t *path, const char *dir, unsigned int len, char s)
 	if (s != 0) {
 		path->path[path->len++] = s;
 	}
-	m_cpy(path->path + path->len, len, dir, len);
+	m_memcpy(path->path + path->len, len, dir, len);
 	path->len += (unsigned int)len;
 
 	path->path[path->len] = '\0';
@@ -73,7 +73,7 @@ int path_set_len(path_t *path, unsigned int len)
 
 int path_ends(const path_t *path, const char *str, unsigned int len)
 {
-	return path->len > len && m_cmp(path->path + path->len - len, str, (size_t)len) == 0;
+	return path->len > len && m_memcmp(path->path + path->len - len, str, (size_t)len) == 0;
 }
 
 int path_calc_rel(const char *path, unsigned int path_len, const char *dest, unsigned int dest_len, path_t *out)

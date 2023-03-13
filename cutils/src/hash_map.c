@@ -72,18 +72,12 @@ static inline uint32_t hash_data(const unsigned char *data, size_t size)
 
 	uint64_t last = size & 0xff;
 	switch (size % 8) {
-	case 7:
-		last |= (uint64_t)data[6] << 56;
-	case 6:
-		last |= (uint64_t)data[5] << 48;
-	case 5:
-		last |= (uint64_t)data[4] << 40;
-	case 4:
-		last |= (uint64_t)data[3] << 32;
-	case 3:
-		last |= (uint64_t)data[2] << 24;
-	case 2:
-		last |= (uint64_t)data[1] << 16;
+	case 7: last |= (uint64_t)data[6] << 56;
+	case 6: last |= (uint64_t)data[5] << 48;
+	case 5: last |= (uint64_t)data[4] << 40;
+	case 4: last |= (uint64_t)data[3] << 32;
+	case 3: last |= (uint64_t)data[2] << 24;
+	case 2: last |= (uint64_t)data[1] << 16;
 	case 1:
 		last |= (uint64_t)data[0] << 8;
 		hash ^= last;
@@ -100,7 +94,7 @@ static struct bucket *find_entry(const hashmap_t *map, void *key, size_t ksize, 
 	for (;;) {
 		struct bucket *entry = &map->buckets[index];
 
-		if (entry->key == NULL || (entry->ksize == ksize && entry->hash == hash && m_cmp(entry->key, key, ksize) == 0)) {
+		if (entry->key == NULL || (entry->ksize == ksize && entry->hash == hash && m_memcmp(entry->key, key, ksize) == 0)) {
 			return entry;
 		}
 

@@ -70,7 +70,7 @@ xml_attr_t *xml_add_attr_c(xml_tag_t *tag, const char *name, unsigned int name_l
 		.val  = { .data = NULL, .len = val_len, .mem = 1 },
 	};
 	attr.val.data = m_calloc((size_t)attr.val.len + 1, sizeof(char));
-	m_cpy(attr.val.tdata, attr.val.len, val, attr.val.len);
+	m_memcpy(attr.val.tdata, attr.val.len, val, attr.val.len);
 	return array_add(&tag->attrs, &attr);
 }
 
@@ -118,7 +118,7 @@ xml_tag_t *xml_add_child_val(xml_tag_t *tag, const char *name, unsigned int name
 		.val	= { .data = NULL, .len = val_len, .mem = 1 },
 	};
 	child.val.data = m_calloc((size_t)child.val.len + 1, sizeof(char));
-	m_cpy(child.val.tdata, child.val.len, val, val_len);
+	m_memcpy(child.val.tdata, child.val.len, val, val_len);
 	xml_init_tag(&child);
 	return array_add(&tag->childs, &child);
 }

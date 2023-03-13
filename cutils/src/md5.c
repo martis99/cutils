@@ -56,10 +56,10 @@ int md5(const char *msg, size_t msg_len, unsigned char *buf, size_t buf_size, ch
 		return 1;
 	}
 
-	m_cpy(buf, buf_size, msg, msg_len);
+	m_memcpy(buf, buf_size, msg, msg_len);
 	buf[msg_len] = (unsigned char)0x80;
 	size_t bits  = 8 * msg_len;
-	m_cpy(buf + 64 * chunk_cnt - 8, buf_size, &bits, 4);
+	m_memcpy(buf + 64 * chunk_cnt - 8, buf_size, &bits, 4);
 
 	for (size_t chunk = 0; chunk < chunk_cnt; chunk++) {
 		unsigned int *w = (unsigned int *)(buf + chunk * 64);

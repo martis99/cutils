@@ -6,12 +6,9 @@
 static inline int switch_int(char c)
 {
 	switch (c) {
-	case '0':
-		return 0;
-	case '1':
-		return 1;
-	default:
-		return -1;
+	case '0': return 0;
+	case '1': return 1;
+	default: return -1;
 	}
 }
 
