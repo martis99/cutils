@@ -5,7 +5,7 @@
 
 typedef struct m_stats_s {
 	size_t mem;
-	size_t max_mem;
+	size_t mem_max;
 	unsigned int allocs;
 	unsigned int reallocs;
 } m_stats_t;
