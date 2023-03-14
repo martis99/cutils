@@ -92,8 +92,6 @@ void *tree_get_data(const tree_t *tree, tnode_t node)
 	return &get_node(tree, node)->data;
 }
 
-static void node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last);
-
 static void node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last)
 {
 	cb(tree, node, depth, last, priv);

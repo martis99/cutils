@@ -1,0 +1,5 @@
+NAME: tree
+TYPE: EXE
+SOURCE: src
+DEPENDS: cutils
+INCLUDES: cutils
