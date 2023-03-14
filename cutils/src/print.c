@@ -2,6 +2,10 @@
 
 #include "platform.h"
 
+#if defined(T_WIN)
+	#include <io.h>
+#endif
+
 int p_fprintf(FILE *f, const char *fmt, ...)
 {
 	va_list args;
@@ -74,4 +78,55 @@ int p_vswprintf(wchar_t *buf, size_t size, const wchar_t *fmt, va_list args)
 #endif
 	va_end(copy);
 	return ret;
+}
+
+int p_set_u16(FILE *f)
+{
+#if defined(T_WIN)
+	return _setmode(_fileno(f), _O_U16TEXT);
+#else
+	return 0;
+#endif
+}
+
+int p_unset_u16(FILE *f, int mode)
+{
+#if defined(T_WIN)
+	return _setmode(_fileno(f), mode);
+#else
+	return 0;
+#endif
+}
+
+void p_ur(FILE *f)
+{
+#if defined(T_WIN)
+	int mode = p_set_u16(f);
+	fwprintf_s(f, L"└─");
+	p_unset_u16(f, mode);
+#else
+	fprintf(f, "└─");
+#endif
+}
+
+void p_v(FILE *f)
+{
+#if defined(T_WIN)
+	int mode = p_set_u16(f);
+	fwprintf_s(f, L"│ ");
+	p_unset_u16(f, mode);
+#else
+	fprintf(f, "│ ");
+#endif
+}
+
+void p_vr(FILE *f)
+{
+#if defined(T_WIN)
+	int mode = p_set_u16(f);
+	fwprintf_s(f, L"├─");
+	p_unset_u16(f, mode);
+#else
+	fprintf(f, "├─");
+#endif
 }

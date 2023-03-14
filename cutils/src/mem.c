@@ -1,6 +1,7 @@
 #include "mem.h"
 
 #include "platform.h"
+#include "print.h"
 
 #include <memory.h>
 #include <stdlib.h>
@@ -15,6 +16,13 @@ void m_init(m_stats_t *stats)
 const m_stats_t *m_get_stats()
 {
 	return s_stats;
+}
+
+void m_print(FILE *f)
+{
+	p_fprintf(f, "mem:      %zd (max: %zd)\n", s_stats->mem, s_stats->mem_max);
+	p_fprintf(f, "allocs:   %d\n", s_stats->allocs);
+	p_fprintf(f, "reallocs: %d\n", s_stats->reallocs);
 }
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)

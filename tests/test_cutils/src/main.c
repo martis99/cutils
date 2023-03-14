@@ -1,12 +1,11 @@
 #include "t_tree.h"
 
+#include "print.h"
 #include "tree.h"
 
 #include "test.h"
 
 #include "mem.h"
-
-#include <stdio.h>
 
 TEST(test)
 {
@@ -15,16 +14,9 @@ TEST(test)
 	SEND;
 }
 
-static void print_node(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+static void print_tree(FILE *f, void *data)
 {
-	for (int i = 0; i < depth - 1; i++) {
-		printf((1 << i) & last ? "  " : "│ ");
-	}
-
-	if (depth > 0) {
-		printf("%s", (1 << (depth - 1)) & last ? "└─" : "├─");
-	}
-	printf("%d\n", *(int *)tree_get_data(tree, node));
+	p_fprintf(f, "%d\n", *(int *)data);
 }
 
 static void tree_ex(m_stats_t *m_stats)
@@ -64,7 +56,7 @@ static void tree_ex(m_stats_t *m_stats)
 
 	*(int *)tree_get_data(&tree, (n1111 = tree_add_child(&tree, n111))) = 1111;
 
-	tree_iterate_pre(&tree, 0, print_node, NULL);
+	tree_print(&tree, 0, stdout, print_tree);
 
 	printf("mem: %zd\n", m_stats->mem);
 
@@ -87,9 +79,9 @@ int main(int argc, char **argv)
 
 	tree_ex(&m_stats);
 
-	printf("mem:      %zd (max: %zd)\n", m_stats.mem, m_stats.mem_max);
-	printf("allocs:   %d\n", m_stats.allocs);
-	printf("reallocs: %d\n", m_stats.reallocs);
+	printf("\n");
+
+	m_print(stdout);
 
 	return 0;
 }

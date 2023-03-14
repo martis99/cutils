@@ -1,6 +1,7 @@
 #include "tree.h"
 
 #include "mem.h"
+#include "print.h"
 
 typedef struct header_s {
 	tnode_t child;
@@ -110,4 +111,41 @@ static void node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb c
 void tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv)
 {
 	node_iterate_pre(tree, node, cb, priv, 0, 0);
+}
+
+typedef struct node_print_priv_s {
+	FILE *f;
+	tree_print_cb cb;
+} node_print_priv_t;
+
+static void node_print(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+{
+	node_print_priv_t *p = priv;
+
+	for (int i = 0; i < depth - 1; i++) {
+		if ((1 << i) & last) {
+			p_fprintf(p->f, "  ");
+		} else {
+			p_v(p->f);
+		}
+	}
+
+	if (depth > 0) {
+		if ((1 << (depth - 1)) & last) {
+			p_ur(p->f);
+		} else {
+			p_vr(p->f);
+		}
+	}
+
+	p->cb(p->f, tree_get_data(tree, node));
+}
+
+void tree_print(const tree_t *tree, tnode_t node, FILE *f, tree_print_cb cb)
+{
+	node_print_priv_t priv = {
+		.f  = f,
+		.cb = cb,
+	};
+	tree_iterate_pre(tree, 0, node_print, &priv);
 }

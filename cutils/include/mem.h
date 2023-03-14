@@ -1,7 +1,7 @@
 #ifndef MEM_H
 #define MEM_H
 
-#include <stddef.h>
+#include <stdio.h>
 
 typedef struct m_stats_s {
 	size_t mem;
@@ -12,6 +12,7 @@ typedef struct m_stats_s {
 
 void m_init(m_stats_t *stats);
 const m_stats_t *m_get_stats();
+void m_print(FILE *f);
 
 void *m_malloc(size_t size);
 void *m_calloc(size_t count, size_t size);
