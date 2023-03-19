@@ -41,8 +41,8 @@ xml_attr_t *xml_add_attr_f(xml_tag_t *tag, const char *name, unsigned int name_l
 
 xml_tag_t *xml_add_child(xml_tag_t *tag, const char *name, unsigned int name_len);
 xml_tag_t *xml_add_child_val(xml_tag_t *tag, const char *name, unsigned int name_len, const char *val, unsigned int val_len);
-xml_attr_t *xml_add_child_val_v(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, va_list args);
-xml_attr_t *xml_add_child_val_f(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, ...);
+xml_tag_t *xml_add_child_val_v(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, va_list args);
+xml_tag_t *xml_add_child_val_f(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, ...);
 
 xml_str_t *xml_set_val(xml_tag_t *tag, const char *val, unsigned int val_len);
 

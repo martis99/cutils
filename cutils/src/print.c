@@ -2,7 +2,11 @@
 
 #include "platform.h"
 
-#if defined(T_WIN)
+#include <stdio.h>
+#include <fcntl.h>
+#include <wchar.h>
+
+#if defined(P_WIN)
 	#include <io.h>
 #endif
 
@@ -82,7 +86,7 @@ int p_vswprintf(wchar_t *buf, size_t size, const wchar_t *fmt, va_list args)
 
 int p_set_u16(FILE *f)
 {
-#if defined(T_WIN)
+#if defined(P_WIN)
 	return _setmode(_fileno(f), _O_U16TEXT);
 #else
 	return 0;
@@ -91,7 +95,7 @@ int p_set_u16(FILE *f)
 
 int p_unset_u16(FILE *f, int mode)
 {
-#if defined(T_WIN)
+#if defined(P_WIN)
 	return _setmode(_fileno(f), mode);
 #else
 	return 0;
@@ -100,20 +104,21 @@ int p_unset_u16(FILE *f, int mode)
 
 void p_ur(FILE *f)
 {
-#if defined(T_WIN)
+#if defined(P_WIN)
 	int mode = p_set_u16(f);
-	fwprintf_s(f, L"└─");
+	fwprintf_s(f, L"\u2514\u2500");
 	p_unset_u16(f, mode);
 #else
 	fprintf(f, "└─");
 #endif
+
 }
 
 void p_v(FILE *f)
 {
-#if defined(T_WIN)
+#if defined(P_WIN)
 	int mode = p_set_u16(f);
-	fwprintf_s(f, L"│ ");
+	fwprintf_s(f, L"\u2502 ");
 	p_unset_u16(f, mode);
 #else
 	fprintf(f, "│ ");
@@ -122,9 +127,9 @@ void p_v(FILE *f)
 
 void p_vr(FILE *f)
 {
-#if defined(T_WIN)
+#if defined(P_WIN)
 	int mode = p_set_u16(f);
-	fwprintf_s(f, L"├─");
+	fwprintf_s(f, L"\u251C\u2500");
 	p_unset_u16(f, mode);
 #else
 	fprintf(f, "├─");

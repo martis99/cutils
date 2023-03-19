@@ -123,7 +123,7 @@ xml_tag_t *xml_add_child_val(xml_tag_t *tag, const char *name, unsigned int name
 	return array_add(&tag->childs, &child);
 }
 
-xml_attr_t *xml_add_child_val_v(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, va_list args)
+xml_tag_t *xml_add_child_val_v(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, va_list args)
 {
 	xml_tag_t child = {
 		.name	= { .data = name, .len = name_len, .mem = 0 },
@@ -139,11 +139,11 @@ xml_attr_t *xml_add_child_val_v(xml_tag_t *tag, const char *name, unsigned int n
 	return array_add(&tag->childs, &child);
 }
 
-xml_attr_t *xml_add_child_val_f(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, ...)
+xml_tag_t *xml_add_child_val_f(xml_tag_t *tag, const char *name, unsigned int name_len, const char *format, ...)
 {
 	va_list args;
 	va_start(args, format);
-	xml_attr_t *attr = xml_add_child_val_v(tag, name, name_len, format, args);
+	xml_tag_t *attr = xml_add_child_val_v(tag, name, name_len, format, args);
 	va_end(args);
 	return attr;
 }
