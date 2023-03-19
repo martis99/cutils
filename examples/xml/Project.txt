@@ -1,0 +1,5 @@
+NAME: xml
+TYPE: EXE
+SOURCE: src
+DEPENDS: cutils
+INCLUDES: cutils
