@@ -82,6 +82,32 @@ tnode_t tree_get_child(const tree_t *tree, tnode_t node)
 	return get_node(tree, node)->header.child;
 }
 
+tnode_t tree_add_next(tree_t *tree, tnode_t node)
+{
+	const size_t node_size = sizeof(header_t) + tree->size;
+
+	if (tree->cnt >= tree->cap) {
+		size_t old_size = tree->cap * node_size;
+		tree->cap *= 2;
+		tree->nodes = m_realloc(tree->nodes, tree->cap * node_size, old_size);
+		if (tree->nodes == NULL) {
+			return -1;
+		}
+	}
+
+	tnode_t next = tree->cnt;
+
+	tnode_t *target = &get_node(tree, node)->header.next;
+	while (*target != 0) {
+		target = &get_node(tree, *target)->header.next;
+	}
+	*target = next;
+	tree->cnt++;
+
+	init_node(tree, next);
+	return next;
+}
+
 tnode_t tree_get_next(const tree_t *tree, tnode_t node)
 {
 	return get_node(tree, node)->header.next;
@@ -109,6 +135,16 @@ static void node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb c
 void tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv)
 {
 	node_iterate_pre(tree, node, cb, priv, 0, 0);
+}
+
+void tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv)
+{
+	tnode_t child = tree_get_child(tree, node);
+
+	while (child != 0) {
+		cb(tree, child, priv);
+		child = tree_get_next(tree, child);
+	}
 }
 
 typedef struct node_print_priv_s {
