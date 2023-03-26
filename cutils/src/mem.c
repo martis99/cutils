@@ -18,11 +18,26 @@ const m_stats_t *m_get_stats()
 	return s_stats;
 }
 
-void m_print(FILE *f)
+void m_print(FILE *file)
 {
-	p_fprintf(f, "mem:      %zd (max: %zd)\n", s_stats->mem, s_stats->mem_max);
-	p_fprintf(f, "allocs:   %d\n", s_stats->allocs);
-	p_fprintf(f, "reallocs: %d\n", s_stats->reallocs);
+	size_t mem_max = s_stats->mem_max;
+	char s	       = '\0';
+
+	if (mem_max > 1024 * 1024) {
+		mem_max /= 1024 * 1024;
+		s = 'M';
+	} else if (mem_max > 1024) {
+		mem_max /= 1024;
+		s = 'K';
+	}
+
+	if (s == '\0') {
+		p_fprintf(file, "mem:      %zu max: %zu B\n", s_stats->mem, s_stats->mem_max);
+	} else {
+		p_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_stats->mem, mem_max, s, s_stats->mem_max);
+	}
+	p_fprintf(file, "allocs:   %d\n", s_stats->allocs);
+	p_fprintf(file, "reallocs: %d\n", s_stats->reallocs);
 }
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)
@@ -33,12 +48,7 @@ void *m_malloc(size_t size)
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
 	s_stats->allocs++;
 
-	void *ptr = malloc(size);
-	if (ptr == NULL) {
-		return NULL;
-	}
-
-	return memset(ptr, 0, size);
+	return malloc(size);
 }
 
 void *m_calloc(size_t count, size_t size)

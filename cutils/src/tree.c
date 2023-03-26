@@ -148,7 +148,7 @@ void tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_c
 }
 
 typedef struct node_print_priv_s {
-	FILE *f;
+	FILE *file;
 	tree_print_cb cb;
 } node_print_priv_t;
 
@@ -158,28 +158,28 @@ static void node_print(const tree_t *tree, tnode_t node, int depth, int last, vo
 
 	for (int i = 0; i < depth - 1; i++) {
 		if ((1 << i) & last) {
-			p_fprintf(p->f, "  ");
+			p_fprintf(p->file, "  ");
 		} else {
-			p_v(p->f);
+			p_v(p->file);
 		}
 	}
 
 	if (depth > 0) {
 		if ((1 << (depth - 1)) & last) {
-			p_ur(p->f);
+			p_ur(p->file);
 		} else {
-			p_vr(p->f);
+			p_vr(p->file);
 		}
 	}
 
-	p->cb(p->f, tree_get_data(tree, node));
+	p->cb(p->file, tree_get_data(tree, node));
 }
 
-void tree_print(const tree_t *tree, tnode_t node, FILE *f, tree_print_cb cb)
+void tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb)
 {
 	node_print_priv_t priv = {
-		.f  = f,
-		.cb = cb,
+		.file = file,
+		.cb   = cb,
 	};
 	tree_iterate_pre(tree, 0, node_print, &priv);
 }

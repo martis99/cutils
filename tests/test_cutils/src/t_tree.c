@@ -39,7 +39,7 @@ TEST(add_child)
 
 	*(int *)tree_get_data(&tree, 0) = 0;
 
-	tnode_t n1, n2, n3, n11, n12, n13, n21, n22, n23, n31, n32, n33, n111, n131, n212, n222, n232, n333, n1111;
+	tnode_t n1, n2, n12;
 
 	*(int *)tree_get_data(&tree, (n1 = tree_add_child(&tree, 0))) = 1;
 	*(int *)tree_get_data(&tree, (n2 = tree_add_child(&tree, 0))) = 2;

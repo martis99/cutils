@@ -6,13 +6,16 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-FILE *file_open(const char *path, const char *mode, int exists);
-FILE *file_open_v(const char *format, const char *mode, int exists, va_list args);
-FILE *file_open_f(const char *format, const char *mode, int exists, ...);
+FILE *file_open(const char *path, const char *mode);
+FILE *file_open_v(const char *format, const char *mode, va_list args);
+FILE *file_open_f(const char *format, const char *mode, ...);
 
-size_t file_read(const char *path, int exists, char *data, size_t data_len);
-size_t file_read_v(const char *format, int exists, char *data, size_t data_len, va_list args);
-size_t file_read_f(const char *format, int exists, char *data, size_t data_len, ...);
+size_t file_read(FILE *file, size_t size, char *data, size_t data_size);
+size_t file_read_t(const char *path, char *data, size_t data_size);
+
+size_t file_size(FILE *file);
+
+int file_close(FILE *file);
 
 int file_exists(const char *path);
 int file_exists_v(const char *format, va_list args);

@@ -186,64 +186,64 @@ static void xml_attr_print_cb(const tree_t *tree, tnode_t node, void *priv)
 
 typedef struct xml_tag_print_cb_priv_s {
 	const xml_t *xml;
-	FILE *f;
+	FILE *file;
 	unsigned int depth;
 } xml_tag_print_cb_priv_t;
 
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *f, unsigned int depth);
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, unsigned int depth);
 
 static void xml_tag_print_cb(const tree_t *tree, tnode_t node, void *priv)
 {
 	xml_tag_print_cb_priv_t *p = priv;
 
-	xml_tag_print(p->xml, node, p->f, p->depth);
+	xml_tag_print(p->xml, node, p->file, p->depth);
 }
 
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *f, unsigned int depth)
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, unsigned int depth)
 {
 	xml_tag_data_t *tag_d = tree_get_data(&xml->tags, tag);
 
-	p_fprintf(f, "%*s<%.*s", depth * 2, "", tag_d->name.len, tag_d->name.data);
+	p_fprintf(file, "%*s<%.*s", depth * 2, "", tag_d->name.len, tag_d->name.data);
 
 	if (tag_d->attrs != 0) {
-		xml_attr_print_cb(&xml->attrs, tag_d->attrs, f);
-		tree_iterate_childs(&xml->attrs, tag_d->attrs, xml_attr_print_cb, f);
+		xml_attr_print_cb(&xml->attrs, tag_d->attrs, file);
+		tree_iterate_childs(&xml->attrs, tag_d->attrs, xml_attr_print_cb, file);
 	}
 
 	xml_tag_print_cb_priv_t priv = {
 		.xml   = xml,
-		.f     = f,
+		.file  = file,
 		.depth = depth + 1,
 	};
 
 	if (tree_get_child(&xml->tags, tag) != 0) {
-		p_fprintf(f, ">\n");
+		p_fprintf(file, ">\n");
 
 		tree_iterate_childs(&xml->tags, tag, xml_tag_print_cb, &priv);
 
-		p_fprintf(f, "%*s</%.*s>\n", depth * 2, "", tag_d->name.len, tag_d->name.data);
+		p_fprintf(file, "%*s</%.*s>\n", depth * 2, "", tag_d->name.len, tag_d->name.data);
 	} else if (tag_d->val.data) {
 		if (tag_d->val.len > 0 && tag_d->val.data[tag_d->val.len - 1] == '\n') {
-			p_fprintf(f, ">%.*s%*s</%.*s>\n", tag_d->val.len, tag_d->val.data, depth * 2, "", tag_d->name.len, tag_d->name.data);
+			p_fprintf(file, ">%.*s%*s</%.*s>\n", tag_d->val.len, tag_d->val.data, depth * 2, "", tag_d->name.len, tag_d->name.data);
 		} else {
-			p_fprintf(f, ">%.*s</%.*s>\n", tag_d->val.len, tag_d->val.data, tag_d->name.len, tag_d->name.data);
+			p_fprintf(file, ">%.*s</%.*s>\n", tag_d->val.len, tag_d->val.data, tag_d->name.len, tag_d->name.data);
 		}
 	} else {
-		p_fprintf(f, " />\n");
+		p_fprintf(file, " />\n");
 	}
 
 	return 0;
 }
 
-int xml_print(const xml_t *xml, FILE *f)
+int xml_print(const xml_t *xml, FILE *file)
 {
 	xml_tag_print_cb_priv_t priv = {
 		.xml   = xml,
-		.f     = f,
+		.file  = file,
 		.depth = 0,
 	};
 
-	p_fprintf(f, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	p_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	tree_iterate_childs(&xml->tags, 0, xml_tag_print_cb, &priv);
 	return 0;
 }

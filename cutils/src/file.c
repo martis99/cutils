@@ -14,12 +14,8 @@
 	#include <sys/stat.h>
 #endif
 
-FILE *file_open(const char *path, const char *mode, int exists)
+FILE *file_open(const char *path, const char *mode)
 {
-	if (path == NULL || mode == NULL) {
-		return NULL;
-	}
-
 	FILE *file = NULL;
 
 #if defined(P_WIN)
@@ -30,7 +26,7 @@ FILE *file_open(const char *path, const char *mode, int exists)
 	return file;
 }
 
-FILE *file_open_v(const char *format, const char *mode, int exists, va_list args)
+FILE *file_open_v(const char *format, const char *mode, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
@@ -38,75 +34,67 @@ FILE *file_open_v(const char *format, const char *mode, int exists, va_list args
 		return NULL;
 	}
 
-	return file_open(path, mode, exists);
+	return file_open(path, mode);
 }
 
-FILE *file_open_f(const char *format, const char *mode, int exists, ...)
+FILE *file_open_f(const char *format, const char *mode, ...)
 {
 	va_list args;
-	va_start(args, exists);
-	FILE *file = file_open_v(format, mode, exists, args);
+	va_start(args, mode);
+	FILE *file = file_open_v(format, mode, args);
 	va_end(args);
 	return file;
 }
 
-size_t file_read(const char *path, int exists, char *data, size_t data_len)
+size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 {
-	if (data == NULL) {
-		return -1;
-	}
-
-	FILE *file = file_open(path, "r", exists);
-	if (file == NULL) {
-		return -1;
-	}
-
-	fseek(file, 0L, SEEK_END);
-	size_t len = ftell(file);
-	fseek(file, 0L, SEEK_SET);
-
-	if (len >= data_len) {
-		fclose(file);
-		return -1;
-	}
-
+	size_t cnt;
 #if defined(P_WIN)
-	fread_s(data, data_len, sizeof(char), len, file);
+	cnt = fread_s(data, data_size, size, 1, file);
 #else
-	fread(data, sizeof(char), len, file);
+	cnt  = fread(data, size, 1, file);
 #endif
+	if (cnt != 1) {
+		return 1;
+	}
 
-	unsigned int dst = 0;
-	for (unsigned int i = 0; i < len; i++) {
-		data[dst] = data[i];
+	return 0;
+}
+
+size_t file_read_t(const char *path, char *data, size_t data_size)
+{
+	FILE *file = file_open(path, "r");
+
+	size_t size = file_size(file);
+
+	if (file_read(file, size, data, data_size)) {
+		return 0;
+	}
+
+	size_t len = 0;
+	for (size_t i = 0; i < data_size; i++) {
+		data[len] = data[i];
 		if (data[i] != '\r') {
-			dst++;
+			len++;
 		}
 	}
-	len = dst;
 
-	fclose(file);
+	file_close(file);
+
 	return len;
 }
 
-size_t file_read_v(const char *format, int exists, char *data, size_t data_len, va_list args)
+size_t file_size(FILE *file)
 {
-	char path[P_MAX_PATH] = { 0 };
-
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
-		return -1;
-	}
-
-	return file_read(path, exists, data, data_len);
+	fseek(file, 0L, SEEK_END);
+	size_t size = ftell(file);
+	fseek(file, 0L, SEEK_SET);
+	return size;
 }
 
-size_t file_read_f(const char *format, int exists, char *data, size_t data_len, ...)
+int file_close(FILE *file)
 {
-	va_list args;
-	va_start(args, data_len);
-	size_t len = file_read_v(format, exists, data, data_len, args);
-	va_end(args);
-	return len;
+	return fclose(file);
 }
 
 int file_exists(const char *path)

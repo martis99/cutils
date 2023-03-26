@@ -39,6 +39,6 @@ xml_tag_t xml_add_child_val_c(xml_t *xml, xml_tag_t tag, const char *name, unsig
 xml_tag_t xml_add_child_val_v(xml_t *xml, xml_tag_t tag, const char *name, unsigned int name_len, const char *format, va_list args);
 xml_tag_t xml_add_child_val_f(xml_t *xml, xml_tag_t tag, const char *name, unsigned int name_len, const char *format, ...);
 
-int xml_print(const xml_t *xml, FILE *f);
+int xml_print(const xml_t *xml, FILE *file);
 
 #endif

@@ -2,9 +2,9 @@
 #include "print.h"
 #include "tree.h"
 
-static void print_tree(FILE *f, void *data)
+static void print_tree(FILE *file, void *data)
 {
-	p_fprintf(f, "%d\n", *(int *)data);
+	p_fprintf(file, "%d\n", *(int *)data);
 }
 
 int main(int argc, char **argv)

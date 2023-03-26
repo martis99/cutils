@@ -2,25 +2,34 @@
 
 #include "platform.h"
 
-#include <stdio.h>
 #include <fcntl.h>
+#include <stdio.h>
 #include <wchar.h>
 
 #if defined(P_WIN)
 	#include <io.h>
 #endif
 
-int p_fprintf(FILE *f, const char *fmt, ...)
+int p_fprintf(FILE *file, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
+	int ret = p_vfprintf(file, fmt, args);
+	va_end(args);
+	return ret;
+}
+
+int p_vfprintf(FILE *file, const char *fmt, va_list args)
+{
+	va_list copy;
+	va_copy(copy, args);
 	int ret;
 #if defined(P_WIN)
-	ret = vfprintf_s(f, fmt, args);
+	ret = vfprintf_s(file, fmt, copy);
 #else
-	ret = vfprintf(f, fmt, args);
+	ret = vfprintf(file, fmt, copy);
 #endif
-	va_end(args);
+	va_end(copy);
 	return ret;
 }
 
@@ -39,9 +48,9 @@ int p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
 	va_copy(copy, args);
 	int ret;
 #if defined(P_WIN)
-	ret = vsprintf_s(buf, size, fmt, args);
+	ret = vsprintf_s(buf, size, fmt, copy);
 #else
-	ret = vsprintf(buf, fmt, args);
+	ret = vsprintf(buf, fmt, copy);
 #endif
 	va_end(copy);
 	return ret;
@@ -84,53 +93,52 @@ int p_vswprintf(wchar_t *buf, size_t size, const wchar_t *fmt, va_list args)
 	return ret;
 }
 
-int p_set_u16(FILE *f)
+int p_set_u16(FILE *file)
 {
 #if defined(P_WIN)
-	return _setmode(_fileno(f), _O_U16TEXT);
+	return _setmode(_fileno(file), _O_U16TEXT);
 #else
 	return 0;
 #endif
 }
 
-int p_unset_u16(FILE *f, int mode)
+int p_unset_u16(FILE *file, int mode)
 {
 #if defined(P_WIN)
-	return _setmode(_fileno(f), mode);
+	return _setmode(_fileno(file), mode);
 #else
 	return 0;
 #endif
 }
 
-void p_ur(FILE *f)
+void p_ur(FILE *file)
 {
 #if defined(P_WIN)
-	int mode = p_set_u16(f);
-	fwprintf_s(f, L"\u2514\u2500");
-	p_unset_u16(f, mode);
+	int mode = p_set_u16(file);
+	fwprintf_s(file, L"\u2514\u2500");
+	p_unset_u16(file, mode);
 #else
 	fprintf(f, "└─");
 #endif
-
 }
 
-void p_v(FILE *f)
+void p_v(FILE *file)
 {
 #if defined(P_WIN)
-	int mode = p_set_u16(f);
-	fwprintf_s(f, L"\u2502 ");
-	p_unset_u16(f, mode);
+	int mode = p_set_u16(file);
+	fwprintf_s(file, L"\u2502 ");
+	p_unset_u16(file, mode);
 #else
 	fprintf(f, "│ ");
 #endif
 }
 
-void p_vr(FILE *f)
+void p_vr(FILE *file)
 {
 #if defined(P_WIN)
-	int mode = p_set_u16(f);
-	fwprintf_s(f, L"\u251C\u2500");
-	p_unset_u16(f, mode);
+	int mode = p_set_u16(file);
+	fwprintf_s(file, L"\u251C\u2500");
+	p_unset_u16(file, mode);
 #else
 	fprintf(f, "├─");
 #endif
