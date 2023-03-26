@@ -63,12 +63,10 @@ size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 
 size_t file_read_t(const char *path, char *data, size_t data_size)
 {
-	FILE *file = file_open(path, "r");
+	FILE *file = file_open(path, "rb");
 
-	size_t size = file_size(file);
-
-	if (file_read(file, size, data, data_size)) {
-		return 0;
+	if (file_read(file, file_size(file), data, data_size)) {
+		return -1;
 	}
 
 	size_t len = 0;
