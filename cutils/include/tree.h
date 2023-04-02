@@ -23,13 +23,13 @@ tnode_t tree_get_next(const tree_t *tree, tnode_t node);
 
 void *tree_get_data(const tree_t *tree, tnode_t node);
 
-typedef void (*tree_iterate_cb)(const tree_t *tree, tnode_t node, int depth, int last, void *priv);
-void tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv);
+typedef int (*tree_iterate_cb)(const tree_t *tree, tnode_t node, int depth, int last, void *priv);
+int tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv);
 
-typedef void (*tree_iterate_childs_cb)(const tree_t *tree, tnode_t node, void *priv);
-void tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv);
+typedef int (*tree_iterate_childs_cb)(const tree_t *tree, tnode_t node, int last, void *priv);
+int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv);
 
-typedef void (*tree_print_cb)(FILE *file, void *data);
-void tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb);
+typedef int (*tree_print_cb)(FILE *file, void *data);
+int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb);
 
 #endif

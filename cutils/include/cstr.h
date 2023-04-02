@@ -15,4 +15,6 @@ int cstr_replaces(const char *src, unsigned int src_len, char *dst, unsigned int
 
 void wcstrn_cat(wchar_t *dst, unsigned int size, const wchar_t *src, unsigned int cnt);
 
+#define CSTR(_str) _str, sizeof(_str) - 1
+
 #endif

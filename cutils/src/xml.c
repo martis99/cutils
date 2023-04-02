@@ -177,11 +177,12 @@ xml_tag_t xml_add_child_val_f(xml_t *xml, xml_tag_t tag, const char *name, unsig
 	return attr;
 }
 
-static void xml_attr_print_cb(const tree_t *tree, tnode_t node, void *priv)
+static int xml_attr_print_cb(const tree_t *tree, tnode_t node, int last, void *priv)
 {
 	xml_attr_data_t *attr_d = tree_get_data(tree, node);
 
 	p_fprintf(priv, " %.*s=\"%.*s\"", attr_d->name.len, attr_d->name.data, attr_d->val.len, attr_d->val.data);
+	return 0;
 }
 
 typedef struct xml_tag_print_cb_priv_s {
@@ -192,11 +193,11 @@ typedef struct xml_tag_print_cb_priv_s {
 
 static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, unsigned int depth);
 
-static void xml_tag_print_cb(const tree_t *tree, tnode_t node, void *priv)
+static int xml_tag_print_cb(const tree_t *tree, tnode_t node, int last, void *priv)
 {
 	xml_tag_print_cb_priv_t *p = priv;
 
-	xml_tag_print(p->xml, node, p->file, p->depth);
+	return xml_tag_print(p->xml, node, p->file, p->depth);
 }
 
 static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, unsigned int depth)
@@ -206,7 +207,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, unsigned i
 	p_fprintf(file, "%*s<%.*s", depth * 2, "", tag_d->name.len, tag_d->name.data);
 
 	if (tag_d->attrs != 0) {
-		xml_attr_print_cb(&xml->attrs, tag_d->attrs, file);
+		xml_attr_print_cb(&xml->attrs, tag_d->attrs, 0, file);
 		tree_iterate_childs(&xml->attrs, tag_d->attrs, xml_attr_print_cb, file);
 	}
 

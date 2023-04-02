@@ -77,7 +77,7 @@ void *m_memset(void *dst, int val, size_t size)
 
 void *m_memcpy(void *dst, size_t dst_size, const void *src, size_t src_size)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	memcpy_s(dst, dst_size, src, src_size);
 #else
 	memcpy(dst, src, src_size);

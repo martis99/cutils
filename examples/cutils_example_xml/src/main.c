@@ -1,6 +1,6 @@
+#include "cstr.h"
 #include "mem.h"
 #include "print.h"
-#include "str.h"
 #include "xml.h"
 
 int main(int argc, char **argv)

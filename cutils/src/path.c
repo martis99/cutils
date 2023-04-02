@@ -38,7 +38,7 @@ int path_child_s(path_t *path, const char *dir, unsigned int len, char s)
 int path_child(path_t *path, const char *dir, unsigned int len)
 {
 	char c;
-#if defined(P_WIN)
+#if defined(C_WIN)
 	c = '\\';
 #else
 	c = '/';

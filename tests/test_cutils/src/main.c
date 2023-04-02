@@ -1,15 +1,21 @@
+#include "t_file.h"
+#include "t_log.h"
+#include "t_time.h"
 #include "t_tree.h"
-
-#include "tree.h"
+#include "t_xml.h"
 
 #include "test.h"
 
 #include "mem.h"
 
-TEST(test)
+TEST(tests)
 {
 	SSTART;
+	RUN(file);
+	RUN(log);
 	RUN(tree);
+	RUN(time);
+	RUN(xml);
 	SEND;
 }
 
@@ -18,14 +24,11 @@ int main(int argc, char **argv)
 	m_stats_t m_stats = { 0 };
 	m_init(&m_stats);
 
-	t_init(4);
-
-	test();
-
-	t_results();
-	t_free();
+	t_init(80);
+	tests();
+	const int ret = t_finish();
 
 	m_print(stdout);
 
-	return 0;
+	return ret;
 }

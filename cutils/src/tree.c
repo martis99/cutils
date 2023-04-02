@@ -118,33 +118,41 @@ void *tree_get_data(const tree_t *tree, tnode_t node)
 	return &get_node(tree, node)->data;
 }
 
-static void node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last)
+static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last)
 {
-	cb(tree, node, depth, last, priv);
+	int ret = cb(tree, node, depth, last, priv);
 
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
 
 	while (child != 0) {
 		next = tree_get_next(tree, child);
-		node_iterate_pre(tree, child, cb, priv, depth + 1, last | ((next == 0) << depth));
+		ret += node_iterate_pre(tree, child, cb, priv, depth + 1, last | ((next == 0) << depth));
 		child = next;
 	}
+
+	return ret;
 }
 
-void tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv)
+int tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv)
 {
-	node_iterate_pre(tree, node, cb, priv, 0, 0);
+	return node_iterate_pre(tree, node, cb, priv, 0, 0);
 }
 
-void tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv)
+int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv)
 {
+	int ret = 0;
+
 	tnode_t child = tree_get_child(tree, node);
+	tnode_t next;
 
 	while (child != 0) {
-		cb(tree, child, priv);
-		child = tree_get_next(tree, child);
+		next = tree_get_next(tree, child);
+		ret += cb(tree, child, next == 0, priv);
+		child = next;
 	}
+
+	return ret;
 }
 
 typedef struct node_print_priv_s {
@@ -152,7 +160,7 @@ typedef struct node_print_priv_s {
 	tree_print_cb cb;
 } node_print_priv_t;
 
-static void node_print(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+static int node_print(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
 {
 	node_print_priv_t *p = priv;
 
@@ -172,14 +180,14 @@ static void node_print(const tree_t *tree, tnode_t node, int depth, int last, vo
 		}
 	}
 
-	p->cb(p->file, tree_get_data(tree, node));
+	return p->cb(p->file, tree_get_data(tree, node));
 }
 
-void tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb)
+int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb)
 {
 	node_print_priv_t priv = {
 		.file = file,
 		.cb   = cb,
 	};
-	tree_iterate_pre(tree, 0, node_print, &priv);
+	return tree_iterate_pre(tree, 0, node_print, &priv);
 }

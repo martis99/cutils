@@ -8,7 +8,8 @@
 
 #include <string.h>
 
-#if defined(P_LINUX)
+#if defined(C_WIN)
+#else
 	#include <dirent.h>
 	#include <errno.h>
 	#include <sys/stat.h>
@@ -18,7 +19,7 @@ FILE *file_open(const char *path, const char *mode)
 {
 	FILE *file = NULL;
 
-#if defined(P_WIN)
+#if defined(C_WIN)
 	fopen_s(&file, path, mode);
 #else
 	file = fopen(path, mode);
@@ -46,36 +47,57 @@ FILE *file_open_f(const char *format, const char *mode, ...)
 	return file;
 }
 
+FILE *file_reopen(const char *path, const char *mode, FILE *file)
+{
+	FILE *new_file = NULL;
+
+#if defined(C_WIN)
+	freopen_s(&file, path, mode, file);
+#else
+	file = freopen(path, mode, file);
+#endif
+	return file;
+}
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
 size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 {
 	size_t cnt;
-#if defined(P_WIN)
+	size = MIN(file_size(file), size);
+#if defined(C_WIN)
 	cnt = fread_s(data, data_size, size, 1, file);
 #else
 	cnt  = fread(data, size, 1, file);
 #endif
 	if (cnt != 1) {
-		return 1;
+		return 0;
 	}
 
-	return 0;
+	return size;
+}
+
+size_t file_read_ft(FILE *file, char *data, size_t data_size)
+{
+	const size_t size = file_read(file, data_size, data, data_size);
+
+	size_t len = 0;
+	for (size_t i = 0; i < size; i++) {
+		data[len] = data[i];
+		if (data[i] != '\r') {
+			len++;
+		}
+	}
+	data[len] = '\0';
+
+	return len;
 }
 
 size_t file_read_t(const char *path, char *data, size_t data_size)
 {
 	FILE *file = file_open(path, "rb");
 
-	if (file_read(file, file_size(file), data, data_size)) {
-		return -1;
-	}
-
-	size_t len = 0;
-	for (size_t i = 0; i < data_size; i++) {
-		data[len] = data[i];
-		if (data[i] != '\r') {
-			len++;
-		}
-	}
+	const size_t len = file_read_ft(file, data, data_size);
 
 	file_close(file);
 
@@ -95,9 +117,18 @@ int file_close(FILE *file)
 	return fclose(file);
 }
 
+int file_delete(const char *path)
+{
+#if defined(C_WIN)
+	return DeleteFileA(path) == 0 ? 1 : 0;
+#else
+	return remove(path);
+#endif
+}
+
 int file_exists(const char *path)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	int dwAttrib = GetFileAttributesA(path);
 	return dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
 #else
@@ -132,7 +163,7 @@ int file_exists_f(const char *format, ...)
 
 int folder_exists(const char *path)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	int dwAttrib = GetFileAttributesA(path);
 	return dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
 #else
@@ -168,7 +199,7 @@ int folder_exists_f(const char *format, ...)
 
 int folder_create(const char *path)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	return CreateDirectoryA(path, NULL) || ERROR_ALREADY_EXISTS == GetLastError();
 #else
 	struct stat st = { 0 };
@@ -181,7 +212,7 @@ int folder_create(const char *path)
 
 int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_cb on_file, void *priv)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	WIN32_FIND_DATA file = { 0 };
 	HANDLE find	     = NULL;
 

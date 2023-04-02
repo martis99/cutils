@@ -90,7 +90,7 @@ int cstr_replaces(const char *src, unsigned int src_len, char *dst, unsigned int
 
 void wcstrn_cat(wchar_t *dst, unsigned int size, const wchar_t *src, unsigned int cnt)
 {
-#if defined(P_WIN)
+#if defined(C_WIN)
 	wcsncat_s(dst, size, src, cnt);
 #else
 	wcsncat(dst, src, cnt);
