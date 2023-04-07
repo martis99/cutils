@@ -70,6 +70,10 @@ static void init_event(log_event_t *ev, void *udata)
 
 void log_log(int level, const char *file, int line, const char *fmt, ...)
 {
+	if (s_log == NULL) {
+		return;
+	}
+
 	log_event_t ev = {
 		.fmt   = fmt,
 		.file  = file,
