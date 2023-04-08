@@ -23,8 +23,8 @@ void m_print(FILE *file)
 	size_t mem_max = s_stats->mem_max;
 	char s	       = '\0';
 
-	if (mem_max > 1024 * 1024) {
-		mem_max /= 1024 * 1024;
+	if (mem_max > (size_t)1024 * 1024) {
+		mem_max /= (size_t)1024 * 1024;
 		s = 'M';
 	} else if (mem_max > 1024) {
 		mem_max /= 1024;
