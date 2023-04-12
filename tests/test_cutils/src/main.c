@@ -2,6 +2,7 @@
 #include "t_log.h"
 #include "t_time.h"
 #include "t_tree.h"
+#include "t_type.h"
 #include "t_xml.h"
 
 #include "test.h"
@@ -15,6 +16,7 @@ TEST(tests)
 	RUN(log);
 	RUN(tree);
 	RUN(time);
+	RUN(type);
 	RUN(xml);
 	SEND;
 }
