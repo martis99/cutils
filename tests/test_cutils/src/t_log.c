@@ -14,13 +14,13 @@ TEST(log_trace_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_trace("trace%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u TRACE log_trace_test:%u: trace%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
@@ -37,13 +37,13 @@ TEST(log_debug_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_debug("debug%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u DEBUG log_debug_test:%u: debug%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
@@ -60,13 +60,13 @@ TEST(log_info_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_info("info%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u INFO  log_info_test:%u: info%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
@@ -83,13 +83,13 @@ TEST(log_warn_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_warn("warn%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u WARN  log_warn_test:%u: warn%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
@@ -106,13 +106,13 @@ TEST(log_error_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_error("error%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u ERROR log_error_test:%u: error%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
@@ -129,13 +129,13 @@ TEST(log_fatal_test, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 
 	log_fatal("fatal%d", 1);
-	unsigned int exp_line = __LINE__ - 1;
+	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
 
 	file_read_ft(file, buf, sizeof(buf));
 
-	unsigned int y, m, d, H, M, S, U, line, x;
+	uint y, m, d, H, M, S, U, line, x;
 
 	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u FATAL log_fatal_test:%u: fatal%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 

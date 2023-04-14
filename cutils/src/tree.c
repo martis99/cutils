@@ -15,7 +15,7 @@ typedef struct node_s {
 
 static inline node_t *get_node(const tree_t *tree, tnode_t node)
 {
-	return (node_t *)((unsigned char *)tree->nodes + node * (sizeof(header_t) + tree->size));
+	return (node_t *)((byte *)tree->nodes + node * (sizeof(header_t) + tree->size));
 }
 
 static inline void init_node(tree_t *tree, tnode_t node)
@@ -26,7 +26,7 @@ static inline void init_node(tree_t *tree, tnode_t node)
 	ptr->header.next  = 0;
 }
 
-tree_t *tree_init(tree_t *tree, unsigned int cap, size_t size)
+tree_t *tree_init(tree_t *tree, uint cap, size_t size)
 {
 	tree->nodes = m_calloc(cap, sizeof(header_t) + size);
 	if (tree->nodes == NULL) {

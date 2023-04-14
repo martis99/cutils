@@ -1,5 +1,6 @@
 #include "t_file.h"
 #include "t_log.h"
+#include "t_md5.h"
 #include "t_time.h"
 #include "t_tree.h"
 #include "t_type.h"
@@ -14,8 +15,9 @@ TEST(tests)
 	SSTART;
 	RUN(file);
 	RUN(log);
-	RUN(tree);
+	RUN(md5);
 	RUN(time);
+	RUN(tree);
 	RUN(type);
 	RUN(xml);
 	SEND;

@@ -1,18 +1,20 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include "type.h"
+
 #include <stdio.h>
 
-typedef unsigned int tnode_t;
+typedef uint tnode_t;
 
 typedef struct tree_s {
 	void *nodes;
-	unsigned int cap;
-	unsigned int cnt;
+	uint cap;
+	uint cnt;
 	size_t size;
 } tree_t;
 
-tree_t *tree_init(tree_t *tree, unsigned int cap, size_t size);
+tree_t *tree_init(tree_t *tree, uint cap, size_t size);
 void tree_free(tree_t *tree);
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node);

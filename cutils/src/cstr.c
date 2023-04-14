@@ -5,22 +5,22 @@
 
 #include <string.h>
 
-unsigned int cstr_len(const char *str)
+size_t cstr_len(const char *str)
 {
-	return (unsigned int)strlen(str);
+	return strlen(str);
 }
 
-int cstr_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len)
+int cstr_cmp(const char *str1, size_t str1_len, const char *str2, size_t str2_len)
 {
-	return str1_len == str2_len && m_memcmp(str1, str2, str1_len * sizeof(char)) == 0;
+	return str1_len == str2_len && m_memcmp(str1, str2, str1_len) == 0;
 }
 
-int cstrn_cmp(const char *str1, unsigned int str1_len, const char *str2, unsigned int str2_len, unsigned int len)
+int cstrn_cmp(const char *str1, size_t str1_len, const char *str2, size_t str2_len, size_t len)
 {
-	return str1_len >= len && str2_len >= len && m_memcmp(str1, str2, len * sizeof(char)) == 0;
+	return str1_len >= len && str2_len >= len && m_memcmp(str1, str2, len) == 0;
 }
 
-void *cstr_cpy(char *dst, unsigned int dst_len, const char *src, unsigned int src_len)
+void *cstr_cpy(char *dst, size_t dst_len, const char *src, size_t src_len)
 {
 	return m_memcpy(dst, dst_len, src, src_len * sizeof(char));
 }
@@ -35,14 +35,14 @@ char *cstr_str(const char *str, const char *s)
 	return strstr(str, s);
 }
 
-int cstr_replace(const char *src, unsigned int src_len, char *dst, unsigned int dst_len, const char *from, unsigned int from_len, const char *to, unsigned int to_len)
+size_t cstr_replace(const char *src, size_t src_len, char *dst, size_t dst_len, const char *from, size_t from_len, const char *to, size_t to_len)
 {
 	src_len	 = src_len == 0 ? cstr_len(src) : src_len;
 	from_len = from_len == 0 ? cstr_len(from) : from_len;
 	to_len	 = to_len == 0 ? cstr_len(to) : to_len;
 
-	unsigned int dst_i = 0;
-	for (unsigned int i = 0; i < src_len; i++) {
+	size_t dst_i = 0;
+	for (size_t i = 0; i < src_len; i++) {
 		if (src_len - i > from_len && cstr_cmp(&src[i], from_len, from, from_len)) {
 			cstr_cpy(&dst[dst_i], dst_len, to, to_len);
 			i += from_len - 1;
@@ -55,21 +55,21 @@ int cstr_replace(const char *src, unsigned int src_len, char *dst, unsigned int 
 	return dst_i;
 }
 
-int cstr_replaces(const char *src, unsigned int src_len, char *dst, unsigned int dst_len, const char *const *from, const char *const *to, unsigned int len)
+size_t cstr_replaces(const char *src, size_t src_len, char *dst, size_t dst_len, const char *const *from, const char *const *to, size_t len)
 {
 	src_len = src_len == 0 ? cstr_len(src) : src_len;
 
-	unsigned int dst_i = 0;
-	for (unsigned int i = 0; i < src_len; i++) {
-		int found = 0;
+	size_t dst_i = 0;
+	for (size_t i = 0; i < src_len; i++) {
+		bool found = 0;
 
-		for (unsigned int j = 0; j < len; j++) {
+		for (size_t j = 0; j < len; j++) {
 			if (!from[j] || !to[j]) {
 				continue;
 			}
 
-			unsigned int from_len = cstr_len(from[j]);
-			unsigned int to_len   = cstr_len(to[j]);
+			size_t from_len = cstr_len(from[j]);
+			size_t to_len	= cstr_len(to[j]);
 
 			if (src_len - i >= from_len && cstr_cmp(&src[i], from_len, from[j], from_len)) {
 				cstr_cpy(&dst[dst_i], dst_len, to[j], to_len);
@@ -88,7 +88,7 @@ int cstr_replaces(const char *src, unsigned int src_len, char *dst, unsigned int
 	return dst_i;
 }
 
-void wcstrn_cat(wchar_t *dst, unsigned int size, const wchar_t *src, unsigned int cnt)
+void wcstrn_cat(wchar_t *dst, size_t size, const wchar_t *src, size_t cnt)
 {
 #if defined(C_WIN)
 	wcsncat_s(dst, size, src, cnt);

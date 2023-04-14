@@ -34,10 +34,10 @@ static struct timespec get_time()
 	return now;
 }
 
-unsigned long long c_time()
+u64 c_time()
 {
 	const struct timespec now = get_time();
-	return now.tv_sec * 1000 + (long long)now.tv_nsec / 1000;
+	return now.tv_sec * 1000 + (u64)now.tv_nsec / 1000;
 }
 
 const char *c_time_str(char *buf)
@@ -52,7 +52,7 @@ const char *c_time_str(char *buf)
 	return buf;
 }
 
-int c_sleep(unsigned long milliseconds)
+int c_sleep(u32 milliseconds)
 {
 #if defined(C_WIN)
 	Sleep((DWORD)milliseconds);

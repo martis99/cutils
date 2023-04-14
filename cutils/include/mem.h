@@ -1,13 +1,15 @@
 #ifndef MEM_H
 #define MEM_H
 
+#include "type.h"
+
 #include <stdio.h>
 
 typedef struct m_stats_s {
 	size_t mem;
 	size_t mem_max;
-	unsigned int allocs;
-	unsigned int reallocs;
+	uint allocs;
+	uint reallocs;
 } m_stats_t;
 
 void m_init(m_stats_t *stats);

@@ -4,21 +4,21 @@
 
 #include "platform.h"
 
-int path_init(path_t *path, const char *dir, unsigned int len)
+int path_init(path_t *path, const char *dir, size_t len)
 {
 	if (len + 1 > P_MAX_PATH) {
 		return 1;
 	}
 
 	m_memcpy(path->path, len, dir, len);
-	path->len = (unsigned int)len;
+	path->len = len;
 
 	path->path[path->len] = '\0';
 
 	return 0;
 }
 
-int path_child_s(path_t *path, const char *dir, unsigned int len, char s)
+int path_child_s(path_t *path, const char *dir, size_t len, char s)
 {
 	if (path->len + len + 2 > P_MAX_PATH) {
 		return 1;
@@ -28,14 +28,14 @@ int path_child_s(path_t *path, const char *dir, unsigned int len, char s)
 		path->path[path->len++] = s;
 	}
 	m_memcpy(path->path + path->len, len, dir, len);
-	path->len += (unsigned int)len;
+	path->len += len;
 
 	path->path[path->len] = '\0';
 
 	return 0;
 }
 
-int path_child(path_t *path, const char *dir, unsigned int len)
+int path_child(path_t *path, const char *dir, size_t len)
 {
 	char c;
 #if defined(C_WIN)
@@ -48,7 +48,7 @@ int path_child(path_t *path, const char *dir, unsigned int len)
 
 int path_parent(path_t *path)
 {
-	unsigned int len = path->len;
+	size_t len = path->len;
 
 	while (len > 0 && path->path[len] != '\\' && path->path[len] != '/')
 		len--;
@@ -64,24 +64,24 @@ int path_parent(path_t *path)
 	return 0;
 }
 
-int path_set_len(path_t *path, unsigned int len)
+int path_set_len(path_t *path, size_t len)
 {
 	path->len	      = len;
 	path->path[path->len] = '\0';
 	return 0;
 }
 
-int path_ends(const path_t *path, const char *str, unsigned int len)
+int path_ends(const path_t *path, const char *str, size_t len)
 {
 	return path->len > len && m_memcmp(path->path + path->len - len, str, (size_t)len) == 0;
 }
 
-int path_calc_rel(const char *path, unsigned int path_len, const char *dest, unsigned int dest_len, path_t *out)
+int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t dest_len, path_t *out)
 {
-	int dif	       = 0;
-	int last_slash = 0;
+	size_t dif	  = 0;
+	size_t last_slash = 0;
 
-	for (unsigned int i = 0; i < path_len; i++) {
+	for (size_t i = 0; i < path_len; i++) {
 		if (dif == 0 && (path[i] == '\\' || path[i] == '/')) {
 			last_slash = i;
 		}
@@ -96,7 +96,7 @@ int path_calc_rel(const char *path, unsigned int path_len, const char *dest, uns
 	}
 
 	out->len = 0;
-	for (int i = 0; i < dif; i++) {
+	for (size_t i = 0; i < dif; i++) {
 		out->path[out->len++] = '.';
 		out->path[out->len++] = '.';
 		out->path[out->len++] = '\\';
@@ -127,7 +127,7 @@ int pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r)
 
 int pathv_folder(pathv_t *pathv, const path_t *path)
 {
-	unsigned int len = path->len;
+	size_t len = path->len;
 
 	while (len > 0 && path->path[len] != '\\' && path->path[len] != '/')
 		len--;

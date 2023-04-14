@@ -10,20 +10,20 @@
 	#include <io.h>
 #endif
 
-int p_fprintf(FILE *file, const char *fmt, ...)
+size_t p_fprintf(FILE *file, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	int ret = p_vfprintf(file, fmt, args);
+	size_t ret = p_vfprintf(file, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-int p_vfprintf(FILE *file, const char *fmt, va_list args)
+size_t p_vfprintf(FILE *file, const char *fmt, va_list args)
 {
 	va_list copy;
 	va_copy(copy, args);
-	int ret;
+	size_t ret;
 #if defined(C_WIN)
 	ret = vfprintf_s(file, fmt, copy);
 #else
@@ -33,20 +33,20 @@ int p_vfprintf(FILE *file, const char *fmt, va_list args)
 	return ret;
 }
 
-int p_sprintf(char *buf, size_t size, const char *fmt, ...)
+size_t p_sprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	int ret = p_vsprintf(buf, size, fmt, args);
+	size_t ret = p_vsprintf(buf, size, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-int p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
+size_t p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
 	va_list copy;
 	va_copy(copy, args);
-	int ret;
+	size_t ret;
 #if defined(C_WIN)
 	ret = vsprintf_s(buf, size, fmt, copy);
 #else
@@ -56,11 +56,11 @@ int p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
 	return ret;
 }
 
-int p_vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
+size_t p_vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 {
 	va_list copy;
 	va_copy(copy, args);
-	int ret;
+	size_t ret;
 #if defined(C_WIN)
 	ret = vsnprintf(buf, size, fmt, copy);
 #else
@@ -70,20 +70,20 @@ int p_vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
 	return ret;
 }
 
-int p_swprintf(wchar_t *buf, size_t size, const wchar_t *fmt, ...)
+size_t p_swprintf(wchar *buf, size_t size, const wchar *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	int ret = p_vswprintf(buf, size, fmt, args);
+	size_t ret = p_vswprintf(buf, size, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-int p_vswprintf(wchar_t *buf, size_t size, const wchar_t *fmt, va_list args)
+size_t p_vswprintf(wchar *buf, size_t size, const wchar *fmt, va_list args)
 {
 	va_list copy;
 	va_copy(copy, args);
-	int ret;
+	size_t ret;
 #if defined(C_WIN)
 	ret = vswprintf_s(buf, size, fmt, args);
 #else

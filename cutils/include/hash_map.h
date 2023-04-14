@@ -1,15 +1,14 @@
 #ifndef hash_map_h
 #define hash_map_h
 
-#include <stddef.h>
-#include <stdint.h>
+#include "type.h"
 
 struct bucket {
 	struct bucket *next;
 
 	void *key;
 	size_t ksize;
-	uint32_t hash;
+	u32 hash;
 	void *value;
 };
 

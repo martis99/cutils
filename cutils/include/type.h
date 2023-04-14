@@ -1,6 +1,7 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include <stddef.h>
 #include <stdint.h>
 #include <wchar.h>
 
@@ -20,6 +21,7 @@ typedef uint64_t u64;
 
 typedef wchar_t wchar;
 
+typedef unsigned char bool;
 typedef unsigned int uint;
 
 #endif

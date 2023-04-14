@@ -43,12 +43,12 @@ TEST(add_child, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -70,12 +70,12 @@ TEST(add_child_val, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>Name</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -97,12 +97,12 @@ TEST(add_child_val_c, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>Name</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -124,12 +124,12 @@ TEST(add_child_val_f, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>Name1</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -151,12 +151,12 @@ TEST(add_child_val_r_stack, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>Name</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -183,12 +183,12 @@ TEST(add_child_val_r_heap, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>Name</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -211,12 +211,12 @@ TEST(add_attr, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project1\" />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -239,12 +239,12 @@ TEST(add_attr_c, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project1\" />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -267,12 +267,12 @@ TEST(add_attr_f, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project2\" />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -295,12 +295,12 @@ TEST(add_attr_r_stack, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project1\" />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -328,12 +328,12 @@ TEST(add_attr_r_heap, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project3\" />\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -356,12 +356,12 @@ TEST(add_child_val_attr, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project Name=\"Project1\">Value</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 
@@ -384,14 +384,14 @@ TEST(add_child_child, FILE *file)
 
 	char buf[1024] = { 0 };
 
-	unsigned int len = (unsigned int)file_read_ft(file, buf, sizeof(buf));
+	file_read_ft(file, buf, sizeof(buf));
 
 	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
 			   "<Project>\n"
 			   "  <Child />\n"
 			   "</Project>\n";
 
-	EXPECT(cstr_cmp(buf, len, exp, sizeof(exp) - 1));
+	EXPECT_STR(buf, exp);
 
 	xml_free(&xml);
 

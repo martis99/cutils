@@ -8,7 +8,7 @@ TEST(time_int)
 {
 	START;
 
-	unsigned long long start, end;
+	u64 start, end;
 
 	start = c_time();
 
@@ -16,7 +16,7 @@ TEST(time_int)
 
 	end = c_time();
 
-	unsigned int eps = (unsigned int)(end - start - 1000);
+	u64 eps = end - start - 1000;
 
 	EXPECT_GE(eps, 0);
 	EXPECT_LT(eps, 100);
@@ -32,7 +32,7 @@ TEST(time_str)
 
 	c_time_str(buf);
 
-	unsigned int y, m, d, H, M, S, U;
+	uint y, m, d, H, M, S, U;
 
 	EXPECT_FMT(buf, 7, "%4u-%2u-%2u %2u:%2u:%2u.%3u", &y, &m, &d, &H, &M, &S, &U);
 
