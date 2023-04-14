@@ -14,7 +14,7 @@ TEST(tests)
 {
 	SSTART;
 	RUN(file);
-	RUN(log);
+	RUN(logt);
 	RUN(md5);
 	RUN(time);
 	RUN(tree);
