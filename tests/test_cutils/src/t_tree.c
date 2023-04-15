@@ -334,7 +334,7 @@ static int iterate_pre_child_cb(const tree_t *tree, tnode_t node, int depth, int
 		EXPECT_EQ(depth, 1);
 		EXPECT_EQ(last, 1);
 		break;
-	default: EXPECT_FAIL("Unknown node"); break;
+	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -382,7 +382,7 @@ static int iterate_pre_childs_cb(const tree_t *tree, tnode_t node, int depth, in
 		EXPECT_EQ(depth, 1);
 		EXPECT_EQ(last, 1);
 		break;
-	default: EXPECT_FAIL("Unknown node"); break;
+	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -432,7 +432,7 @@ static int iterate_pre_grand_child_cb(const tree_t *tree, tnode_t node, int dept
 		EXPECT_EQ(depth, 2);
 		EXPECT_EQ(last, 0b11);
 		break;
-	default: EXPECT_FAIL("Unknown node"); break;
+	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -469,7 +469,7 @@ static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, int last, vo
 {
 	START;
 
-	EXPECT_FAIL("Root has child");
+	EXPECT_FAIL("%s", "Root has child");
 
 	*(int *)priv += 1;
 
@@ -538,7 +538,7 @@ static int iterate_childs_childs_cb(const tree_t *tree, tnode_t node, int last, 
 	switch (node) {
 	case 1: EXPECT_EQ(last, 0); break;
 	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("Unknown node"); break;
+	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -554,8 +554,8 @@ TEST(iterate_childs_childs)
 
 	tree_init(&tree, 3, sizeof(int));
 
-	const n1 = tree_add_child(&tree, 0);
-	const n2 = tree_add_child(&tree, 0);
+	const tnode_t n1 = tree_add_child(&tree, 0);
+	const tnode_t n2 = tree_add_child(&tree, 0);
 
 	int cnt = 0;
 
@@ -578,7 +578,7 @@ static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, int l
 	switch (node) {
 	case 1: EXPECT_EQ(last, 0); break;
 	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("Unknown node"); break;
+	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;

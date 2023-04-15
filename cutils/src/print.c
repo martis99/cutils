@@ -118,7 +118,7 @@ void p_ur(FILE *file)
 	fwprintf_s(file, L"\u2514\u2500");
 	p_unset_u16(file, mode);
 #else
-	fprintf(f, "└─");
+	fprintf(file, "└─");
 #endif
 }
 
@@ -129,7 +129,7 @@ void p_v(FILE *file)
 	fwprintf_s(file, L"\u2502 ");
 	p_unset_u16(file, mode);
 #else
-	fprintf(f, "│ ");
+	fprintf(file, "│ ");
 #endif
 }
 
@@ -140,6 +140,6 @@ void p_vr(FILE *file)
 	fwprintf_s(file, L"\u251C\u2500");
 	p_unset_u16(file, mode);
 #else
-	fprintf(f, "├─");
+	fprintf(file, "├─");
 #endif
 }
