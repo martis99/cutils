@@ -7,28 +7,31 @@
 #include <time.h>
 
 #if defined(C_WIN)
-	#define gmtime(_tm, _time) gmtime_s(_tm, _time)
 #else
 	#include <sys/time.h>
 	#include <unistd.h>
-	#define gmtime(_tm, _time) gmtime_r(_time, _tm)
 #endif
 
-static struct timespec get_time()
+typedef struct ctime_s {
+	time_t sec;
+	u32 msec;
+} ctime_t;
+
+static ctime_t get_time()
 {
 #if defined(C_WIN)
 	SYSTEMTIME st;
 	GetSystemTime(&st);
-	const struct timespec now = {
-		.tv_sec	 = time(NULL),
-		.tv_nsec = st.wMilliseconds * 1000,
+	const ctime_t now = {
+		.sec  = time(NULL),
+		.msec = st.wMilliseconds,
 	};
 #else
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	const struct timespec now = {
-		.tv_sec	 = tv.tv_sec,
-		.tv_nsec = tv.tv_usec,
+	const ctime_t now = {
+		.sec  = tv.tv_sec,
+		.msec = tv.tv_usec / 1000,
 	};
 #endif
 	return now;
@@ -36,18 +39,24 @@ static struct timespec get_time()
 
 u64 c_time()
 {
-	const struct timespec now = get_time();
-	return now.tv_sec * 1000 + (u64)now.tv_nsec / 1000;
+	const ctime_t now = get_time();
+	return (u64)now.sec * 1000 + (u64)now.msec;
 }
 
 const char *c_time_str(char *buf)
 {
-	struct tm timeinfo;
-	const struct timespec now = get_time();
+	struct tm *timeinfo;
+	const ctime_t now = get_time();
+#if defined(C_WIN)
+	struct tm ti;
+	gmtime_s(&ti, &now.sec);
+	timeinfo = &ti;
+#else
+	timeinfo = gmtime(&now.sec);
+#endif
 
-	gmtime(&timeinfo, &now.tv_sec);
-	strftime(buf, C_TIME_BUF_SIZE, "%Y-%m-%d %H:%M:%S", &timeinfo);
-	p_sprintf(buf + 19, C_TIME_BUF_SIZE - 19, ".%03ld", now.tv_nsec / 1000);
+	strftime(buf, C_TIME_BUF_SIZE, "%Y-%m-%d %H:%M:%S", timeinfo);
+	p_sprintf(buf + 19, C_TIME_BUF_SIZE - 19, ".%03ld", now.msec);
 
 	return buf;
 }
@@ -58,6 +67,10 @@ int c_sleep(u32 milliseconds)
 	Sleep((DWORD)milliseconds);
 	return 0;
 #else
-	return usleep(milliseconds * 1000);
+	struct timeval tv;
+	tv.tv_sec  = milliseconds / 1000;
+	tv.tv_usec = milliseconds % 1000 * 1000;
+	select(0, NULL, NULL, NULL, &tv);
+	return 0;
 #endif
 }

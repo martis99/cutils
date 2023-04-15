@@ -4,3 +4,4 @@ DIRS: cutils, tests, examples
 STARTUP: test_cutils
 CONFIGS: Debug, Release
 PLATFORMS: x64, x86
+CFLAGS: STD_C99
