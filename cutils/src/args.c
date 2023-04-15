@@ -75,7 +75,7 @@ static inline void help(const char *name, const char *description, const arg_t *
 	fflush(stdout);
 }
 
-static inline int get_arg(const arg_t *args, size_t args_size, int argc, const char **argv, size_t *index, const char **param)
+static inline int get_arg(const arg_t *args, size_t args_size, int argc, const char **argv, int *index, const char **param)
 {
 	int arg = -2;
 
@@ -111,7 +111,7 @@ static inline int get_arg(const arg_t *args, size_t args_size, int argc, const c
 	(*index)++;
 
 	if (arg >= 0 && args[arg].param != PARAM_NONE) {
-		if (*index < (size_t)argc) {
+		if (*index < argc) {
 			*param = argv[(*index)++];
 		} else {
 			arg = -1;
@@ -137,7 +137,7 @@ int args_handle(const char *name, const char *description, const arg_t *args, si
 {
 	int ret = 0;
 
-	size_t i = 1;
+	int i = 1;
 	while (i < argc) {
 		const char *param = NULL;
 
