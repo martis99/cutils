@@ -10,6 +10,29 @@ permissions:
   contents: read
 
 jobs:
+  Ubuntu-Make:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Generate solution
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./build-linux
+
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: make test_cutils CONFIG=${{matrix.configuration}}
+
+    - name: Test
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: ./bin/${{matrix.configuration}}-x64/tests/test_cutils/test_cutils
+
   Windows-MSBuild:
     runs-on: windows-latest
     strategy:
