@@ -3,8 +3,15 @@ name: Test
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,21 +24,21 @@ jobs:
         configuration: [Debug, Release]
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: Generate solution
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./build-linux
+      - name: Generate solution
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: ./build-linux
 
-    - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: make test_cutils CONFIG=${{matrix.configuration}}
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: make CONFIG=${{matrix.configuration}}
 
-    - name: Test
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: ./bin/${{matrix.configuration}}-x64/tests/test_cutils/test_cutils
+      - name: Test
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: ./bin/${{matrix.configuration}}-x64/tests/test_cutils/test_cutils
 
   Windows-MSBuild:
     runs-on: windows-latest
@@ -41,25 +48,25 @@ jobs:
         platform: [x64, x86]
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: Generate solution
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: .\build-win-x64.exe
+      - name: Generate solution
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: .\build-win-x64.exe
 
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
 
-    - name: Restore NuGet packages
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: nuget restore .
+      - name: Restore NuGet packages
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: nuget restore .
 
-    - name: Build
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}} .
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: msbuild /m /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}} .
 
-    - name: Test
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: .\bin\${{matrix.configuration}}-${{matrix.platform}}\tests\test_cutils\test_cutils.exe
+      - name: Test
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: .\bin\${{matrix.configuration}}-${{matrix.platform}}\tests\test_cutils\test_cutils.exe
