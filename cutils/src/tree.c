@@ -5,117 +5,68 @@
 
 typedef struct header_s {
 	tnode_t child;
-	tnode_t next;
 } header_t;
 
-typedef struct node_s {
-	header_t header;
-	void *data;
-} node_t;
-
-static inline node_t *get_node(const tree_t *tree, tnode_t node)
+static inline header_t *get_node(const tree_t *tree, tnode_t node)
 {
-	return (node_t *)((byte *)tree->nodes + node * (sizeof(header_t) + tree->size));
+	return list_get_data(tree, node);
 }
 
 static inline void init_node(tree_t *tree, tnode_t node)
 {
-	node_t *ptr = get_node(tree, node);
+	header_t *ptr = get_node(tree, node);
 
-	ptr->header.child = 0;
-	ptr->header.next  = 0;
+	ptr->child = 0;
 }
 
 tree_t *tree_init(tree_t *tree, uint cap, size_t size)
 {
-	tree->nodes = m_calloc(cap, sizeof(header_t) + size);
-	if (tree->nodes == NULL) {
+	tree = list_init(tree, cap, sizeof(header_t) + size);
+	if (tree == NULL) {
 		return NULL;
 	}
 
-	tree->cap  = cap;
-	tree->cnt  = 1;
-	tree->size = size;
+	tnode_t node = list_add(tree);
 
-	init_node(tree, 0);
+	init_node(tree, node);
 
 	return tree;
 }
 
 void tree_free(tree_t *tree)
 {
-	m_free(tree->nodes, tree->cap * (sizeof(header_t) + tree->size));
-	tree->nodes = NULL;
-	tree->cap   = 0;
-	tree->cnt   = 0;
-	tree->size  = 0;
+	list_free(tree);
 }
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node)
 {
-	const size_t node_size = sizeof(header_t) + tree->size;
-
-	if (tree->cnt >= tree->cap) {
-		size_t old_size = tree->cap * node_size;
-		tree->cap *= 2;
-		tree->nodes = m_realloc(tree->nodes, tree->cap * node_size, old_size);
-		if (tree->nodes == NULL) {
-			return -1;
-		}
-	}
-
-	tnode_t child = tree->cnt;
-
-	tnode_t *target = &get_node(tree, node)->header.child;
-	while (*target != 0) {
-		target = &get_node(tree, *target)->header.next;
-	}
-	*target = child;
-	tree->cnt++;
-
+	header_t *nodeh = get_node(tree, node);
+	tnode_t child	= nodeh->child == 0 ? nodeh->child = list_add(tree) : list_add_next(tree, nodeh->child);
 	init_node(tree, child);
 	return child;
 }
 
 tnode_t tree_get_child(const tree_t *tree, tnode_t node)
 {
-	return get_node(tree, node)->header.child;
+	return get_node(tree, node)->child;
 }
 
 tnode_t tree_add_next(tree_t *tree, tnode_t node)
 {
-	const size_t node_size = sizeof(header_t) + tree->size;
-
-	if (tree->cnt >= tree->cap) {
-		size_t old_size = tree->cap * node_size;
-		tree->cap *= 2;
-		tree->nodes = m_realloc(tree->nodes, tree->cap * node_size, old_size);
-		if (tree->nodes == NULL) {
-			return -1;
-		}
-	}
-
-	tnode_t next = tree->cnt;
-
-	tnode_t *target = &get_node(tree, node)->header.next;
-	while (*target != 0) {
-		target = &get_node(tree, *target)->header.next;
-	}
-	*target = next;
-	tree->cnt++;
-
-	init_node(tree, next);
-	return next;
+	header_t *nodeh = get_node(tree, node);
+	tnode_t child	= list_add_next(tree, node);
+	init_node(tree, child);
+	return child;
 }
 
 tnode_t tree_get_next(const tree_t *tree, tnode_t node)
 {
-	return get_node(tree, node)->header.next;
+	return list_get_next(tree, node);
 }
 
 void *tree_get_data(const tree_t *tree, tnode_t node)
 {
-	return &get_node(tree, node)->data;
+	return (byte *)get_node(tree, node) + sizeof(header_t);
 }
 
 static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last)

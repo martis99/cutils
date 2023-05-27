@@ -1,4 +1,5 @@
 #include "t_file.h"
+#include "t_list.h"
 #include "t_log.h"
 #include "t_md5.h"
 #include "t_time.h"
@@ -14,6 +15,7 @@ TEST(tests)
 {
 	SSTART;
 	RUN(file);
+	RUN(list);
 	RUN(logt);
 	RUN(md5);
 	RUN(time);

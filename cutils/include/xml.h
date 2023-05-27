@@ -1,6 +1,7 @@
 #ifndef XML_H
 #define XML_H
 
+#include "list.h"
 #include "tree.h"
 #include "type.h"
 
@@ -16,11 +17,11 @@ typedef struct xml_str_s {
 } xml_str_t;
 
 typedef tnode_t xml_tag_t;
-typedef tnode_t xml_attr_t;
+typedef lnode_t xml_attr_t;
 
 typedef struct xml_s {
 	tree_t tags;
-	tree_t attrs;
+	list_t attrs;
 } xml_t;
 
 xml_t *xml_init(xml_t *xml, uint cap);

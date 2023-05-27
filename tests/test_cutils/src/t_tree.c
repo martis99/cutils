@@ -15,7 +15,6 @@ TEST(init_free)
 	EXPECT_NE(tree.nodes, NULL);
 	EXPECT_EQ(tree.cap, 1);
 	EXPECT_EQ(tree.cnt, 1);
-	EXPECT_EQ(tree.size, sizeof(int));
 
 	tree_free(&tree);
 

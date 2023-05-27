@@ -15,6 +15,7 @@ cross-platform utitilities and basic data structures implementation for C
 - [x] MD5
 
 ### Data structures
+- [x] list
 - [x] tree
 - [x] xml
 

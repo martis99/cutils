@@ -1,18 +1,13 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include "list.h"
 #include "type.h"
 
 #include <stdio.h>
 
-typedef uint tnode_t;
-
-typedef struct tree_s {
-	void *nodes;
-	uint cap;
-	uint cnt;
-	size_t size;
-} tree_t;
+typedef lnode_t tnode_t;
+typedef list_t tree_t;
 
 tree_t *tree_init(tree_t *tree, uint cap, size_t size);
 void tree_free(tree_t *tree);

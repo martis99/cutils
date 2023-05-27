@@ -20,9 +20,11 @@ xml_t *xml_init(xml_t *xml, uint cap)
 		return NULL;
 	}
 
-	if (tree_init(&xml->attrs, cap, sizeof(xml_attr_data_t)) == NULL) {
+	if (list_init(&xml->attrs, cap, sizeof(xml_attr_data_t)) == NULL) {
 		return NULL;
 	}
+
+	list_add(&xml->attrs);
 
 	return xml;
 }
@@ -45,9 +47,9 @@ static int xml_tag_free(const tree_t *tree, tnode_t node, int depth, int last, v
 	return 0;
 }
 
-static int xml_attr_free(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+static int xml_attr_free(const list_t *list, lnode_t node, int last, void *priv)
 {
-	xml_attr_data_t *attr_d = tree_get_data(tree, node);
+	xml_attr_data_t *attr_d = list_get_data(list, node);
 
 	xml_str_free(&attr_d->name);
 	xml_str_free(&attr_d->val);
@@ -59,8 +61,8 @@ void xml_free(xml_t *xml)
 	tree_iterate_pre(&xml->tags, 0, xml_tag_free, NULL);
 	tree_free(&xml->tags);
 
-	tree_iterate_pre(&xml->attrs, 0, xml_attr_free, NULL);
-	tree_free(&xml->attrs);
+	list_iterate_all(&xml->attrs, xml_attr_free, NULL);
+	list_free(&xml->attrs);
 }
 
 static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
@@ -68,17 +70,17 @@ static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 	xml_tag_data_t *tag_d = tree_get_data(&xml->tags, tag);
 
 	if (tag_d->attrs == 0) {
-		tag_d->attrs = tree_add_child(&xml->attrs, 0);
+		tag_d->attrs = list_add(&xml->attrs);
 		return tag_d->attrs;
 	}
 
-	return tree_add_child(&xml->attrs, tag_d->attrs);
+	return tree_add_next(&xml->attrs, tag_d->attrs);
 }
 
 xml_attr_t xml_add_attr_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
 {
 	xml_attr_t attr		= add_attr(xml, tag);
-	xml_attr_data_t *attr_d = tree_get_data(&xml->attrs, attr);
+	xml_attr_data_t *attr_d = list_get_data(&xml->attrs, attr);
 
 	*attr_d = (xml_attr_data_t){
 		.name = { .data = name, .len = name_len, .mem = 0 },
@@ -177,9 +179,9 @@ xml_tag_t xml_add_child_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_
 	return attr;
 }
 
-static int xml_attr_print_cb(const tree_t *tree, tnode_t node, int last, void *priv)
+static int xml_attr_print_cb(const list_t *list, lnode_t node, int last, void *priv)
 {
-	xml_attr_data_t *attr_d = tree_get_data(tree, node);
+	xml_attr_data_t *attr_d = list_get_data(list, node);
 
 	p_fprintf(priv, " %.*s=\"%.*s\"", attr_d->name.len, attr_d->name.data, attr_d->val.len, attr_d->val.data);
 	return 0;
@@ -207,8 +209,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 	p_fprintf(file, "%*s<%.*s", depth * 2, "", tag_d->name.len, tag_d->name.data);
 
 	if (tag_d->attrs != 0) {
-		xml_attr_print_cb(&xml->attrs, tag_d->attrs, 0, file);
-		tree_iterate_childs(&xml->attrs, tag_d->attrs, xml_attr_print_cb, file);
+		list_iterate(&xml->attrs, tag_d->attrs, xml_attr_print_cb, file);
 	}
 
 	xml_tag_print_cb_priv_t priv = {
