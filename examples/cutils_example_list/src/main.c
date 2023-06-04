@@ -2,10 +2,10 @@
 #include "mem.h"
 #include "print.h"
 
-static int print_list(FILE *file, void *data)
+static int print_list(FILE *file, void *data, int ret)
 {
 	p_fprintf(file, "%d\n", *(int *)data);
-	return 0;
+	return ret;
 }
 
 int main(int argc, char **argv)
@@ -15,9 +15,9 @@ int main(int argc, char **argv)
 
 	list_t list = { 0 };
 
-	list_init(&list, 10, sizeof(int));
+	list_init(&list, 13, sizeof(int));
 
-	*(int *)list_get_data(&list, 0) = 0;
+	*(int *)list_get_data(&list, list_add(&list)) = 0;
 
 	lnode_t n1, n2, n3, n11, n12, n13, n21, n22, n23, n31, n32, n33;
 
@@ -37,9 +37,9 @@ int main(int argc, char **argv)
 	*(int *)list_get_data(&list, (n32 = list_add_next(&list, n3))) = 32;
 	*(int *)list_get_data(&list, (n33 = list_add_next(&list, n3))) = 33;
 
-	list_print(&list, n1, stdout, print_list);
-	list_print(&list, n2, stdout, print_list);
-	list_print(&list, n3, stdout, print_list);
+	list_print(&list, n1, stdout, print_list, 0);
+	list_print(&list, n2, stdout, print_list, 0);
+	list_print(&list, n3, stdout, print_list, 0);
 
 	list_free(&list);
 

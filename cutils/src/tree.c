@@ -12,23 +12,22 @@ static inline header_t *get_node(const tree_t *tree, tnode_t node)
 	return list_get_data(tree, node);
 }
 
-static inline void init_node(tree_t *tree, tnode_t node)
+static inline tnode_t init_node(tree_t *tree, tnode_t node)
 {
 	header_t *ptr = get_node(tree, node);
+	if (ptr == NULL) {
+		return -1;
+	}
 
-	ptr->child = 0;
+	ptr->child = -1;
+	return node;
 }
 
 tree_t *tree_init(tree_t *tree, uint cap, size_t size)
 {
-	tree = list_init(tree, cap, sizeof(header_t) + size);
-	if (tree == NULL) {
+	if (list_init(tree, cap, sizeof(header_t) + size) == NULL) {
 		return NULL;
 	}
-
-	tnode_t node = list_add(tree);
-
-	init_node(tree, node);
 
 	return tree;
 }
@@ -38,25 +37,34 @@ void tree_free(tree_t *tree)
 	list_free(tree);
 }
 
+tnode_t tree_add(tree_t *tree)
+{
+	return init_node(tree, list_add(tree));
+}
+
 tnode_t tree_add_child(tree_t *tree, tnode_t node)
 {
-	header_t *nodeh = get_node(tree, node);
-	tnode_t child	= nodeh->child == 0 ? nodeh->child = list_add(tree) : list_add_next(tree, nodeh->child);
-	init_node(tree, child);
-	return child;
+	header_t *header = get_node(tree, node);
+	if (header == NULL) {
+		return -1;
+	}
+
+	tnode_t child = header->child == -1 ? header->child = list_add(tree) : list_add_next(tree, header->child);
+	return init_node(tree, child);
 }
 
 tnode_t tree_get_child(const tree_t *tree, tnode_t node)
 {
-	return get_node(tree, node)->child;
+	header_t *header = get_node(tree, node);
+	if (header == NULL) {
+		return -1;
+	}
+	return header->child;
 }
 
 tnode_t tree_add_next(tree_t *tree, tnode_t node)
 {
-	header_t *nodeh = get_node(tree, node);
-	tnode_t child	= list_add_next(tree, node);
-	init_node(tree, child);
-	return child;
+	return init_node(tree, list_add_next(tree, node));
 }
 
 tnode_t tree_get_next(const tree_t *tree, tnode_t node)
@@ -66,54 +74,60 @@ tnode_t tree_get_next(const tree_t *tree, tnode_t node)
 
 void *tree_get_data(const tree_t *tree, tnode_t node)
 {
-	return (byte *)get_node(tree, node) + sizeof(header_t);
+	header_t *header = get_node(tree, node);
+	if (header == NULL) {
+		return NULL;
+	}
+	return header + 1;
 }
 
-static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv, int depth, int last)
+static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, int ret, void *priv, int depth, int last)
 {
-	int ret = cb(tree, node, depth, last, priv);
+	if (node >= tree->cnt) {
+		return ret;
+	}
+
+	ret = cb(tree, node, tree_get_data(tree, node), ret, depth, last, priv);
 
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
 
-	while (child != 0) {
-		next = tree_get_next(tree, child);
-		ret += node_iterate_pre(tree, child, cb, priv, depth + 1, last | ((next == 0) << depth));
+	while (child != -1) {
+		next  = tree_get_next(tree, child);
+		ret   = node_iterate_pre(tree, child, cb, ret, priv, depth + 1, last | ((next == -1) << depth));
 		child = next;
 	}
 
 	return ret;
 }
 
-int tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, void *priv)
+int tree_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, int ret, void *priv)
 {
-	return node_iterate_pre(tree, node, cb, priv, 0, 0);
+	return node_iterate_pre(tree, node, cb, ret, priv, 0, 0);
 }
 
-int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, void *priv)
+int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb cb, int ret, void *priv)
 {
-	int ret = 0;
-
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
 
-	while (child != 0) {
-		next = tree_get_next(tree, child);
-		ret += cb(tree, child, next == 0, priv);
+	while (child != -1) {
+		next  = tree_get_next(tree, child);
+		ret   = cb(tree, child, tree_get_data(tree, child), ret, next == -1, priv);
 		child = next;
 	}
 
 	return ret;
 }
 
-typedef struct node_print_priv_s {
+typedef struct tree_print_priv_s {
 	FILE *file;
 	tree_print_cb cb;
-} node_print_priv_t;
+} tree_print_priv_t;
 
-static int node_print(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+static int print_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	node_print_priv_t *p = priv;
+	tree_print_priv_t *p = priv;
 
 	for (int i = 0; i < depth - 1; i++) {
 		if ((1 << i) & last) {
@@ -131,14 +145,14 @@ static int node_print(const tree_t *tree, tnode_t node, int depth, int last, voi
 		}
 	}
 
-	return p->cb(p->file, tree_get_data(tree, node));
+	return p->cb(p->file, value, ret);
 }
 
-int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb)
+int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, int ret)
 {
-	node_print_priv_t priv = {
+	tree_print_priv_t priv = {
 		.file = file,
 		.cb   = cb,
 	};
-	return tree_iterate_pre(tree, 0, node_print, &priv);
+	return tree_iterate_pre(tree, node, print_cb, ret, &priv);
 }

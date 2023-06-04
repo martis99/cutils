@@ -2,10 +2,10 @@
 #include "print.h"
 #include "tree.h"
 
-static int print_tree(FILE *file, void *data)
+static int print_tree(FILE *file, void *data, int ret)
 {
 	p_fprintf(file, "%d\n", *(int *)data);
-	return 0;
+	return ret;
 }
 
 int main(int argc, char **argv)
@@ -15,9 +15,9 @@ int main(int argc, char **argv)
 
 	tree_t tree = { 0 };
 
-	tree_init(&tree, 10, sizeof(int));
+	tree_init(&tree, 20, sizeof(int));
 
-	*(int *)tree_get_data(&tree, 0) = 0;
+	*(int *)tree_get_data(&tree, tree_add(&tree)) = 0;
 
 	tnode_t n1, n2, n3, n11, n12, n13, n21, n22, n23, n31, n32, n33, n111, n131, n212, n222, n232, n333, n1111;
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
 	*(int *)tree_get_data(&tree, (n1111 = tree_add_child(&tree, n111))) = 1111;
 
-	tree_print(&tree, 0, stdout, print_tree);
+	tree_print(&tree, 0, stdout, print_tree, 0);
 
 	tree_free(&tree);
 

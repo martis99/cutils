@@ -1,3 +1,4 @@
+#include "t_arr.h"
 #include "t_file.h"
 #include "t_list.h"
 #include "t_log.h"
@@ -14,6 +15,7 @@
 TEST(tests)
 {
 	SSTART;
+	RUN(arr);
 	RUN(file);
 	RUN(list);
 	RUN(logt);

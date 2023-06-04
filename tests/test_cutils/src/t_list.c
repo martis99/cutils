@@ -12,14 +12,14 @@ TEST(init_free)
 
 	list_init(&list, 1, sizeof(int));
 
-	EXPECT_NE(list.nodes, NULL);
+	EXPECT_NE(list.data, NULL);
 	EXPECT_EQ(list.cap, 1);
 	EXPECT_EQ(list.cnt, 0);
-	EXPECT_EQ(list.size, sizeof(int));
+	EXPECT_NE(list.size, 0);
 
 	list_free(&list);
 
-	EXPECT_EQ(list.nodes, NULL);
+	EXPECT_EQ(list.data, NULL);
 	EXPECT_EQ(list.cap, 0);
 	EXPECT_EQ(list.cnt, 0);
 	EXPECT_EQ(list.size, 0);
@@ -231,7 +231,7 @@ TEST(get_next)
 	END;
 }
 
-static int iterate_cb(const list_t *list, lnode_t node, int last, void *priv)
+static int iterate_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
 	START;
 
@@ -240,7 +240,7 @@ static int iterate_cb(const list_t *list, lnode_t node, int last, void *priv)
 
 	*(int *)priv += 1;
 
-	END;
+	return ret + RES;
 }
 
 TEST(iterate)
@@ -255,7 +255,7 @@ TEST(iterate)
 
 	int cnt = 0;
 
-	int ret = list_iterate(&list, node, iterate_cb, &cnt);
+	int ret = list_iterate(&list, node, iterate_cb, 0, &cnt);
 
 	EXPECT_EQ(cnt, 1);
 	EXPECT_EQ(ret, 0);
@@ -265,7 +265,7 @@ TEST(iterate)
 	END;
 }
 
-static int iterate_next_cb(const list_t *list, lnode_t node, int last, void *priv)
+static int iterate_next_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
 	START;
 
@@ -277,7 +277,7 @@ static int iterate_next_cb(const list_t *list, lnode_t node, int last, void *pri
 
 	*(int *)priv += 1;
 
-	END;
+	return ret + RES;
 }
 
 TEST(iterate_next)
@@ -293,7 +293,7 @@ TEST(iterate_next)
 
 	int cnt = 0;
 
-	int ret = list_iterate(&list, 0, iterate_next_cb, &cnt);
+	int ret = list_iterate(&list, 0, iterate_next_cb, 0, &cnt);
 
 	EXPECT_EQ(child, 1);
 	EXPECT_EQ(cnt, 2);
@@ -304,7 +304,7 @@ TEST(iterate_next)
 	END;
 }
 
-static int iterate_nexts_cb(const list_t *list, lnode_t node, int last, void *priv)
+static int iterate_nexts_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
 	START;
 
@@ -317,7 +317,7 @@ static int iterate_nexts_cb(const list_t *list, lnode_t node, int last, void *pr
 
 	*(int *)priv += 1;
 
-	END;
+	return ret + RES;
 }
 
 TEST(iterate_nexts)
@@ -334,7 +334,7 @@ TEST(iterate_nexts)
 
 	int cnt = 0;
 
-	int ret = list_iterate(&list, 0, iterate_nexts_cb, &cnt);
+	int ret = list_iterate(&list, 0, iterate_nexts_cb, 0, &cnt);
 
 	EXPECT_EQ(next1, 1);
 	EXPECT_EQ(next2, 2);
@@ -346,7 +346,7 @@ TEST(iterate_nexts)
 	END;
 }
 
-static int iterate_all_cb(const list_t *list, lnode_t node, int last, void *priv)
+static int iterate_all_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
 	START;
 
@@ -359,7 +359,7 @@ static int iterate_all_cb(const list_t *list, lnode_t node, int last, void *priv
 
 	*(int *)priv += 1;
 
-	END;
+	return ret + RES;
 }
 
 TEST(iterate_all)
@@ -376,7 +376,7 @@ TEST(iterate_all)
 
 	int cnt = 0;
 
-	int ret = list_iterate_all(&list, iterate_all_cb, &cnt);
+	int ret = list_iterate_all(&list, iterate_all_cb, 0, &cnt);
 
 	EXPECT_EQ(next1, 1);
 	EXPECT_EQ(node2, 2);

@@ -17,13 +17,13 @@ TEST(init_free)
 
 	xml_init(&xml, 4);
 
-	EXPECT_NE(xml.tags.nodes, NULL);
-	EXPECT_NE(xml.attrs.nodes, NULL);
+	EXPECT_NE(xml.tags.data, NULL);
+	EXPECT_NE(xml.attrs.data, NULL);
 
 	xml_free(&xml);
 
-	EXPECT_EQ(xml.tags.nodes, NULL);
-	EXPECT_EQ(xml.attrs.nodes, NULL);
+	EXPECT_EQ(xml.tags.data, NULL);
+	EXPECT_EQ(xml.attrs.data, NULL);
 
 	END;
 }
@@ -36,10 +36,10 @@ TEST(add_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_child(&xml, 0, CSTR("Project"));
+	xml_add_tag(&xml, -1, CSTR("Project"));
 
 	FILE *nf = file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -63,10 +63,10 @@ TEST(add_child_val, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_child_val(&xml, 0, CSTR("Project"), CSTR("Name"));
+	xml_add_tag_val(&xml, -1, CSTR("Project"), CSTR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -90,10 +90,10 @@ TEST(add_child_val_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_child_val_c(&xml, 0, CSTR("Project"), CSTR("Name"));
+	xml_add_tag_val_c(&xml, -1, CSTR("Project"), CSTR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -117,10 +117,10 @@ TEST(add_child_val_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_child_val_f(&xml, 0, CSTR("Project"), "Name%d", 1);
+	xml_add_tag_val_f(&xml, -1, CSTR("Project"), "Name%d", 1);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -144,10 +144,10 @@ TEST(add_child_val_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_child_val_r(&xml, 0, CSTR("Project"), CSTR("Name"), 0);
+	xml_add_tag_val_r(&xml, -1, CSTR("Project"), CSTR("Name"), 0);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -176,10 +176,10 @@ TEST(add_child_val_r_heap, FILE *file)
 	char *name = m_malloc(sizeof(val));
 	m_memcpy(name, sizeof(val), val, sizeof(val));
 
-	xml_add_child_val_r(&xml, 0, CSTR("Project"), name, sizeof(val), 1);
+	xml_add_tag_val_r(&xml, -1, CSTR("Project"), name, sizeof(val), 1);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -203,11 +203,11 @@ TEST(add_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
 	xml_add_attr(&xml, project, CSTR("Name"), CSTR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -231,11 +231,11 @@ TEST(add_attr_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
 	xml_add_attr_c(&xml, project, CSTR("Name"), CSTR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -259,11 +259,11 @@ TEST(add_attr_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
 	xml_add_attr_f(&xml, project, CSTR("Name"), "Project%d", 2);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -287,11 +287,11 @@ TEST(add_attr_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
 	xml_add_attr_r(&xml, project, CSTR("Name"), CSTR("Project1"), 0);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -320,11 +320,11 @@ TEST(add_attr_r_heap, FILE *file)
 	char *name = m_malloc(sizeof(val));
 	m_memcpy(name, sizeof(val), val, sizeof(val));
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
 	xml_add_attr_r(&xml, project, CSTR("Name"), name, sizeof(val), 1);
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -348,11 +348,11 @@ TEST(add_child_val_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child_val(&xml, 0, CSTR("Project"), CSTR("Value"));
+	const xml_tag_t project = xml_add_tag_val(&xml, -1, CSTR("Project"), CSTR("Value"));
 	xml_add_attr(&xml, project, CSTR("Name"), CSTR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 
@@ -376,11 +376,11 @@ TEST(add_child_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_child(&xml, 0, CSTR("Project"));
-	xml_add_child(&xml, project, CSTR("Child"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
+	xml_add_tag(&xml, project, CSTR("Child"));
 
 	file_reopen(TEST_FILE, "wb+", file);
-	xml_print(&xml, file);
+	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
 

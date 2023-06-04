@@ -24,8 +24,6 @@ xml_t *xml_init(xml_t *xml, uint cap)
 		return NULL;
 	}
 
-	list_add(&xml->attrs);
-
 	return xml;
 }
 
@@ -37,52 +35,125 @@ static int xml_str_free(xml_str_t *str)
 	return 0;
 }
 
-static int xml_tag_free(const tree_t *tree, tnode_t node, int depth, int last, void *priv)
+static int xml_tag_free(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	xml_tag_data_t *tag_d = tree_get_data(tree, node);
+	xml_tag_data_t *data = value;
+	if (data == NULL) {
+		return 1;
+	}
 
-	xml_str_free(&tag_d->name);
-	xml_str_free(&tag_d->val);
+	xml_str_free(&data->name);
+	xml_str_free(&data->val);
 
 	return 0;
 }
 
-static int xml_attr_free(const list_t *list, lnode_t node, int last, void *priv)
+static int xml_attr_free(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
-	xml_attr_data_t *attr_d = list_get_data(list, node);
+	xml_attr_data_t *attr_d = value;
 
 	xml_str_free(&attr_d->name);
 	xml_str_free(&attr_d->val);
-	return 0;
+	return ret;
 }
 
 void xml_free(xml_t *xml)
 {
-	tree_iterate_pre(&xml->tags, 0, xml_tag_free, NULL);
+	if (xml->tags.cnt > 0) {
+		tree_iterate_pre(&xml->tags, 0, xml_tag_free, 0, NULL);
+	}
 	tree_free(&xml->tags);
 
-	list_iterate_all(&xml->attrs, xml_attr_free, NULL);
+	if (xml->attrs.cnt > 0) {
+		list_iterate_all(&xml->attrs, xml_attr_free, 0, NULL);
+	}
 	list_free(&xml->attrs);
+}
+
+xml_tag_t xml_add_tag_val_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
+{
+	xml_tag_t child	     = tag == -1 ? tree_add(&xml->tags) : tree_add_child(&xml->tags, tag);
+	xml_tag_data_t *data = tree_get_data(&xml->tags, child);
+	if (data == NULL) {
+		return -1;
+	}
+
+	*data = (xml_tag_data_t){
+		.name  = { .data = name, .len = name_len, .mem = 0 },
+		.attrs = -1,
+		.val   = { .data = val, .len = val_len, .mem = val_mem },
+	};
+	return child;
+}
+
+xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len)
+{
+	return xml_add_tag_val_r(xml, tag, name, name_len, NULL, 0, 0);
+}
+
+xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len)
+{
+	return xml_add_tag_val_r(xml, tag, name, name_len, val, val_len, 0);
+}
+
+xml_tag_t xml_add_tag_val_c(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len)
+{
+	size_t len = val_len + 1;
+	char *data = m_malloc(len);
+	if (data == NULL) {
+		return -1;
+	}
+
+	m_memcpy(data, len, val, val_len);
+	data[len - 1] = '\0';
+	return xml_add_tag_val_r(xml, tag, name, name_len, data, len, 1);
+}
+
+xml_tag_t xml_add_tag_val_v(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, va_list args)
+{
+	size_t len = p_vsnprintf(NULL, 0, format, args) + 1;
+	char *data = m_malloc(len);
+	if (data == NULL) {
+		return -1;
+	}
+
+	p_vsnprintf(data, len, format, args);
+	return xml_add_tag_val_r(xml, tag, name, name_len, data, len, 1);
+}
+
+xml_tag_t xml_add_tag_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	xml_tag_t attr = xml_add_tag_val_v(xml, tag, name, name_len, format, args);
+	va_end(args);
+	return attr;
 }
 
 static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 {
-	xml_tag_data_t *tag_d = tree_get_data(&xml->tags, tag);
-
-	if (tag_d->attrs == 0) {
-		tag_d->attrs = list_add(&xml->attrs);
-		return tag_d->attrs;
+	xml_tag_data_t *data = tree_get_data(&xml->tags, tag);
+	if (data == NULL) {
+		return -1;
 	}
 
-	return tree_add_next(&xml->attrs, tag_d->attrs);
+	if (data->attrs == -1) {
+		data->attrs = list_add(&xml->attrs);
+		return data->attrs;
+	}
+
+	return tree_add_next(&xml->attrs, data->attrs);
 }
 
 xml_attr_t xml_add_attr_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
 {
-	xml_attr_t attr		= add_attr(xml, tag);
-	xml_attr_data_t *attr_d = list_get_data(&xml->attrs, attr);
+	xml_attr_t attr	      = add_attr(xml, tag);
+	xml_attr_data_t *data = list_get_data(&xml->attrs, attr);
+	if (data == NULL) {
+		return -1;
+	}
 
-	*attr_d = (xml_attr_data_t){
+	*data = (xml_attr_data_t){
 		.name = { .data = name, .len = name_len, .mem = 0 },
 		.val  = { .data = val, .len = val_len, .mem = val_mem },
 	};
@@ -99,6 +170,10 @@ xml_attr_t xml_add_attr_c(xml_t *xml, xml_tag_t tag, const char *name, size_t na
 {
 	size_t len = val_len + 1;
 	char *data = m_malloc((size_t)len);
+	if (data == NULL) {
+		return -1;
+	}
+
 	m_memcpy(data, len, val, val_len);
 	data[len - 1] = '\0';
 	return xml_add_attr_r(xml, tag, name, name_len, data, len, 1);
@@ -108,6 +183,10 @@ xml_attr_t xml_add_attr_v(xml_t *xml, xml_tag_t tag, const char *name, size_t na
 {
 	size_t len = p_vsnprintf(NULL, 0, format, args) + 1;
 	char *data = m_malloc(len);
+	if (data == NULL) {
+		return -1;
+	}
+
 	p_vsnprintf(data, len, format, args);
 	return xml_add_attr_r(xml, tag, name, name_len, data, len, 1);
 }
@@ -121,70 +200,15 @@ xml_attr_t xml_add_attr_f(xml_t *xml, xml_tag_t tag, const char *name, size_t na
 	return attr;
 }
 
-xml_tag_t xml_add_child(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len)
+static int xml_attr_print_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
-	xml_tag_t child		= tree_add_child(&xml->tags, tag);
-	xml_tag_data_t *child_d = tree_get_data(&xml->tags, child);
+	xml_attr_data_t *data = value;
+	if (data == NULL) {
+		return -1;
+	}
 
-	*child_d = (xml_tag_data_t){
-		.name  = { .data = name, .len = name_len, .mem = 0 },
-		.attrs = 0,
-		.val   = { 0 },
-	};
-
-	return child;
-}
-
-xml_tag_t xml_add_child_val_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
-{
-	xml_tag_t child		= tree_add_child(&xml->tags, tag);
-	xml_tag_data_t *child_d = tree_get_data(&xml->tags, child);
-
-	*child_d = (xml_tag_data_t){
-		.name  = { .data = name, .len = name_len, .mem = 0 },
-		.attrs = 0,
-		.val   = { .data = val, .len = val_len, .mem = val_mem },
-	};
-	return child;
-}
-
-xml_tag_t xml_add_child_val(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len)
-{
-	return xml_add_child_val_r(xml, tag, name, name_len, val, val_len, 0);
-}
-
-xml_tag_t xml_add_child_val_c(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len)
-{
-	size_t len = val_len + 1;
-	char *data = m_malloc(len);
-	m_memcpy(data, len, val, val_len);
-	data[len - 1] = '\0';
-	return xml_add_child_val_r(xml, tag, name, name_len, data, len, 1);
-}
-
-xml_tag_t xml_add_child_val_v(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, va_list args)
-{
-	size_t len = p_vsnprintf(NULL, 0, format, args) + 1;
-	char *data = m_malloc(len);
-	p_vsnprintf(data, len, format, args);
-	return xml_add_child_val_r(xml, tag, name, name_len, data, len, 1);
-}
-
-xml_tag_t xml_add_child_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	xml_tag_t attr = xml_add_child_val_v(xml, tag, name, name_len, format, args);
-	va_end(args);
-	return attr;
-}
-
-static int xml_attr_print_cb(const list_t *list, lnode_t node, int last, void *priv)
-{
-	xml_attr_data_t *attr_d = list_get_data(list, node);
-
-	p_fprintf(priv, " %.*s=\"%.*s\"", attr_d->name.len, attr_d->name.data, attr_d->val.len, attr_d->val.data);
-	return 0;
+	p_fprintf(priv, " %.*s=\"%.*s\"", data->name.len, data->name.data, data->val.len, data->val.data);
+	return ret;
 }
 
 typedef struct xml_tag_print_cb_priv_s {
@@ -193,23 +217,26 @@ typedef struct xml_tag_print_cb_priv_s {
 	uint depth;
 } xml_tag_print_cb_priv_t;
 
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth);
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *file, uint depth);
 
-static int xml_tag_print_cb(const tree_t *tree, tnode_t node, int last, void *priv)
+static int xml_tag_print_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
 	xml_tag_print_cb_priv_t *p = priv;
 
-	return xml_tag_print(p->xml, node, p->file, p->depth);
+	return xml_tag_print(p->xml, node, value, p->file, p->depth);
 }
 
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth)
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *file, uint depth)
 {
-	xml_tag_data_t *tag_d = tree_get_data(&xml->tags, tag);
+	xml_tag_data_t *data = value;
+	if (data == NULL) {
+		return 1;
+	}
 
-	p_fprintf(file, "%*s<%.*s", depth * 2, "", tag_d->name.len, tag_d->name.data);
+	p_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
-	if (tag_d->attrs != 0) {
-		list_iterate(&xml->attrs, tag_d->attrs, xml_attr_print_cb, file);
+	if (data->attrs != -1) {
+		list_iterate(&xml->attrs, data->attrs, xml_attr_print_cb, 0, file);
 	}
 
 	xml_tag_print_cb_priv_t priv = {
@@ -218,17 +245,17 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 		.depth = depth + 1,
 	};
 
-	if (tree_get_child(&xml->tags, tag) != 0) {
+	if (tree_get_child(&xml->tags, tag) != -1) {
 		p_fprintf(file, ">\n");
 
-		tree_iterate_childs(&xml->tags, tag, xml_tag_print_cb, &priv);
+		tree_iterate_childs(&xml->tags, tag, xml_tag_print_cb, 0, &priv);
 
-		p_fprintf(file, "%*s</%.*s>\n", depth * 2, "", tag_d->name.len, tag_d->name.data);
-	} else if (tag_d->val.data) {
-		if (tag_d->val.len > 0 && tag_d->val.data[tag_d->val.len - 1] == '\n') {
-			p_fprintf(file, ">%.*s%*s</%.*s>\n", tag_d->val.len, tag_d->val.data, depth * 2, "", tag_d->name.len, tag_d->name.data);
+		p_fprintf(file, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
+	} else if (data->val.data) {
+		if (data->val.len > 0 && data->val.data[data->val.len - 1] == '\n') {
+			p_fprintf(file, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
 		} else {
-			p_fprintf(file, ">%.*s</%.*s>\n", tag_d->val.len, tag_d->val.data, tag_d->name.len, tag_d->name.data);
+			p_fprintf(file, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
 		}
 	} else {
 		p_fprintf(file, " />\n");
@@ -237,7 +264,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 	return 0;
 }
 
-int xml_print(const xml_t *xml, FILE *file)
+int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file)
 {
 	xml_tag_print_cb_priv_t priv = {
 		.xml   = xml,
@@ -246,6 +273,6 @@ int xml_print(const xml_t *xml, FILE *file)
 	};
 
 	p_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	tree_iterate_childs(&xml->tags, 0, xml_tag_print_cb, &priv);
+	xml_tag_print(xml, tag, tree_get_data(&xml->tags, tag), file, 0);
 	return 0;
 }
