@@ -80,6 +80,13 @@ void *arr_set(arr_t *arr, uint index, const void *value)
 	return m_memcpy(dst, arr->size, value, arr->size);
 }
 
+uint arr_app(arr_t *arr, const void *value)
+{
+	uint index = arr_add(arr);
+	arr_set(arr, index, value);
+	return index;
+}
+
 uint arr_index(const arr_t *arr, const void *value)
 {
 	for (uint i = 0; i < arr->cnt; i++) {

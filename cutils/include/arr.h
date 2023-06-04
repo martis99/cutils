@@ -21,6 +21,8 @@ void *arr_get(const arr_t *arr, uint index);
 
 void *arr_set(arr_t *arr, uint index, const void *value);
 
+uint arr_app(arr_t *arr, const void *value);
+
 uint arr_index(const arr_t *arr, const void *value);
 
 typedef int (*arr_index_cmp_cb)(const void *value1, const void *value2);

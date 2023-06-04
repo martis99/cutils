@@ -166,6 +166,32 @@ TEST(add_realloc)
 	END;
 }
 
+TEST(app)
+{
+	START;
+
+	arr_t arr = { 0 };
+
+	arr_init(&arr, 2, sizeof(int));
+
+	const int v0 = 1;
+	const int v1 = 2;
+
+	uint i0 = arr_app(&arr, &v0);
+	uint i1 = arr_app(&arr, &v1);
+
+	EXPECT_EQ(i0, 0);
+	EXPECT_EQ(i1, 1);
+	EXPECT_EQ(*(int *)arr_get(&arr, 0), 1);
+	EXPECT_EQ(*(int *)arr_get(&arr, 1), 2);
+	EXPECT_EQ(arr.cnt, 2);
+	EXPECT_EQ(arr.cap, 2);
+
+	arr_free(&arr);
+
+	END;
+}
+
 TEST(index)
 {
 	START;
@@ -390,6 +416,7 @@ STEST(arr)
 	RUN(set_invalid_value);
 	RUN(adds);
 	RUN(add_realloc);
+	RUN(app);
 	RUN(index);
 	RUN(index_cmp);
 	RUN(add_all);
