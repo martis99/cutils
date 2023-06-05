@@ -30,6 +30,11 @@ int folder_exists(const char *path);
 int folder_exists_v(const char *format, va_list args);
 int folder_exists_f(const char *format, ...);
 int folder_create(const char *path);
+int folder_create_v(const char *path, va_list args);
+int folder_create_f(const char *path, ...);
+int folder_delete(const char *path);
+int folder_delete_v(const char *path, va_list args);
+int folder_delete_f(const char *path, ...);
 
 typedef int (*files_foreach_cb)(path_t *path, const char *folder, void *priv);
 int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_cb on_file, void *priv);

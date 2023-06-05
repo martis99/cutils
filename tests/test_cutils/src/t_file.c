@@ -167,6 +167,23 @@ TEST(file_read_ft_r_test)
 	END;
 }
 
+TEST(folder)
+{
+	START;
+
+	EXPECT_EQ(folder_exists_f("%s", "temp"), 0);
+
+	folder_create_f("%s", "temp");
+
+	EXPECT_EQ(folder_exists_f("%s", "temp"), 1);
+
+	folder_delete_f("%s", "temp");
+
+	EXPECT_EQ(folder_exists_f("%s", "temp"), 0);
+
+	END;
+}
+
 STEST(file)
 {
 	SSTART;
@@ -179,5 +196,6 @@ STEST(file)
 	RUN(file_read_test);
 	RUN(file_read_ft_test);
 	RUN(file_read_ft_r_test);
+	RUN(folder);
 	SEND;
 }

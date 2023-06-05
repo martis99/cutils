@@ -30,6 +30,11 @@ char *cstr_chr(const char *str, char c)
 	return strchr(str, c);
 }
 
+char *cstr_rchr(const char *str, char c)
+{
+	return strrchr(str, c);
+}
+
 char *cstr_str(const char *str, const char *s)
 {
 	return strstr(str, s);

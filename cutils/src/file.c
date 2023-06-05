@@ -210,6 +210,55 @@ int folder_create(const char *path)
 #endif
 }
 
+int folder_create_v(const char *format, va_list args)
+{
+	char path[P_MAX_PATH] = { 0 };
+
+	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+		return 0;
+	}
+
+	return folder_create(path);
+}
+
+int folder_create_f(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int ret = folder_create_v(format, args);
+	va_end(args);
+	return ret;
+}
+
+int folder_delete(const char *path)
+{
+#if defined(C_WIN)
+	return RemoveDirectoryA(path) == 0 ? 1 : 0;
+#else
+	return remove(path);
+#endif
+}
+
+int folder_delete_v(const char *format, va_list args)
+{
+	char path[P_MAX_PATH] = { 0 };
+
+	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+		return 0;
+	}
+
+	return folder_delete(path);
+}
+
+int folder_delete_f(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int ret = folder_delete_v(format, args);
+	va_end(args);
+	return ret;
+}
+
 int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_cb on_file, void *priv)
 {
 #if defined(C_WIN)

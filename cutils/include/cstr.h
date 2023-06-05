@@ -8,6 +8,7 @@ int cstr_cmp(const char *str1, size_t str1_len, const char *str2, size_t str2_le
 int cstrn_cmp(const char *str1, size_t str1_len, const char *str2, size_t str2_len, size_t len);
 void *cstr_cpy(char *dst, size_t dst_len, const char *src, size_t src_len);
 char *cstr_chr(const char *str, char c);
+char *cstr_rchr(const char *str, char c);
 char *cstr_str(const char *str, const char *s);
 
 size_t cstr_replace(const char *src, size_t src_len, char *dst, size_t dst_len, const char *from, size_t from_len, const char *to, size_t to_len);
