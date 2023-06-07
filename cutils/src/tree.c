@@ -14,12 +14,12 @@ static inline header_t *get_node(const tree_t *tree, tnode_t node)
 
 static inline tnode_t init_node(tree_t *tree, tnode_t node)
 {
-	header_t *ptr = get_node(tree, node);
-	if (ptr == NULL) {
+	header_t *data = get_node(tree, node);
+	if (data == NULL) {
 		return -1;
 	}
 
-	ptr->child = -1;
+	data->child = -1;
 	return node;
 }
 
@@ -49,7 +49,7 @@ tnode_t tree_add_child(tree_t *tree, tnode_t node)
 		return -1;
 	}
 
-	tnode_t child = header->child == -1 ? header->child = list_add(tree) : list_add_next(tree, header->child);
+	tnode_t child = header->child == -1 ? get_node(tree, node)->child = list_add(tree) : list_add_next(tree, header->child);
 	return init_node(tree, child);
 }
 

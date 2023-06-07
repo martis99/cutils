@@ -40,6 +40,8 @@ lnode_t list_add(list_t *list)
 
 lnode_t list_add_next(list_t *list, lnode_t node)
 {
+	lnode_t next = list_add(list);
+
 	header_t *header = arr_get(list, node);
 	if (header == NULL) {
 		return -1;
@@ -49,7 +51,9 @@ lnode_t list_add_next(list_t *list, lnode_t node)
 	while (*target != -1) {
 		target = &((header_t *)arr_get(list, *target))->next;
 	}
-	*target = list_add(list);
+
+	*target = next;
+
 	return *target;
 }
 

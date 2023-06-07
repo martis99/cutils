@@ -14,6 +14,16 @@ typedef struct xml_attr_data_s {
 	xml_str_t val;
 } xml_attr_data_t;
 
+static inline xml_tag_data_t *get_tag(const tree_t *tags, xml_tag_t tag)
+{
+	return tree_get_data(tags, tag);
+}
+
+static inline xml_attr_data_t *get_attr(const list_t *attrs, xml_attr_t attr)
+{
+	return list_get_data(attrs, attr);
+}
+
 xml_t *xml_init(xml_t *xml, uint cap)
 {
 	if (tree_init(&xml->tags, cap, sizeof(xml_tag_data_t)) == NULL) {
@@ -73,7 +83,7 @@ void xml_free(xml_t *xml)
 xml_tag_t xml_add_tag_val_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
 {
 	xml_tag_t child	     = tag == -1 ? tree_add(&xml->tags) : tree_add_child(&xml->tags, tag);
-	xml_tag_data_t *data = tree_get_data(&xml->tags, child);
+	xml_tag_data_t *data = get_tag(&xml->tags, child);
 	if (data == NULL) {
 		return -1;
 	}
@@ -132,23 +142,18 @@ xml_tag_t xml_add_tag_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t 
 
 static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 {
-	xml_tag_data_t *data = tree_get_data(&xml->tags, tag);
+	xml_tag_data_t *data = get_tag(&xml->tags, tag);
 	if (data == NULL) {
 		return -1;
 	}
 
-	if (data->attrs == -1) {
-		data->attrs = list_add(&xml->attrs);
-		return data->attrs;
-	}
-
-	return tree_add_next(&xml->attrs, data->attrs);
+	return data->attrs == -1 ? get_tag(&xml->tags, tag)->attrs = list_add(&xml->attrs) : list_add_next(&xml->attrs, data->attrs);
 }
 
 xml_attr_t xml_add_attr_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem)
 {
 	xml_attr_t attr	      = add_attr(xml, tag);
-	xml_attr_data_t *data = list_get_data(&xml->attrs, attr);
+	xml_attr_data_t *data = get_attr(&xml->attrs, attr);
 	if (data == NULL) {
 		return -1;
 	}
@@ -273,6 +278,6 @@ int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file)
 	};
 
 	p_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	xml_tag_print(xml, tag, tree_get_data(&xml->tags, tag), file, 0);
+	xml_tag_print(xml, tag, get_tag(&xml->tags, tag), file, 0);
 	return 0;
 }
