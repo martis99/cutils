@@ -96,6 +96,9 @@ size_t file_read_ft(FILE *file, char *data, size_t data_size)
 size_t file_read_t(const char *path, char *data, size_t data_size)
 {
 	FILE *file = file_open(path, "rb");
+	if (file == NULL) {
+		return -1;
+	}
 
 	const size_t len = file_read_ft(file, data, data_size);
 
