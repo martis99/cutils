@@ -38,6 +38,21 @@ lnode_t list_add(list_t *list)
 	return init_node(list, node);
 }
 
+void list_remove(list_t *list, lnode_t node)
+{
+	header_t *header = arr_get(list, node);
+	if (header == NULL) {
+		return;
+	}
+
+	for (uint i = 0; i < list->cnt; i++) {
+		header_t *prev = arr_get(list, i);
+		if (i != node && prev->next == node) {
+			prev->next = header->next;
+		}
+	}
+}
+
 lnode_t list_add_next(list_t *list, lnode_t node)
 {
 	lnode_t next = list_add(list);

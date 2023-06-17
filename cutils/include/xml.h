@@ -34,6 +34,9 @@ xml_tag_t xml_add_tag_val_c(xml_t *xml, xml_tag_t tag, const char *name, size_t 
 xml_tag_t xml_add_tag_val_v(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, va_list args);
 xml_tag_t xml_add_tag_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, ...);
 
+void xml_remove_tag(xml_t *xml, xml_tag_t tag);
+bool xml_has_child(const xml_t *xml, xml_tag_t tag);
+
 xml_attr_t xml_add_attr_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem);
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);
 xml_attr_t xml_add_attr_c(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);

@@ -25,11 +25,7 @@ static inline tnode_t init_node(tree_t *tree, tnode_t node)
 
 tree_t *tree_init(tree_t *tree, uint cap, size_t size)
 {
-	if (list_init(tree, cap, sizeof(header_t) + size) == NULL) {
-		return NULL;
-	}
-
-	return tree;
+	return list_init(tree, cap, sizeof(header_t) + size);
 }
 
 void tree_free(tree_t *tree)
@@ -40,6 +36,21 @@ void tree_free(tree_t *tree)
 tnode_t tree_add(tree_t *tree)
 {
 	return init_node(tree, list_add(tree));
+}
+
+void tree_remove(tree_t *tree, tnode_t node)
+{
+	for (uint i = 0; i < tree->cnt; i++) {
+		header_t *data = get_node(tree, i);
+		if (data == NULL) {
+			continue;
+		}
+		if (data->child == node) {
+			data->child = list_get_next(tree, node);
+		}
+	}
+
+	list_remove(tree, node);
 }
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node)
@@ -56,10 +67,13 @@ tnode_t tree_add_child(tree_t *tree, tnode_t node)
 tnode_t tree_get_child(const tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
-	if (header == NULL) {
-		return -1;
-	}
-	return header->child;
+	return header == NULL ? -1 : header->child;
+}
+
+bool tree_has_child(const tree_t *tree, tnode_t node)
+{
+	header_t *header = get_node(tree, node);
+	return header != NULL && header->child != -1;
 }
 
 tnode_t tree_add_next(tree_t *tree, tnode_t node)
@@ -75,10 +89,7 @@ tnode_t tree_get_next(const tree_t *tree, tnode_t node)
 void *tree_get_data(const tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
-	if (header == NULL) {
-		return NULL;
-	}
-	return header + 1;
+	return header == NULL ? NULL : header + 1;
 }
 
 static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, int ret, void *priv, int depth, int last)

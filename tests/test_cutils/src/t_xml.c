@@ -398,6 +398,107 @@ TEST(add_child_child, FILE *file)
 	END;
 }
 
+TEST(remove_tag_empty, FILE *file)
+{
+	START;
+
+	xml_t xml = { 0 };
+
+	xml_init(&xml, 4);
+
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
+	const xml_tag_t child	= xml_add_tag(&xml, project, CSTR("Child"));
+
+	xml_remove_tag(&xml, child);
+
+	file_reopen(TEST_FILE, "wb+", file);
+	xml_print(&xml, 0, file);
+
+	char buf[1024] = { 0 };
+
+	file_read_ft(file, buf, sizeof(buf));
+
+	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			   "<Project />\n";
+
+	EXPECT_STR(buf, exp);
+
+	xml_free(&xml);
+
+	END;
+}
+
+TEST(remove_tag_with_attr_heap, FILE *file)
+{
+	START;
+
+	xml_t xml = { 0 };
+
+	xml_init(&xml, 4);
+
+	char val[] = "Project3";
+
+	char *name = m_malloc(sizeof(val));
+	m_memcpy(name, sizeof(val), val, sizeof(val));
+
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
+	const xml_tag_t child	= xml_add_tag(&xml, project, CSTR("Child"));
+	xml_add_attr_r(&xml, child, CSTR("Name"), name, sizeof(val), 1);
+
+	xml_remove_tag(&xml, child);
+
+	file_reopen(TEST_FILE, "wb+", file);
+	xml_print(&xml, 0, file);
+
+	char buf[1024] = { 0 };
+
+	file_read_ft(file, buf, sizeof(buf));
+
+	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			   "<Project />\n";
+
+	EXPECT_STR(buf, exp);
+
+	xml_free(&xml);
+
+	END;
+}
+
+TEST(remove_tag_middle, FILE *file)
+{
+	START;
+
+	xml_t xml = { 0 };
+
+	xml_init(&xml, 4);
+
+	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
+	const xml_tag_t child1	= xml_add_tag(&xml, project, CSTR("Child1"));
+	const xml_tag_t child2	= xml_add_tag(&xml, project, CSTR("Child2"));
+	const xml_tag_t child3	= xml_add_tag(&xml, project, CSTR("Child3"));
+
+	xml_remove_tag(&xml, child2);
+
+	file_reopen(TEST_FILE, "wb+", file);
+	xml_print(&xml, 0, file);
+
+	char buf[1024] = { 0 };
+
+	file_read_ft(file, buf, sizeof(buf));
+
+	const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			   "<Project>\n"
+			   "  <Child1 />\n"
+			   "  <Child3 />\n"
+			   "</Project>\n";
+
+	EXPECT_STR(buf, exp);
+
+	xml_free(&xml);
+
+	END;
+}
+
 TEST(add_child_tests, FILE *file)
 {
 	SSTART;
@@ -431,6 +532,15 @@ TEST(add, FILE *file)
 	SEND;
 }
 
+TEST(removet, FILE *file)
+{
+	SSTART;
+	RUN(remove_tag_empty, file);
+	RUN(remove_tag_with_attr_heap, file);
+	RUN(remove_tag_middle, file);
+	SEND;
+}
+
 STEST(xml)
 {
 	SSTART;
@@ -439,6 +549,7 @@ STEST(xml)
 
 	RUN(init_free, file);
 	RUN(add, file);
+	RUN(removet, file);
 
 	file_close(file);
 

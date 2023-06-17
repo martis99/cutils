@@ -140,6 +140,16 @@ xml_tag_t xml_add_tag_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t 
 	return attr;
 }
 
+void xml_remove_tag(xml_t *xml, xml_tag_t tag)
+{
+	tree_remove(&xml->tags, tag);
+}
+
+bool xml_has_child(const xml_t *xml, xml_tag_t tag)
+{
+	return tree_has_child(&xml->tags, tag);
+}
+
 static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 {
 	xml_tag_data_t *data = get_tag(&xml->tags, tag);

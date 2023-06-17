@@ -231,6 +231,48 @@ TEST(get_next)
 	END;
 }
 
+TEST(remove_middle)
+{
+	START;
+
+	list_t list = { 0 };
+
+	list_init(&list, 3, sizeof(int));
+
+	const lnode_t node = list_add(&list);
+	const lnode_t n1   = list_add_next(&list, node);
+	const lnode_t n2   = list_add_next(&list, node);
+
+	list_remove(&list, n1);
+
+	EXPECT_EQ(list_get_next(&list, node), n2);
+
+	list_free(&list);
+
+	END;
+}
+
+TEST(remove_last)
+{
+	START;
+
+	list_t list = { 0 };
+
+	list_init(&list, 3, sizeof(int));
+
+	const lnode_t node = list_add(&list);
+	const lnode_t n1   = list_add_next(&list, node);
+	const lnode_t n2   = list_add_next(&list, node);
+
+	list_remove(&list, n2);
+
+	EXPECT_EQ(list_get_next(&list, n1), -1);
+
+	list_free(&list);
+
+	END;
+}
+
 static int iterate_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
 {
 	START;
@@ -408,6 +450,14 @@ TEST(get)
 	SEND;
 }
 
+TEST(removet)
+{
+	SSTART;
+	RUN(remove_middle);
+	RUN(remove_last);
+	SEND;
+}
+
 TEST(iteratet)
 {
 	SSTART;
@@ -425,6 +475,7 @@ STEST(list)
 	RUN(set_data);
 	RUN(addt);
 	RUN(get);
+	RUN(removet);
 	RUN(iteratet);
 	SEND;
 }

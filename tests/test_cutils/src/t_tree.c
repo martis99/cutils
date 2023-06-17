@@ -302,6 +302,48 @@ TEST(get_next)
 	END;
 }
 
+TEST(remove_next)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 3, sizeof(int));
+
+	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
+	const tnode_t n2 = tree_add_child(&tree, 0);
+	const tnode_t n3 = tree_add_child(&tree, 0);
+
+	tree_remove(&tree, n2);
+
+	EXPECT_EQ(tree_get_next(&tree, n1), n3);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(remove_child)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 3, sizeof(int));
+
+	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
+	const tnode_t n2 = tree_add_child(&tree, 0);
+	const tnode_t n3 = tree_add_child(&tree, 0);
+
+	tree_remove(&tree, n1);
+
+	EXPECT_EQ(tree_get_child(&tree, 0), n2);
+
+	tree_free(&tree);
+
+	END;
+}
+
 static int iterate_pre_root_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
 	START;
@@ -656,6 +698,14 @@ TEST(get)
 	SEND;
 }
 
+TEST(removet)
+{
+	SSTART;
+	RUN(remove_next);
+	RUN(remove_child);
+	SEND;
+}
+
 TEST(iterate_pre)
 {
 	SSTART;
@@ -682,6 +732,7 @@ STEST(tree)
 	RUN(init_free);
 	RUN(addt);
 	RUN(get);
+	RUN(removet);
 	RUN(iterate_pre);
 	RUN(iterate_childs);
 	SEND;

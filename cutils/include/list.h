@@ -13,6 +13,7 @@ list_t *list_init(list_t *list, uint cap, size_t size);
 void list_free(list_t *list);
 
 lnode_t list_add(list_t *list);
+void list_remove(list_t *list, lnode_t node);
 
 lnode_t list_add_next(list_t *list, lnode_t node);
 lnode_t list_get_next(const list_t *list, lnode_t node);
