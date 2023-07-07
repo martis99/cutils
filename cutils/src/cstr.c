@@ -93,6 +93,70 @@ size_t cstr_replaces(const char *src, size_t src_len, char *dst, size_t dst_len,
 	return dst_i;
 }
 
+size_t cstr_inplace(char *str, size_t str_size, size_t str_len, const char *old, size_t old_len, const char *new, size_t new_len)
+{
+	str_len = str_len == 0 ? cstr_len(str) : str_len;
+	old_len = old_len == 0 ? cstr_len(old) : old_len;
+	new_len = new_len == 0 ? cstr_len(new) : new_len;
+
+	if (str_len < old_len) {
+		return str_len;
+	}
+
+	for (size_t i = 0; i <= str_len - old_len; i++) {
+		if (i > str_size) {
+			return 0;
+		}
+
+		if (!cstrn_cmp(&str[i], str_len, old, old_len, old_len)) {
+			continue;
+		}
+
+		if (new_len < old_len) {
+			for (size_t j = i + new_len, k = i + old_len; k <= str_len; j++, k++) {
+				str[j] = str[k];
+			}
+		} else if (new_len > old_len) {
+			if (str_len + new_len - old_len > str_size) {
+				return 0;
+			}
+			for (size_t j = str_len + new_len - old_len, k = str_len; k >= i + old_len; j--, k--) {
+				str[j] = str[k];
+			}
+		}
+
+		if (i + new_len > str_size) {
+			return 0;
+		}
+
+		for (size_t j = 0; j < new_len; j++) {
+			str[i + j] = new[j];
+		}
+
+		str_len += new_len - old_len;
+		i = i + new_len - 1;
+
+		if (str_len > str_size) {
+			return 0;
+		}
+	}
+
+	return str_len;
+}
+
+size_t cstr_inplaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt)
+{
+	for (size_t i = 0; i < cnt; i++) {
+		if (!old[i] || !new[i]) {
+			continue;
+		}
+
+		str_len = cstr_inplace(str, str_size, str_len, old[i], 0, new[i], 0);
+	}
+
+	return str_len;
+}
+
 void wcstrn_cat(wchar_t *dst, size_t size, const wchar_t *src, size_t cnt)
 {
 #if defined(C_WIN)
