@@ -9,6 +9,7 @@ cross-platform utitilities and basic data structures implementation for C
 - [x] file
 - [x] log
 - [x] memory
+- [x] string 
 - [x] time
 
 ### Algorithms
@@ -18,6 +19,10 @@ cross-platform utitilities and basic data structures implementation for C
 - [x] array
 - [x] list
 - [x] tree
+
+### File Formats
+- [ ] json
+- [ ] Makefile
 - [x] xml
 
 ## Build
