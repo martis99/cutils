@@ -30,7 +30,7 @@ jobs:
         run: ./build-linux
 
       - name: Run
-        run: make test_cutils/coverage SHOW=false
+        run: make test_cutils/coverage CONFIG=Debug PLATFORM=x64 SHOW=false
 
       - name: Upload
         uses: codecov/codecov-action@v3
