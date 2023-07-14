@@ -1,0 +1,44 @@
+name: coverage
+run-name: coverage
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '.github/**'
+
+  workflow_dispatch:
+
+jobs:
+  Coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Prepare
+        run: sudo apt install lcov
+
+      - name: Generate
+        run: ./build-linux
+
+      - name: Run
+        run: make test_cutils/coverage SHOW=false
+
+      - name: Upload
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./bin/Debug-x64/tests/test_cutils/lcov.info
+
+      - name: Save
+        uses: actions/upload-artifact@v3
+        with:
+          name: lcov.info
+          path: ./bin/Debug-x64/tests/test_cutils/lcov.info
