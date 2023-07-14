@@ -3,6 +3,8 @@ cross-platform utitilities and basic data structures implementation for C
 
 ***
 
+[![codecov](https://codecov.io/github/martis99/cutils/branch/main/graph/badge.svg?token=LZ14PL0R4E)](https://codecov.io/github/martis99/cutils)
+
 ## Featues
 
 ### Utilities
