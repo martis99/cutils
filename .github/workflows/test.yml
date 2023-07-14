@@ -22,6 +22,7 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
+        platform: [x64, x86]
 
     steps:
       - uses: actions/checkout@v3
@@ -34,11 +35,11 @@ jobs:
 
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: make CONFIG=${{matrix.configuration}}
+        run: make CONFIG=${{matrix.configuration}} PLATFORM=${{matrix.platform}}
 
       - name: Test
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: ./bin/${{matrix.configuration}}-x64/tests/test_cutils/test_cutils
+        run: ./bin/${{matrix.configuration}}-${{matrix.platform}}/tests/test_cutils/test_cutils
 
   Windows-MSBuild:
     runs-on: windows-latest
