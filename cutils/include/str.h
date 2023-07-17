@@ -12,13 +12,14 @@ typedef struct str_s {
 	bool ref;
 } str_t;
 
-str_t str_init(size_t size);
-str_t str_cstr(const char *cstr, size_t len);
-str_t str_cstrn(const char *cstr, size_t len, size_t size);
-str_t str_cstrv(const char *fmt, va_list args);
-str_t str_cstrf(const char *fmt, ...);
-str_t str_buf(const char *buf, size_t size, size_t len);
-str_t str_ref();
+str_t str_null();
+str_t strz(size_t size);
+str_t strc(const char *cstr, size_t len);
+str_t strn(const char *cstr, size_t len, size_t size);
+str_t strv(const char *fmt, va_list args);
+str_t strf(const char *fmt, ...);
+str_t strb(const char *buf, size_t size, size_t len);
+str_t strr();
 
 void str_free(str_t *str);
 
@@ -42,6 +43,6 @@ int str_split(str_t str, char c, str_t *l, str_t *r);
 int str_rsplit(str_t str, char c, str_t *l, str_t *r);
 
 // clang-format off
-#define STR(_str) { .data = _str, .len = sizeof(_str) - 1 }
+#define STR(_str) strc(_str, sizeof(_str) - 1)
 // clang-format on
 #endif

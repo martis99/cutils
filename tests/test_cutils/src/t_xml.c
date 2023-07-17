@@ -36,7 +36,7 @@ TEST(add_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag(&xml, -1, CSTR("Project"));
+	xml_add_tag(&xml, -1, STR("Project"));
 
 	FILE *nf = file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -63,7 +63,7 @@ TEST(add_child_val, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val(&xml, -1, CSTR("Project"), CSTR("Name"));
+	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -90,7 +90,7 @@ TEST(add_child_val_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val_c(&xml, -1, CSTR("Project"), CSTR("Name"));
+	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -117,7 +117,7 @@ TEST(add_child_val_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val_f(&xml, -1, CSTR("Project"), "Name%d", 1);
+	xml_add_tag_val(&xml, -1, STR("Project"), strf("Name%d", 1));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -144,7 +144,7 @@ TEST(add_child_val_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val_r(&xml, -1, CSTR("Project"), CSTR("Name"), 0);
+	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -171,12 +171,9 @@ TEST(add_child_val_r_heap, FILE *file)
 
 	xml_init(&xml, 4);
 
-	char val[] = "Name";
+	char name[] = "Name";
 
-	char *name = m_malloc(sizeof(val));
-	m_memcpy(name, sizeof(val), val, sizeof(val));
-
-	xml_add_tag_val_r(&xml, -1, CSTR("Project"), name, sizeof(val), 1);
+	xml_add_tag_val(&xml, -1, STR("Project"), strn(CSTR(name), sizeof(name)));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -203,8 +200,8 @@ TEST(add_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_attr(&xml, project, CSTR("Name"), CSTR("Project1"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -231,8 +228,8 @@ TEST(add_attr_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_attr_c(&xml, project, CSTR("Name"), CSTR("Project1"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -259,8 +256,8 @@ TEST(add_attr_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_attr_f(&xml, project, CSTR("Name"), "Project%d", 2);
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_attr(&xml, project, STR("Name"), strf("Project%d", 2));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -287,8 +284,8 @@ TEST(add_attr_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_attr_r(&xml, project, CSTR("Name"), CSTR("Project1"), 0);
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -315,13 +312,10 @@ TEST(add_attr_r_heap, FILE *file)
 
 	xml_init(&xml, 4);
 
-	char val[] = "Project3";
+	char name[] = "Project3";
 
-	char *name = m_malloc(sizeof(val));
-	m_memcpy(name, sizeof(val), val, sizeof(val));
-
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_attr_r(&xml, project, CSTR("Name"), name, sizeof(val), 1);
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_attr(&xml, project, STR("Name"), strn(CSTR(name), sizeof(name)));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -348,8 +342,8 @@ TEST(add_child_val_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag_val(&xml, -1, CSTR("Project"), CSTR("Value"));
-	xml_add_attr(&xml, project, CSTR("Name"), CSTR("Project1"));
+	const xml_tag_t project = xml_add_tag_val(&xml, -1, STR("Project"), STR("Value"));
+	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -376,8 +370,8 @@ TEST(add_child_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	xml_add_tag(&xml, project, CSTR("Child"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_tag(&xml, project, STR("Child"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -406,8 +400,8 @@ TEST(remove_tag_empty, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	const xml_tag_t child	= xml_add_tag(&xml, project, CSTR("Child"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t child	= xml_add_tag(&xml, project, STR("Child"));
 
 	xml_remove_tag(&xml, child);
 
@@ -436,14 +430,11 @@ TEST(remove_tag_with_attr_heap, FILE *file)
 
 	xml_init(&xml, 4);
 
-	char val[] = "Project3";
+	char name[] = "Project3";
 
-	char *name = m_malloc(sizeof(val));
-	m_memcpy(name, sizeof(val), val, sizeof(val));
-
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	const xml_tag_t child	= xml_add_tag(&xml, project, CSTR("Child"));
-	xml_add_attr_r(&xml, child, CSTR("Name"), name, sizeof(val), 1);
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t child	= xml_add_tag(&xml, project, STR("Child"));
+	xml_add_attr(&xml, child, STR("Name"), strn(CSTR(name), sizeof(name)));
 
 	xml_remove_tag(&xml, child);
 
@@ -472,10 +463,10 @@ TEST(remove_tag_middle, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, CSTR("Project"));
-	const xml_tag_t child1	= xml_add_tag(&xml, project, CSTR("Child1"));
-	const xml_tag_t child2	= xml_add_tag(&xml, project, CSTR("Child2"));
-	const xml_tag_t child3	= xml_add_tag(&xml, project, CSTR("Child3"));
+	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t child1	= xml_add_tag(&xml, project, STR("Child1"));
+	const xml_tag_t child2	= xml_add_tag(&xml, project, STR("Child2"));
+	const xml_tag_t child3	= xml_add_tag(&xml, project, STR("Child3"));
 
 	xml_remove_tag(&xml, child2);
 

@@ -3,7 +3,12 @@
 #include "cstr.h"
 #include "mem.h"
 
-str_t str_init(size_t size)
+str_t str_null()
+{
+	return (str_t){ 0 };
+}
+
+str_t strz(size_t size)
 {
 	char *data = m_malloc(size);
 	if (size > 0) {
@@ -18,7 +23,7 @@ str_t str_init(size_t size)
 	};
 }
 
-str_t str_cstr(const char *cstr, size_t len)
+str_t strc(const char *cstr, size_t len)
 {
 	return (str_t){
 		.data = cstr,
@@ -28,7 +33,7 @@ str_t str_cstr(const char *cstr, size_t len)
 	};
 }
 
-str_t str_cstrn(const char *cstr, size_t len, size_t size)
+str_t strn(const char *cstr, size_t len, size_t size)
 {
 	if (cstr == NULL) {
 		return (str_t){ 0 };
@@ -50,7 +55,7 @@ str_t str_cstrn(const char *cstr, size_t len, size_t size)
 	};
 }
 
-str_t str_cstrv(const char *fmt, va_list args)
+str_t strv(const char *fmt, va_list args)
 {
 	str_t str   = { 0 };
 	size_t size = cstrv(NULL, 0, fmt, args);
@@ -69,16 +74,16 @@ str_t str_cstrv(const char *fmt, va_list args)
 	return str;
 }
 
-str_t str_cstrf(const char *fmt, ...)
+str_t strf(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	str_t ret = str_cstrv(fmt, args);
+	str_t ret = strv(fmt, args);
 	va_end(args);
 	return ret;
 }
 
-str_t str_buf(const char *buf, size_t size, size_t len)
+str_t strb(const char *buf, size_t size, size_t len)
 {
 	return (str_t){
 		.data = buf,
@@ -88,9 +93,9 @@ str_t str_buf(const char *buf, size_t size, size_t len)
 	};
 }
 
-str_t str_ref()
+str_t strr()
 {
-	return str_cstr(NULL, 0);
+	return strc(NULL, 0);
 }
 
 void str_free(str_t *str)
@@ -188,14 +193,14 @@ int str_eq(str_t str, str_t src)
 
 str_t str_cpy(str_t src)
 {
-	str_t str = str_init(src.len + 1);
+	str_t copy = strz(src.len + 1);
 
-	cstr_cpy((char *)str.data, str.size, src.data, src.len);
-	((char *)str.data)[src.len] = '\0';
+	cstr_cpy((char *)copy.data, copy.size, src.data, src.len);
+	((char *)copy.data)[src.len] = '\0';
 
-	str.len = src.len;
+	copy.len = src.len;
 
-	return str;
+	return copy;
 }
 
 static int append(str_t *str, const char *cstr, size_t len)

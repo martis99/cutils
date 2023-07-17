@@ -2,19 +2,11 @@
 #define XML_H
 
 #include "list.h"
+#include "str.h"
 #include "tree.h"
 #include "type.h"
 
 #include <stdarg.h>
-
-typedef struct xml_str_s {
-	union {
-		const char *data;
-		char *tdata;
-	};
-	size_t len;
-	bool mem;
-} xml_str_t;
 
 typedef tnode_t xml_tag_t;
 typedef lnode_t xml_attr_t;
@@ -27,21 +19,13 @@ typedef struct xml_s {
 xml_t *xml_init(xml_t *xml, uint cap);
 void xml_free(xml_t *xml);
 
-xml_tag_t xml_add_tag_val_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem);
-xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len);
-xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);
-xml_tag_t xml_add_tag_val_c(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);
-xml_tag_t xml_add_tag_val_v(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, va_list args);
-xml_tag_t xml_add_tag_val_f(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, ...);
+xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, str_t name);
+xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val);
 
 void xml_remove_tag(xml_t *xml, xml_tag_t tag);
 bool xml_has_child(const xml_t *xml, xml_tag_t tag);
 
-xml_attr_t xml_add_attr_r(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len, bool val_mem);
-xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);
-xml_attr_t xml_add_attr_c(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *val, size_t val_len);
-xml_attr_t xml_add_attr_v(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, va_list args);
-xml_attr_t xml_add_attr_f(xml_t *xml, xml_tag_t tag, const char *name, size_t name_len, const char *format, ...);
+xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val);
 
 int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file);
 

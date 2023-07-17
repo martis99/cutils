@@ -4,38 +4,38 @@
 
 #include "test.h"
 
-TEST(t_str_cstr_null)
+TEST(t_strc_null)
 {
 	START;
 
-	str_cstr(NULL, 0);
+	strc(NULL, 0);
 
 	END;
 }
 
-TEST(t_str_cstrn_null)
+TEST(t_strn_null)
 {
 	START;
 
-	str_cstrn(NULL, 0, 0);
+	strn(NULL, 0, 0);
 
 	END;
 }
 
-TEST(t_str_cstrv_null)
+TEST(t_strf_null)
 {
 	START;
 
-	str_cstrf(NULL);
+	strf(NULL);
 
 	END;
 }
 
-TEST(t_str_buf_null)
+TEST(t_strb_null)
 {
 	START;
 
-	str_buf(NULL, 0, 0);
+	strb(NULL, 0, 0);
 
 	END;
 }
@@ -89,7 +89,7 @@ TEST(t_str_split_null)
 {
 	START;
 
-	str_t str = str_ref();
+	str_t str = strr();
 
 	EXPECT_EQ(str_split(str, 0, NULL, NULL), 1);
 	EXPECT_EQ(str_split(str, 0, &str, NULL), 1);
@@ -102,7 +102,7 @@ TEST(t_str_rsplit_null)
 {
 	START;
 
-	str_t str = str_ref();
+	str_t str = strr();
 
 	EXPECT_EQ(str_split(str, 0, NULL, NULL), 1);
 	EXPECT_EQ(str_split(str, 0, &str, NULL), 1);
@@ -114,10 +114,10 @@ TEST(t_str_rsplit_null)
 TEST(t_str_null)
 {
 	SSTART;
-	RUN(t_str_cstr_null);
-	RUN(t_str_cstrn_null);
-	RUN(t_str_cstrv_null);
-	RUN(t_str_buf_null);
+	RUN(t_strc_null);
+	RUN(t_strn_null);
+	RUN(t_strf_null);
+	RUN(t_strb_null);
 	RUN(t_str_free_null);
 	RUN(t_str_catc_null);
 	RUN(t_str_catn_null);
@@ -131,7 +131,7 @@ TEST(t_str_init)
 {
 	START;
 
-	str_t str = str_init(16);
+	str_t str = strz(16);
 
 	EXPECT_STR(str.data, "");
 	EXPECT_EQ(str.size, 16);
@@ -152,7 +152,7 @@ TEST(t_str_cstrn)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 2, 16);
+	str_t str = strn("abc", 2, 16);
 
 	EXPECT_STR(str.data, "ab");
 	EXPECT_EQ(str.size, 16);
@@ -168,7 +168,7 @@ TEST(t_str_cstrf)
 {
 	START;
 
-	str_t str = str_cstrf("%s", "a");
+	str_t str = strf("%s", "a");
 
 	EXPECT_STR(str.data, "a");
 	EXPECT_EQ(str.size, 2);
@@ -190,7 +190,7 @@ TEST(t_str_buf)
 	START;
 
 	char buf[16] = "abc";
-	str_t str    = str_buf(buf, sizeof(buf), 3);
+	str_t str    = strb(buf, sizeof(buf), 3);
 
 	EXPECT_STR(str.data, "abc");
 	EXPECT_EQ(str.size, 16);
@@ -211,7 +211,7 @@ TEST(t_str_ref)
 {
 	START;
 
-	str_t str = str_ref();
+	str_t str = strr();
 
 	EXPECT_STR(str.data, NULL);
 	EXPECT_EQ(str.size, 0);
@@ -243,7 +243,7 @@ TEST(t_str_catc)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
 
 	str_catc(&str, "def", 2);
 
@@ -261,8 +261,8 @@ TEST(t_str_catn)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
-	str_t src = str_cstrn("def", 3, 16);
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("def", 3, 16);
 
 	str_catn(&str, src, 2);
 
@@ -281,8 +281,8 @@ TEST(t_str_cat)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
-	str_t src = str_cstrn("def", 3, 16);
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("def", 3, 16);
 
 	str_cat(&str, src);
 
@@ -301,7 +301,7 @@ TEST(t_str_cmpnc)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_cmpnc(str, "abc", 3, 3), 0);
 
@@ -314,7 +314,7 @@ TEST(t_str_cmpc)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_cmpc(str, "abc", 3), 0);
 
@@ -327,8 +327,8 @@ TEST(t_str_cmpn)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
-	str_t src = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_cmpn(str, src, 3), 0);
 
@@ -342,8 +342,8 @@ TEST(t_str_cmp)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
-	str_t src = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_cmp(str, src), 0);
 
@@ -357,7 +357,7 @@ TEST(t_str_eqc)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_eqc(str, "abc", 3), 1);
 
@@ -370,8 +370,8 @@ TEST(t_str_eq)
 {
 	START;
 
-	str_t str = str_cstrn("abc", 3, 16);
-	str_t src = str_cstrn("abc", 3, 16);
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("abc", 3, 16);
 
 	EXPECT_EQ(str_eq(str, src), 1);
 
@@ -385,7 +385,7 @@ TEST(t_str_cpy)
 {
 	START;
 
-	str_t src = str_cstr("abc", 3);
+	str_t src = strc("abc", 3);
 
 	str_t str = str_cpy(src);
 
@@ -403,9 +403,9 @@ TEST(t_str_split_ref)
 {
 	START;
 
-	str_t str = str_cstr("abc defgh ijkl", 14);
-	str_t l	  = str_ref();
-	str_t r	  = str_ref();
+	str_t str = strc("abc defgh ijkl", 14);
+	str_t l	  = strr();
+	str_t r	  = strr();
 
 	str_split(str, ' ', &l, &r);
 
@@ -424,9 +424,9 @@ TEST(t_str_split_buf)
 	char lbuf[18] = { "buf1: " };
 	char rbuf[18] = { "buf2: " };
 
-	str_t str = str_cstr("abc defgh ijkl", 14);
-	str_t l	  = str_buf(lbuf, sizeof(lbuf), 6);
-	str_t r	  = str_buf(rbuf, sizeof(rbuf), 6);
+	str_t str = strc("abc defgh ijkl", 14);
+	str_t l	  = strb(lbuf, sizeof(lbuf), 6);
+	str_t r	  = strb(rbuf, sizeof(rbuf), 6);
 
 	str_split(str, ' ', &l, &r);
 
@@ -442,9 +442,9 @@ TEST(t_str_split_own)
 {
 	START;
 
-	str_t str = str_cstr("abc defgh ijkl", 14);
-	str_t l	  = str_init(18);
-	str_t r	  = str_init(18);
+	str_t str = strc("abc defgh ijkl", 14);
+	str_t l	  = strz(18);
+	str_t r	  = strz(18);
 
 	str_split(str, ' ', &l, &r);
 
@@ -464,9 +464,9 @@ TEST(t_str_rsplit)
 {
 	START;
 
-	str_t str = str_cstr("abc defgh ijkl", 14);
-	str_t l	  = str_ref();
-	str_t r	  = str_ref();
+	str_t str = strc("abc defgh ijkl", 14);
+	str_t l	  = strr();
+	str_t r	  = strr();
 
 	str_rsplit(str, ' ', &l, &r);
 
