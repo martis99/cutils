@@ -1,4 +1,4 @@
-#include "c_md5.h"
+#include "md5.h"
 
 #include "mem.h"
 
@@ -44,7 +44,7 @@ static u32 k[64]      = {
 	     0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391,
 };
 
-int c_md5(const char *msg, size_t msg_len, byte *buf, size_t buf_size, char *out, size_t out_size)
+int md5(const char *msg, size_t msg_len, byte *buf, size_t buf_size, char *out, size_t out_size)
 {
 	union {
 		u32 h[4];

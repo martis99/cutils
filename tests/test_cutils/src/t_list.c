@@ -468,7 +468,7 @@ TEST(iteratet)
 	SEND;
 }
 
-STEST(list)
+STEST(t_list)
 {
 	SSTART;
 	RUN(init_free);

@@ -184,7 +184,7 @@ TEST(folder)
 	END;
 }
 
-STEST(file)
+STEST(t_file)
 {
 	SSTART;
 	RUN(file_open_close);

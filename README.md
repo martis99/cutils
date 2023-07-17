@@ -19,6 +19,7 @@ cross-platform utitilities and basic data structures implementation for C
 
 ### Data structures
 - [x] array
+- [x] hashmap
 - [x] list
 - [x] tree
 

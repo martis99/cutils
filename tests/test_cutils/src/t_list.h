@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(list);
+STEST(t_list);
 
 #endif

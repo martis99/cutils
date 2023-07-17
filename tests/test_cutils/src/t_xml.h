@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(xml);
+STEST(t_xml);
 
 #endif

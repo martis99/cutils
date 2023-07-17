@@ -1,6 +1,7 @@
 #include "t_arr.h"
 #include "t_cstr.h"
 #include "t_file.h"
+#include "t_hashmap.h"
 #include "t_list.h"
 #include "t_log.h"
 #include "t_md5.h"
@@ -18,18 +19,19 @@
 TEST(tests)
 {
 	SSTART;
-	RUN(arr);
+	RUN(t_arr);
 	RUN(t_cstr);
-	RUN(file);
-	RUN(list);
-	RUN(logt);
-	RUN(md5);
+	RUN(t_file);
+	RUN(t_hashmap);
+	RUN(t_list);
+	RUN(t_log);
+	RUN(t_md5);
 	RUN(t_print);
 	RUN(t_str);
-	RUN(time);
-	RUN(tree);
-	RUN(type);
-	RUN(xml);
+	RUN(t_time);
+	RUN(t_tree);
+	RUN(t_type);
+	RUN(t_xml);
 	SEND;
 }
 

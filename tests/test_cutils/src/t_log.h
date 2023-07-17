@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(logt);
+STEST(t_log);
 
 #endif

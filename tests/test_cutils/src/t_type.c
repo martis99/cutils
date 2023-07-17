@@ -18,7 +18,7 @@ TEST(size)
 	END;
 }
 
-STEST(type)
+STEST(t_type)
 {
 	SSTART;
 	RUN(size);

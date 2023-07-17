@@ -25,8 +25,7 @@ typedef void (*hashmap_callback)(void *key, size_t ksize, void *value, void *pri
 typedef void (*hashmap_callback_c)(void *key, size_t ksize, void *value, const void *priv);
 typedef void (*hashmap_callback_hc)(void *key, size_t ksize, void *value, void *priv);
 
-void hashmap_create(hashmap_t *map, int capacity);
-
+hashmap_t *hashmap_init(hashmap_t *map, int capacity);
 void hashmap_free(hashmap_t *map);
 
 void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *value);

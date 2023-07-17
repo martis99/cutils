@@ -726,7 +726,7 @@ TEST(iterate_childs)
 	SEND;
 }
 
-STEST(tree)
+STEST(t_tree)
 {
 	SSTART;
 	RUN(init_free);

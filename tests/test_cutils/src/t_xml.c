@@ -532,7 +532,7 @@ TEST(removet, FILE *file)
 	SEND;
 }
 
-STEST(xml)
+STEST(t_xml)
 {
 	SSTART;
 

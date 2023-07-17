@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(type);
+STEST(t_type);
 
 #endif

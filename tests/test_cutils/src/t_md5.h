@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(md5);
+STEST(t_md5);
 
 #endif

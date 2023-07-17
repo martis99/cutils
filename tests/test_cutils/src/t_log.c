@@ -145,7 +145,7 @@ TEST(log_fatal_test, FILE *file)
 	END;
 }
 
-STEST(logt)
+STEST(t_log)
 {
 	SSTART;
 

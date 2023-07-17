@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(time);
+STEST(t_time);
 
 #endif

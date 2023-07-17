@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(tree);
+STEST(t_tree);
 
 #endif

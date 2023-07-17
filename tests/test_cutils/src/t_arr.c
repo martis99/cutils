@@ -404,7 +404,7 @@ TEST(iterate)
 	END;
 }
 
-STEST(arr)
+STEST(t_arr)
 {
 	SSTART;
 	RUN(init_free);

@@ -1,4 +1,4 @@
-#include "hash_map.h"
+#include "hashmap.h"
 
 #include "mem.h"
 
@@ -8,19 +8,31 @@
 #define HASHMAP_MAX_LOAD      0.75f
 #define HASHMAP_RESIZE_FACTOR 2
 
-void hashmap_create(hashmap_t *map, int capacity)
+hashmap_t *hashmap_init(hashmap_t *map, int capacity)
 {
-	map->capacity = capacity;
-	map->count    = 0;
+	if (map == NULL) {
+		return NULL;
+	}
 
 	map->buckets = m_calloc(capacity, sizeof(struct bucket));
-	map->first   = NULL;
+	if (map->buckets == NULL) {
+		return NULL;
+	}
 
-	map->last = (struct bucket *)&map->first;
+	map->capacity = capacity;
+	map->count    = 0;
+	map->first    = NULL;
+	map->last     = (struct bucket *)&map->first;
+
+	return map;
 }
 
 void hashmap_free(hashmap_t *map)
 {
+	if (map == NULL) {
+		return;
+	}
+
 	m_free(map->buckets, map->capacity * sizeof(struct bucket));
 }
 
@@ -104,6 +116,10 @@ static struct bucket *find_entry(const hashmap_t *map, void *key, size_t ksize, 
 
 void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *val)
 {
+	if (map == NULL || key == NULL) {
+		return;
+	}
+
 	if (map->count + 1 > HASHMAP_MAX_LOAD * map->capacity) {
 		hashmap_resize(map);
 	}
@@ -126,6 +142,10 @@ void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *val)
 
 int hashmap_get(const hashmap_t *map, void *key, size_t ksize, void **out_val)
 {
+	if (map == NULL || key == NULL) {
+		return 1;
+	}
+
 	u32 hash	     = hash_data(key, ksize);
 	struct bucket *entry = find_entry(map, key, ksize, hash);
 
@@ -138,6 +158,10 @@ int hashmap_get(const hashmap_t *map, void *key, size_t ksize, void **out_val)
 
 void hashmap_iterate(hashmap_t *map, hashmap_callback callback, void *priv)
 {
+	if (map == NULL) {
+		return;
+	}
+
 	struct bucket *current = map->first;
 
 	int co = 0;
@@ -156,6 +180,10 @@ void hashmap_iterate(hashmap_t *map, hashmap_callback callback, void *priv)
 
 void hashmap_iterate_c(const hashmap_t *map, hashmap_callback_c callback, const void *priv)
 {
+	if (map == NULL) {
+		return;
+	}
+
 	struct bucket *current = map->first;
 
 	int co = 0;
@@ -174,6 +202,10 @@ void hashmap_iterate_c(const hashmap_t *map, hashmap_callback_c callback, const 
 
 void hashmap_iterate_hc(const hashmap_t *map, hashmap_callback_hc callback, void *priv)
 {
+	if (map == NULL) {
+		return;
+	}
+
 	struct bucket *current = map->first;
 
 	int co = 0;

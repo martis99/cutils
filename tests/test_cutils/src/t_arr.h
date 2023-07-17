@@ -3,6 +3,6 @@
 
 #include "test_h.h"
 
-STEST(arr);
+STEST(t_arr);
 
 #endif

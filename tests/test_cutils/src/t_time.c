@@ -47,7 +47,7 @@ TEST(time_str)
 	END;
 }
 
-STEST(time)
+STEST(t_time)
 {
 	SSTART;
 	RUN(time_int);
