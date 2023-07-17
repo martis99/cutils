@@ -31,7 +31,7 @@ FILE *file_open_v(const char *format, const char *mode, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
 		return NULL;
 	}
 
@@ -148,7 +148,7 @@ int file_exists_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
 		return 0;
 	}
 
@@ -184,7 +184,7 @@ int folder_exists_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
 		return 0;
 	}
 
@@ -217,7 +217,7 @@ int folder_create_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
 		return 0;
 	}
 
@@ -246,7 +246,7 @@ int folder_delete_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (p_vsnprintf(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
 		return 0;
 	}
 

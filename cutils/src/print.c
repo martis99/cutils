@@ -10,17 +10,34 @@
 	#include <io.h>
 #endif
 
-size_t p_fprintf(FILE *file, const char *fmt, ...)
+size_t c_printv(const char *fmt, va_list args)
+{
+	if (fmt == NULL) {
+		return 0;
+	}
+
+	va_list copy;
+	va_copy(copy, args);
+	size_t ret = vprintf(fmt, copy);
+	va_end(copy);
+	return ret;
+}
+
+size_t c_printf(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = p_vfprintf(file, fmt, args);
+	size_t ret = c_printv(fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t p_vfprintf(FILE *file, const char *fmt, va_list args)
+size_t c_fprintv(FILE *file, const char *fmt, va_list args)
 {
+	if (file == NULL || fmt == NULL) {
+		return 0;
+	}
+
 	va_list copy;
 	va_copy(copy, args);
 	size_t ret;
@@ -33,68 +50,97 @@ size_t p_vfprintf(FILE *file, const char *fmt, va_list args)
 	return ret;
 }
 
-size_t p_sprintf(char *buf, size_t size, const char *fmt, ...)
+size_t c_fprintf(FILE *file, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = p_vsprintf(buf, size, fmt, args);
+	size_t ret = c_fprintv(file, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t p_vsprintf(char *buf, size_t size, const char *fmt, va_list args)
+size_t c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 {
+	if ((buf == NULL && size > 0) || fmt == NULL) {
+		return 0;
+	}
+
 	va_list copy;
 	va_copy(copy, args);
 	size_t ret;
 #if defined(C_WIN)
-	ret = vsprintf_s(buf, size, fmt, copy);
+	ret = vsnprintf(buf, size / sizeof(char), fmt, copy);
 #else
-	ret = vsprintf(buf, fmt, copy);
+	ret = vsnprintf(buf, size / sizeof(char), fmt, copy);
 #endif
 	va_end(copy);
 	return ret;
 }
 
-size_t p_vsnprintf(char *buf, size_t size, const char *fmt, va_list args)
-{
-	va_list copy;
-	va_copy(copy, args);
-	size_t ret;
-#if defined(C_WIN)
-	ret = vsnprintf(buf, size, fmt, copy);
-#else
-	ret = vsnprintf(buf, size, fmt, copy);
-#endif
-	va_end(copy);
-	return ret;
-}
-
-size_t p_swprintf(wchar *buf, size_t size, const wchar *fmt, ...)
+size_t c_sprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = p_vswprintf(buf, size, fmt, args);
+	size_t ret = c_sprintv(buf, size, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t p_vswprintf(wchar *buf, size_t size, const wchar *fmt, va_list args)
+size_t c_wprintv(const wchar *fmt, va_list args)
 {
+	if (fmt == NULL) {
+		return 0;
+	}
+
+	va_list copy;
+	va_copy(copy, args);
+	size_t ret = vwprintf(fmt, copy);
+	va_end(copy);
+	return ret;
+}
+
+size_t c_wprintf(const wchar *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	size_t ret = c_wprintv(fmt, args);
+	va_end(args);
+	return ret;
+}
+
+size_t c_swprintv(wchar *buf, size_t size, const wchar *fmt, va_list args)
+{
+	if ((buf == NULL && size > 0) || fmt == NULL) {
+		return 0;
+	}
+
 	va_list copy;
 	va_copy(copy, args);
 	size_t ret;
 #if defined(C_WIN)
-	ret = vswprintf_s(buf, size, fmt, args);
+	ret = vswprintf_s(buf, size / sizeof(wchar_t), fmt, copy);
 #else
-	ret = vswprintf(buf, size, fmt, args);
+	ret = vswprintf(buf, size / sizeof(wchar_t), fmt, copy);
 #endif
 	va_end(copy);
 	return ret;
 }
 
-int p_set_u16(FILE *file)
+size_t c_swprintf(wchar *buf, size_t size, const wchar *fmt, ...)
 {
+	va_list args;
+	va_start(args, fmt);
+	size_t ret = c_swprintv(buf, size, fmt, args);
+	va_end(args);
+	return ret;
+}
+
+int c_set_u16(FILE *file)
+{
+	if (file == NULL) {
+		return 0;
+	}
+
 #if defined(C_WIN)
 	return _setmode(_fileno(file), _O_U16TEXT);
 #else
@@ -102,8 +148,12 @@ int p_set_u16(FILE *file)
 #endif
 }
 
-int p_unset_u16(FILE *file, int mode)
+int c_unset_u16(FILE *file, int mode)
 {
+	if (file == NULL) {
+		return 0;
+	}
+
 #if defined(C_WIN)
 	return _setmode(_fileno(file), mode);
 #else
@@ -111,34 +161,46 @@ int p_unset_u16(FILE *file, int mode)
 #endif
 }
 
-void p_ur(FILE *file)
+void c_ur(FILE *file)
 {
+	if (file == NULL) {
+		return;
+	}
+
 #if defined(C_WIN)
-	int mode = p_set_u16(file);
+	int mode = c_set_u16(file);
 	fwprintf_s(file, L"\u2514\u2500");
-	p_unset_u16(file, mode);
+	c_unset_u16(file, mode);
 #else
 	fprintf(file, "└─");
 #endif
 }
 
-void p_v(FILE *file)
+void c_v(FILE *file)
 {
+	if (file == NULL) {
+		return;
+	}
+
 #if defined(C_WIN)
-	int mode = p_set_u16(file);
+	int mode = c_set_u16(file);
 	fwprintf_s(file, L"\u2502 ");
-	p_unset_u16(file, mode);
+	c_unset_u16(file, mode);
 #else
 	fprintf(file, "│ ");
 #endif
 }
 
-void p_vr(FILE *file)
+void c_vr(FILE *file)
 {
+	if (file == NULL) {
+		return;
+	}
+
 #if defined(C_WIN)
-	int mode = p_set_u16(file);
+	int mode = c_set_u16(file);
 	fwprintf_s(file, L"\u251C\u2500");
-	p_unset_u16(file, mode);
+	c_unset_u16(file, mode);
 #else
 	fprintf(file, "├─");
 #endif

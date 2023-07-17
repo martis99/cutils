@@ -32,12 +32,12 @@ void m_print(FILE *file)
 	}
 
 	if (s == '\0') {
-		p_fprintf(file, "mem:      %zu max: %zu B\n", s_stats->mem, s_stats->mem_max);
+		c_fprintf(file, "mem:      %zu max: %zu B\n", s_stats->mem, s_stats->mem_max);
 	} else {
-		p_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_stats->mem, mem_max, s, s_stats->mem_max);
+		c_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_stats->mem, mem_max, s, s_stats->mem_max);
 	}
-	p_fprintf(file, "allocs:   %d\n", s_stats->allocs);
-	p_fprintf(file, "reallocs: %d\n", s_stats->reallocs);
+	c_fprintf(file, "allocs:   %d\n", s_stats->allocs);
+	c_fprintf(file, "reallocs: %d\n", s_stats->reallocs);
 }
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)

@@ -1,8 +1,11 @@
 #include "t_arr.h"
+#include "t_cstr.h"
 #include "t_file.h"
 #include "t_list.h"
 #include "t_log.h"
 #include "t_md5.h"
+#include "t_print.h"
+#include "t_str.h"
 #include "t_time.h"
 #include "t_tree.h"
 #include "t_type.h"
@@ -16,10 +19,13 @@ TEST(tests)
 {
 	SSTART;
 	RUN(arr);
+	RUN(t_cstr);
 	RUN(file);
 	RUN(list);
 	RUN(logt);
 	RUN(md5);
+	RUN(t_print);
+	RUN(t_str);
 	RUN(time);
 	RUN(tree);
 	RUN(type);

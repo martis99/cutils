@@ -4,7 +4,7 @@
 
 static int print_tree(FILE *file, void *data, int ret)
 {
-	p_fprintf(file, "%d\n", *(int *)data);
+	c_fprintf(file, "%d\n", *(int *)data);
 	return ret;
 }
 

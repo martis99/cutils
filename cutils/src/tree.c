@@ -142,17 +142,17 @@ static int print_cb(const tree_t *tree, tnode_t node, void *value, int ret, int 
 
 	for (int i = 0; i < depth - 1; i++) {
 		if ((1 << i) & last) {
-			p_fprintf(p->file, "  ");
+			c_fprintf(p->file, "  ");
 		} else {
-			p_v(p->file);
+			c_v(p->file);
 		}
 	}
 
 	if (depth > 0) {
 		if ((1 << (depth - 1)) & last) {
-			p_ur(p->file);
+			c_ur(p->file);
 		} else {
-			p_vr(p->file);
+			c_vr(p->file);
 		}
 	}
 

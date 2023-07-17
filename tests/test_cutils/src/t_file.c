@@ -88,7 +88,7 @@ TEST(file_size_test)
 
 	FILE *file = file_open(TEST_FILE, "w+");
 
-	p_fprintf(file, "Test");
+	c_fprintf(file, "Test");
 
 	const size_t size = file_size(file);
 
@@ -107,7 +107,7 @@ TEST(file_read_test)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	p_fprintf(file, "Test");
+	c_fprintf(file, "Test");
 
 	char data[64] = { 0 };
 
@@ -129,7 +129,7 @@ TEST(file_read_ft_test)
 
 	FILE *file = file_open(TEST_FILE, "w+");
 
-	p_fprintf(file, "Test");
+	c_fprintf(file, "Test");
 
 	char data[64] = { 0 };
 
@@ -151,7 +151,7 @@ TEST(file_read_ft_r_test)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	p_fprintf(file, "Test\r\nTest");
+	c_fprintf(file, "Test\r\nTest");
 
 	char data[64] = { 0 };
 

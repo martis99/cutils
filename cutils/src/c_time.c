@@ -56,7 +56,7 @@ const char *c_time_str(char *buf)
 #endif
 
 	strftime(buf, C_TIME_BUF_SIZE, "%Y-%m-%d %H:%M:%S", timeinfo);
-	p_sprintf(buf + 19, C_TIME_BUF_SIZE - 19, ".%03ld", now.msec);
+	c_sprintf(buf + 19, C_TIME_BUF_SIZE - 19, ".%03ld", now.msec);
 
 	return buf;
 }
