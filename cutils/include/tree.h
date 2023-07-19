@@ -33,4 +33,20 @@ int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb
 typedef int (*tree_print_cb)(FILE *file, void *data, int ret);
 int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, int ret);
 
+typedef struct tree_it {
+	const tree_t *tree;
+	tnode_t stack[16];
+	int top;
+} tree_it;
+
+tree_it tree_it_begin(const tree_t *tree, tnode_t node);
+void tree_it_next(tree_it *it);
+
+#define tree_foreach(_tree, _start, _node, _depth) \
+	for (tree_it _it = tree_it_begin(_tree, _start); ((_depth = _it.top - 1) >= 0) && ((_node = _it.stack[_it.top - 1]) != -1); tree_it_next(&_it))
+
+#define tree_foreach_all(_tree, _node) for (_node = 0; _node < (_tree)->cnt; _node++)
+
+#define tree_foreach_child(_tree, _parent, _node) for (_node = tree_get_child(_tree, _parent); _node != -1; _node = tree_get_next(_tree, _node))
+
 #endif

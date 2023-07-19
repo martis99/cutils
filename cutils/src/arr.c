@@ -183,15 +183,6 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 	return arr;
 }
 
-int arr_iterate(const arr_t *arr, arr_iterate_cb cb, int ret, void *priv)
-{
-	for (uint i = 0; i < arr->cnt; i++) {
-		ret = cb(arr, i, arr_get(arr, i), ret, priv);
-	}
-
-	return ret;
-}
-
 typedef struct arr_print_priv_s {
 	FILE *file;
 	arr_print_cb cb;
@@ -206,9 +197,11 @@ static int print_cb(const arr_t *arr, uint index, void *value, int ret, void *pr
 
 int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret)
 {
-	arr_print_priv_t priv = {
-		.file = file,
-		.cb   = cb,
-	};
-	return arr_iterate(arr, print_cb, ret, &priv);
+	void *value;
+	arr_foreach(arr, value)
+	{
+		ret = cb(file, value, ret);
+	}
+
+	return ret;
 }

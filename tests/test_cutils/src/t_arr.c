@@ -371,33 +371,26 @@ TEST(merge_unique)
 	END;
 }
 
-static int iterate_cb(const arr_t *arr, uint index, void *value, int ret, void *priv)
-{
-	START;
-
-	EXPECT_EQ(*(int *)value, 1);
-	EXPECT_EQ(index, 0);
-
-	*(int *)priv += 1;
-
-	return ret + RES;
-}
-
-TEST(iterate)
+TEST(foreach)
 {
 	START;
 
 	arr_t arr = { 0 };
 
-	arr_init(&arr, 1, sizeof(int));
-
+	arr_init(&arr, 2, sizeof(int));
+	*(int *)arr_get(&arr, arr_add(&arr)) = 0;
 	*(int *)arr_get(&arr, arr_add(&arr)) = 1;
 
-	int cnt = 0;
-	int ret = arr_iterate(&arr, iterate_cb, 0, &cnt);
+	int *value = NULL;
 
-	EXPECT_EQ(cnt, 1);
-	EXPECT_EQ(ret, 0);
+	int i = 0;
+	arr_foreach(&arr, value)
+	{
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 2);
 
 	arr_free(&arr);
 
@@ -423,6 +416,6 @@ STEST(t_arr)
 	RUN(add_unique);
 	RUN(merge_all);
 	RUN(merge_unique);
-	RUN(iterate);
+	RUN(foreach);
 	SEND;
 }

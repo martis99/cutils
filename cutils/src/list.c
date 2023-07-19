@@ -92,49 +92,13 @@ void *list_get_data(const list_t *list, lnode_t node)
 	return (byte *)header + sizeof(header_t);
 }
 
-int list_iterate(const list_t *list, lnode_t node, list_iterate_cb cb, int ret, void *priv)
+int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret)
 {
-	lnode_t cur = node;
-	lnode_t next;
-
-	do {
-		next = list_get_next(list, cur);
-		ret  = cb(list, cur, list_get_data(list, cur), ret, next == -1, priv);
-		cur  = next;
-	} while (cur != -1);
-
-	return ret;
-}
-
-int list_iterate_all(const list_t *list, list_iterate_all_cb cb, int ret, void *priv)
-{
-	lnode_t next;
-
-	for (uint i = 0; i < list->cnt; i++) {
-		next = list_get_next(list, i);
-		ret += cb(list, i, list_get_data(list, i), ret, next == -1, priv);
+	void *value;
+	list_foreach(list, node, value)
+	{
+		ret = cb(file, value, ret);
 	}
 
 	return ret;
-}
-
-typedef struct list_print_priv_s {
-	FILE *file;
-	list_print_cb cb;
-} list_print_priv_t;
-
-static int print_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	list_print_priv_t *p = priv;
-
-	return p->cb(p->file, value, ret);
-}
-
-int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret)
-{
-	list_print_priv_t priv = {
-		.file = file,
-		.cb   = cb,
-	};
-	return list_iterate(list, node, print_cb, ret, &priv);
 }

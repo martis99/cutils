@@ -20,13 +20,11 @@ lnode_t list_get_next(const list_t *list, lnode_t node);
 
 void *list_get_data(const list_t *list, lnode_t node);
 
-typedef int (*list_iterate_cb)(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv);
-int list_iterate(const list_t *list, lnode_t node, list_iterate_cb cb, int ret, void *priv);
-
-typedef int (*list_iterate_all_cb)(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv);
-int list_iterate_all(const list_t *list, list_iterate_all_cb cb, int ret, void *priv);
-
 typedef int (*list_print_cb)(FILE *file, void *value, int ret);
 int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret);
+
+#define list_foreach(_list, _node, _val) for (lnode_t _i = _node; _i != -1 && (_val = list_get_data(_list, _i)); _i = list_get_next(_list, _i))
+
+#define list_foreach_all(_list, _val) for (lnode_t _i = 0; _i < (_list)->cnt && (_val = list_get_data(_list, _i)); _i++)
 
 #endif

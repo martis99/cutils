@@ -131,39 +131,62 @@ int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb
 	return ret;
 }
 
-typedef struct tree_print_priv_s {
-	FILE *file;
-	tree_print_cb cb;
-} tree_print_priv_t;
-
-static int print_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
-{
-	tree_print_priv_t *p = priv;
-
-	for (int i = 0; i < depth - 1; i++) {
-		if ((1 << i) & last) {
-			c_fprintf(p->file, "  ");
-		} else {
-			c_v(p->file);
-		}
-	}
-
-	if (depth > 0) {
-		if ((1 << (depth - 1)) & last) {
-			c_ur(p->file);
-		} else {
-			c_vr(p->file);
-		}
-	}
-
-	return p->cb(p->file, value, ret);
-}
-
 int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, int ret)
 {
-	tree_print_priv_t priv = {
-		.file = file,
-		.cb   = cb,
-	};
-	return tree_iterate_pre(tree, node, print_cb, ret, &priv);
+	tnode_t cur;
+	int depth;
+	tree_foreach(tree, node, cur, depth)
+	{
+		for (int i = 0; i < depth - 1; i++) {
+			if (tree_get_next(tree, _it.stack[i + 1]) == -1) {
+				c_fprintf(file, "  ");
+			} else {
+				c_v(file);
+			}
+		}
+
+		if (depth > 0) {
+			if (tree_get_next(tree, _it.stack[depth]) == -1) {
+				c_ur(file);
+			} else {
+				c_vr(file);
+			}
+		}
+
+		ret = cb(file, tree_get_data(tree, cur), ret);
+	}
+
+	return ret;
+}
+
+tree_it tree_it_begin(const tree_t *tree, tnode_t node)
+{
+	if (tree == NULL) {
+		return (tree_it){ 0 };
+	}
+
+	tree_it it  = { 0 };
+	it.tree	    = tree;
+	it.stack[0] = node;
+	it.top	    = 1;
+
+	return it;
+}
+
+void tree_it_next(tree_it *it)
+{
+	if (it == NULL) {
+		return;
+	}
+
+	const tnode_t node  = it->stack[it->top - 1];
+	const tnode_t child = tree_get_child(it->tree, node);
+
+	if (child != -1) {
+		it->stack[it->top++] = child;
+	} else {
+		do {
+			it->stack[it->top - 1] = tree_get_next(it->tree, it->stack[it->top - 1]);
+		} while (it->stack[it->top - 1] == -1 && it->top-- > 0);
+	}
 }

@@ -32,8 +32,6 @@ void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *value);
 
 int hashmap_get(const hashmap_t *map, void *key, size_t ksize, void **out_val);
 
-void hashmap_iterate(hashmap_t *map, hashmap_callback callback, void *priv);
-void hashmap_iterate_c(const hashmap_t *map, hashmap_callback_c callback, const void *priv);
-void hashmap_iterate_hc(const hashmap_t *map, hashmap_callback_hc callback, void *priv);
+#define hashmap_foreach(_hashmap, _bucket) for (struct bucket *_bucket = (_hashmap)->first; _bucket != NULL; _bucket = _bucket->next)
 
 #endif

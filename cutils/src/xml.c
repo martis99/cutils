@@ -37,38 +37,25 @@ xml_t *xml_init(xml_t *xml, uint cap)
 	return xml;
 }
 
-static int xml_tag_free(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
-{
-	xml_tag_data_t *data = value;
-	if (data == NULL) {
-		return 1;
-	}
-
-	str_free(&data->name);
-	str_free(&data->val);
-
-	return 0;
-}
-
-static int xml_attr_free(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	xml_attr_data_t *attr_d = value;
-
-	str_free(&attr_d->name);
-	str_free(&attr_d->val);
-	return ret;
-}
-
 void xml_free(xml_t *xml)
 {
-	if (xml->tags.cnt > 0) {
-		tree_iterate_pre(&xml->tags, 0, xml_tag_free, 0, NULL);
+	xml_tag_t tag;
+	tree_foreach_all(&xml->tags, tag)
+	{
+		xml_tag_data_t *data = tree_get_data(&xml->tags, tag);
+		str_free(&data->name);
+		str_free(&data->val);
 	}
+
 	tree_free(&xml->tags);
 
-	if (xml->attrs.cnt > 0) {
-		list_iterate_all(&xml->attrs, xml_attr_free, 0, NULL);
+	xml_attr_data_t *attr;
+	list_foreach_all(&xml->attrs, attr)
+	{
+		str_free(&attr->name);
+		str_free(&attr->val);
 	}
+
 	list_free(&xml->attrs);
 }
 
@@ -129,35 +116,9 @@ xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 	return attr;
 }
 
-static int xml_attr_print_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth)
 {
-	xml_attr_data_t *data = value;
-	if (data == NULL) {
-		return -1;
-	}
-
-	c_fprintf(priv, " %.*s=\"%.*s\"", data->name.len, data->name.data, data->val.len, data->val.data);
-	return ret;
-}
-
-typedef struct xml_tag_print_cb_priv_s {
-	const xml_t *xml;
-	FILE *file;
-	uint depth;
-} xml_tag_print_cb_priv_t;
-
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *file, uint depth);
-
-static int xml_tag_print_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
-{
-	xml_tag_print_cb_priv_t *p = priv;
-
-	return xml_tag_print(p->xml, node, value, p->file, p->depth);
-}
-
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *file, uint depth)
-{
-	xml_tag_data_t *data = value;
+	xml_tag_data_t *data = get_tag(&xml->tags, tag);
 	if (data == NULL) {
 		return 1;
 	}
@@ -165,19 +126,21 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *fil
 	c_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
 	if (data->attrs != -1) {
-		list_iterate(&xml->attrs, data->attrs, xml_attr_print_cb, 0, file);
+		xml_attr_data_t *attr;
+		list_foreach(&xml->attrs, 0, attr)
+		{
+			c_fprintf(file, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
+		}
 	}
-
-	xml_tag_print_cb_priv_t priv = {
-		.xml   = xml,
-		.file  = file,
-		.depth = depth + 1,
-	};
 
 	if (tree_get_child(&xml->tags, tag) != -1) {
 		c_fprintf(file, ">\n");
 
-		tree_iterate_childs(&xml->tags, tag, xml_tag_print_cb, 0, &priv);
+		xml_tag_t child;
+		tree_foreach_child(&xml->tags, tag, child)
+		{
+			xml_tag_print(xml, child, file, depth + 1);
+		}
 
 		c_fprintf(file, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
 	} else if (data->val.data) {
@@ -195,13 +158,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, void *value, FILE *fil
 
 int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file)
 {
-	xml_tag_print_cb_priv_t priv = {
-		.xml   = xml,
-		.file  = file,
-		.depth = 0,
-	};
-
 	c_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	xml_tag_print(xml, tag, get_tag(&xml->tags, tag), file, 0);
+	xml_tag_print(xml, tag, file, 0);
 	return 0;
 }

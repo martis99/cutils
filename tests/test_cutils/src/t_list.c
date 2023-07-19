@@ -273,96 +273,7 @@ TEST(remove_last)
 	END;
 }
 
-static int iterate_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	START;
-
-	EXPECT_EQ(node, 0);
-	EXPECT_EQ(last, 1);
-
-	*(int *)priv += 1;
-
-	return ret + RES;
-}
-
-TEST(iterate)
-{
-	START;
-
-	list_t list = { 0 };
-
-	list_init(&list, 1, sizeof(int));
-
-	const lnode_t node = list_add(&list);
-
-	int cnt = 0;
-
-	int ret = list_iterate(&list, node, iterate_cb, 0, &cnt);
-
-	EXPECT_EQ(cnt, 1);
-	EXPECT_EQ(ret, 0);
-
-	list_free(&list);
-
-	END;
-}
-
-static int iterate_next_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	START;
-
-	switch (node) {
-	case 0: EXPECT_EQ(last, 0); break;
-	case 1: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
-	}
-
-	*(int *)priv += 1;
-
-	return ret + RES;
-}
-
-TEST(iterate_next)
-{
-	START;
-
-	list_t list = { 0 };
-
-	list_init(&list, 2, sizeof(int));
-
-	const lnode_t node  = list_add(&list);
-	const lnode_t child = list_add_next(&list, node);
-
-	int cnt = 0;
-
-	int ret = list_iterate(&list, 0, iterate_next_cb, 0, &cnt);
-
-	EXPECT_EQ(child, 1);
-	EXPECT_EQ(cnt, 2);
-	EXPECT_EQ(ret, 0);
-
-	list_free(&list);
-
-	END;
-}
-
-static int iterate_nexts_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	START;
-
-	switch (node) {
-	case 0: EXPECT_EQ(last, 0); break;
-	case 1: EXPECT_EQ(last, 0); break;
-	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
-	}
-
-	*(int *)priv += 1;
-
-	return ret + RES;
-}
-
-TEST(iterate_nexts)
+TEST(foreach)
 {
 	START;
 
@@ -370,41 +281,29 @@ TEST(iterate_nexts)
 
 	list_init(&list, 3, sizeof(int));
 
-	const lnode_t node  = list_add(&list);
-	const lnode_t next1 = list_add_next(&list, node);
-	const lnode_t next2 = list_add_next(&list, node);
+	lnode_t node;
 
-	int cnt = 0;
+	*(int *)list_get_data(&list, node = list_add(&list))	 = 0;
+	*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
+	*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
 
-	int ret = list_iterate(&list, 0, iterate_nexts_cb, 0, &cnt);
+	int *value;
 
-	EXPECT_EQ(next1, 1);
-	EXPECT_EQ(next2, 2);
-	EXPECT_EQ(cnt, 3);
-	EXPECT_EQ(ret, 0);
+	int i = 0;
+	list_foreach(&list, node, value)
+	{
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 3);
 
 	list_free(&list);
 
 	END;
 }
 
-static int iterate_all_cb(const list_t *list, lnode_t node, void *value, int ret, int last, void *priv)
-{
-	START;
-
-	switch (node) {
-	case 0: EXPECT_EQ(last, 0); break;
-	case 1: EXPECT_EQ(last, 1); break;
-	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
-	}
-
-	*(int *)priv += 1;
-
-	return ret + RES;
-}
-
-TEST(iterate_all)
+TEST(foreach_all)
 {
 	START;
 
@@ -412,18 +311,22 @@ TEST(iterate_all)
 
 	list_init(&list, 3, sizeof(int));
 
-	const lnode_t node  = list_add(&list);
-	const lnode_t next1 = list_add_next(&list, node);
-	const lnode_t node2 = list_add(&list);
+	lnode_t node;
 
-	int cnt = 0;
+	*(int *)list_get_data(&list, node = list_add(&list))	 = 0;
+	*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
+	*(int *)list_get_data(&list, list_add(&list))		 = 2;
 
-	int ret = list_iterate_all(&list, iterate_all_cb, 0, &cnt);
+	int *value;
 
-	EXPECT_EQ(next1, 1);
-	EXPECT_EQ(node2, 2);
-	EXPECT_EQ(cnt, 3);
-	EXPECT_EQ(ret, 0);
+	int i = 0;
+	list_foreach_all(&list, value)
+	{
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 3);
 
 	list_free(&list);
 
@@ -450,7 +353,7 @@ TEST(get)
 	SEND;
 }
 
-TEST(removet)
+TEST(t_remove)
 {
 	SSTART;
 	RUN(remove_middle);
@@ -458,13 +361,11 @@ TEST(removet)
 	SEND;
 }
 
-TEST(iteratet)
+TEST(t_foreach)
 {
 	SSTART;
-	RUN(iterate);
-	RUN(iterate_next);
-	RUN(iterate_nexts);
-	RUN(iterate_all);
+	RUN(foreach);
+	RUN(foreach_all);
 	SEND;
 }
 
@@ -475,7 +376,7 @@ STEST(t_list)
 	RUN(set_data);
 	RUN(addt);
 	RUN(get);
-	RUN(removet);
-	RUN(iteratet);
+	RUN(t_remove);
+	RUN(t_foreach);
 	SEND;
 }

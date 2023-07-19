@@ -673,6 +673,243 @@ TEST(iterate_childs_grand_child)
 	END;
 }
 
+TEST(foreach_root)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 1, sizeof(int));
+
+	tnode_t root;
+	*(int *)tree_get_data(&tree, root = tree_add(&tree)) = 0;
+
+	tnode_t node;
+	int depth;
+
+	int i = 0;
+	tree_foreach(&tree, 0, node, depth)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		EXPECT_EQ(depth, 0);
+		i++;
+	}
+
+	EXPECT_EQ(i, 1);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_child)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 2, sizeof(int));
+
+	tnode_t root;
+	*(int *)tree_get_data(&tree, root = tree_add(&tree))	  = 0;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, root)) = 1;
+
+	tnode_t node;
+	int depth;
+
+	int i = 0;
+	tree_foreach(&tree, 0, node, depth)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		EXPECT_EQ(depth, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 2);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_childs)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 3, sizeof(int));
+
+	tnode_t root;
+	*(int *)tree_get_data(&tree, root = tree_add(&tree))	  = 0;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, root)) = 1;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, root)) = 2;
+
+	tnode_t node;
+	int depth;
+
+	int i = 0;
+	tree_foreach(&tree, 0, node, depth)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		EXPECT_EQ(depth, i != 0);
+		i++;
+	}
+
+	EXPECT_EQ(i, 3);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_grand_child)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 3, sizeof(int));
+
+	tnode_t root, n1;
+	*(int *)tree_get_data(&tree, root = tree_add(&tree))	       = 0;
+	*(int *)tree_get_data(&tree, n1 = tree_add_child(&tree, root)) = 1;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, n1))	       = 2;
+
+	tnode_t node;
+	int depth;
+
+	int i = 0;
+	tree_foreach(&tree, 0, node, depth)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		EXPECT_EQ(depth, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 3);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_child_root)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 1, sizeof(int));
+
+	tree_add(&tree);
+
+	tnode_t node;
+
+	int i = 0;
+	tree_foreach_child(&tree, 0, node)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 0);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_child_child)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 2, sizeof(int));
+
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, tree_add(&tree))) = 0;
+
+	tnode_t node;
+
+	int i = 0;
+	tree_foreach_child(&tree, 0, node)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 1);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_child_childs)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 3, sizeof(int));
+
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, tree_add(&tree))) = 0;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, 0))		     = 1;
+
+	tnode_t node;
+
+	int i = 0;
+	tree_foreach_child(&tree, 0, node)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 2);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(foreach_child_grand_child)
+{
+	START;
+
+	tree_t tree = { 0 };
+
+	tree_init(&tree, 4, sizeof(int));
+
+	tnode_t n1;
+	*(int *)tree_get_data(&tree, n1 = tree_add_child(&tree, tree_add(&tree))) = 0;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, 0))			  = 1;
+	*(int *)tree_get_data(&tree, tree_add_child(&tree, n1))			  = 2;
+
+	tnode_t node;
+
+	int i = 0;
+	tree_foreach_child(&tree, 0, node)
+	{
+		const int *value = tree_get_data(&tree, node);
+		EXPECT_EQ(*value, i);
+		i++;
+	}
+
+	EXPECT_EQ(i, 2);
+
+	tree_free(&tree);
+
+	END;
+}
+
 TEST(addt)
 {
 	SSTART;
@@ -713,6 +950,10 @@ TEST(iterate_pre)
 	RUN(iterate_pre_child);
 	RUN(iterate_pre_childs);
 	RUN(iterate_pre_grand_child);
+	RUN(foreach_root);
+	RUN(foreach_child);
+	RUN(foreach_childs);
+	RUN(foreach_grand_child);
 	SEND;
 }
 
@@ -723,6 +964,10 @@ TEST(iterate_childs)
 	RUN(iterate_childs_child);
 	RUN(iterate_childs_childs);
 	RUN(iterate_childs_grand_child);
+	RUN(foreach_child_root);
+	RUN(foreach_child_child);
+	RUN(foreach_child_childs);
+	RUN(foreach_child_grand_child);
 	SEND;
 }
 
