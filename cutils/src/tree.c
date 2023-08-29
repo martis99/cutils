@@ -16,10 +16,10 @@ static inline tnode_t init_node(tree_t *tree, tnode_t node)
 {
 	header_t *data = get_node(tree, node);
 	if (data == NULL) {
-		return -1;
+		return TREE_END;
 	}
 
-	data->child = -1;
+	data->child = TREE_END;
 	return node;
 }
 
@@ -57,23 +57,23 @@ tnode_t tree_add_child(tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
 	if (header == NULL) {
-		return -1;
+		return TREE_END;
 	}
 
-	tnode_t child = header->child == -1 ? get_node(tree, node)->child = list_add(tree) : list_add_next(tree, header->child);
+	tnode_t child = list_add_next_node(tree, get_node(tree, node)->child);
 	return init_node(tree, child);
 }
 
 tnode_t tree_get_child(const tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
-	return header == NULL ? -1 : header->child;
+	return header == NULL ? TREE_END : header->child;
 }
 
 bool tree_has_child(const tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
-	return header != NULL && header->child != -1;
+	return header != NULL && header->child != TREE_END;
 }
 
 tnode_t tree_add_next(tree_t *tree, tnode_t node)
@@ -103,9 +103,9 @@ static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
 
-	while (child != -1) {
+	while (child != TREE_END) {
 		next  = tree_get_next(tree, child);
-		ret   = node_iterate_pre(tree, child, cb, ret, priv, depth + 1, last | ((next == -1) << depth));
+		ret   = node_iterate_pre(tree, child, cb, ret, priv, depth + 1, last | ((next == TREE_END) << depth));
 		child = next;
 	}
 
@@ -122,9 +122,9 @@ int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
 
-	while (child != -1) {
+	while (child != TREE_END) {
 		next  = tree_get_next(tree, child);
-		ret   = cb(tree, child, tree_get_data(tree, child), ret, next == -1, priv);
+		ret   = cb(tree, child, tree_get_data(tree, child), ret, next == TREE_END, priv);
 		child = next;
 	}
 
@@ -138,7 +138,7 @@ int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, i
 	tree_foreach(tree, node, cur, depth)
 	{
 		for (int i = 0; i < depth - 1; i++) {
-			if (tree_get_next(tree, _it.stack[i + 1]) == -1) {
+			if (tree_get_next(tree, _it.stack[i + 1]) == TREE_END) {
 				c_fprintf(file, "  ");
 			} else {
 				c_v(file);
@@ -146,7 +146,7 @@ int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, i
 		}
 
 		if (depth > 0) {
-			if (tree_get_next(tree, _it.stack[depth]) == -1) {
+			if (tree_get_next(tree, _it.stack[depth]) == TREE_END) {
 				c_ur(file);
 			} else {
 				c_vr(file);
@@ -182,11 +182,11 @@ void tree_it_next(tree_it *it)
 	const tnode_t node  = it->stack[it->top - 1];
 	const tnode_t child = tree_get_child(it->tree, node);
 
-	if (child != -1) {
+	if (child != TREE_END) {
 		it->stack[it->top++] = child;
 	} else {
 		do {
 			it->stack[it->top - 1] = tree_get_next(it->tree, it->stack[it->top - 1]);
-		} while (it->stack[it->top - 1] == -1 && it->top-- > 0);
+		} while (it->stack[it->top - 1] == TREE_END && it->top-- > 0);
 	}
 }

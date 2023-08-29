@@ -61,15 +61,15 @@ void xml_free(xml_t *xml)
 
 xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 {
-	xml_tag_t child	     = tag == -1 ? tree_add(&xml->tags) : tree_add_child(&xml->tags, tag);
+	xml_tag_t child	     = tree_add_child_node(&xml->tags, tag);
 	xml_tag_data_t *data = get_tag(&xml->tags, child);
 	if (data == NULL) {
-		return -1;
+		return TREE_END;
 	}
 
 	*data = (xml_tag_data_t){
 		.name  = name,
-		.attrs = -1,
+		.attrs = LIST_END,
 		.val   = val,
 	};
 	return child;
@@ -94,10 +94,10 @@ static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 {
 	xml_tag_data_t *data = get_tag(&xml->tags, tag);
 	if (data == NULL) {
-		return -1;
+		return LIST_END;
 	}
 
-	return data->attrs == -1 ? get_tag(&xml->tags, tag)->attrs = list_add(&xml->attrs) : list_add_next(&xml->attrs, data->attrs);
+	return list_add_next_node(&xml->attrs, get_tag(&xml->tags, tag)->attrs);
 }
 
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
@@ -105,7 +105,7 @@ xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 	xml_attr_t attr	      = add_attr(xml, tag);
 	xml_attr_data_t *data = get_attr(&xml->attrs, attr);
 	if (data == NULL) {
-		return -1;
+		return LIST_END;
 	}
 
 	*data = (xml_attr_data_t){
@@ -125,7 +125,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 
 	c_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
-	if (data->attrs != -1) {
+	if (data->attrs != LIST_END) {
 		xml_attr_data_t *attr;
 		list_foreach(&xml->attrs, 0, attr)
 		{
@@ -133,7 +133,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 		}
 	}
 
-	if (tree_get_child(&xml->tags, tag) != -1) {
+	if (tree_get_child(&xml->tags, tag) != TREE_END) {
 		c_fprintf(file, ">\n");
 
 		xml_tag_t child;

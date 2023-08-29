@@ -48,7 +48,7 @@ static int arr_resize(arr_t *arr)
 uint arr_add(arr_t *arr)
 {
 	if (arr_resize(arr)) {
-		return -1;
+		return ARR_END;
 	}
 
 	uint index = arr->cnt;
@@ -95,7 +95,7 @@ uint arr_index(const arr_t *arr, const void *value)
 		}
 	}
 
-	return -1;
+	return ARR_END;
 }
 
 uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
@@ -106,7 +106,7 @@ uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
 		}
 	}
 
-	return -1;
+	return ARR_END;
 }
 
 arr_t *arr_add_all(arr_t *arr, const arr_t *src)
@@ -131,7 +131,7 @@ arr_t *arr_add_unique(arr_t *arr, const arr_t *src)
 	for (uint i = 0; i < src->cnt; i++) {
 		const void *value = arr_get(src, i);
 
-		if (arr_index(arr, value) != -1) {
+		if (arr_index(arr, value) != ARR_END) {
 			continue;
 		}
 
@@ -181,18 +181,6 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 	}
 
 	return arr;
-}
-
-typedef struct arr_print_priv_s {
-	FILE *file;
-	arr_print_cb cb;
-} arr_print_priv_t;
-
-static int print_cb(const arr_t *arr, uint index, void *value, int ret, void *priv)
-{
-	arr_print_priv_t *p = priv;
-
-	return p->cb(p->file, value, ret);
 }
 
 int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret)

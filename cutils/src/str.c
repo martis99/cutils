@@ -113,6 +113,19 @@ void str_free(str_t *str)
 	str->len  = 0;
 }
 
+void str_zero(str_t *str)
+{
+	if (str == NULL) {
+		return;
+	}
+
+	if (!str->ref) {
+		cstr_zero((char *)str->data, str->size);
+	}
+
+	str->len = 0;
+}
+
 int str_resize(str_t *str, size_t size)
 {
 	if (str->ref) {
@@ -262,4 +275,39 @@ int str_rsplit(str_t str, char c, str_t *l, str_t *r)
 	}
 
 	return 0;
+}
+
+int str_replace(str_t *str, str_t old, str_t new)
+{
+	if (str == NULL) {
+		return 0;
+	}
+
+	int found = 0;
+	str->len  = cstr_replace((char *)str->data, str->size, str->len, old.data, old.len, new.data, new.len, &found);
+	return found;
+}
+
+int str_replaces(str_t *str, const str_t *old, const str_t *new, size_t cnt)
+{
+	if (old == NULL || new == NULL) {
+		return 0;
+	}
+
+	int found = 0;
+	for (size_t i = 0; i < cnt; i++) {
+		found |= str_replace(str, old[i], new[i]);
+	}
+
+	return found;
+}
+
+int str_rreplaces(str_t *str, const str_t *old, const str_t *new, size_t cnt)
+{
+	int ret	  = 0;
+	int found = 0;
+	do {
+		ret |= found = str_replaces(str, old, new, cnt);
+	} while (found);
+	return ret;
 }

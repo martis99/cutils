@@ -11,10 +11,10 @@ static inline lnode_t init_node(list_t *list, lnode_t node)
 {
 	header_t *ptr = arr_get(list, node);
 	if (ptr == NULL) {
-		return -1;
+		return LIST_END;
 	}
 
-	ptr->next = -1;
+	ptr->next = LIST_END;
 	return node;
 }
 
@@ -31,8 +31,8 @@ void list_free(list_t *list)
 lnode_t list_add(list_t *list)
 {
 	lnode_t node = arr_add(list);
-	if (node == -1) {
-		return -1;
+	if (node == LIST_END) {
+		return LIST_END;
 	}
 
 	return init_node(list, node);
@@ -55,15 +55,18 @@ void list_remove(list_t *list, lnode_t node)
 
 lnode_t list_add_next(list_t *list, lnode_t node)
 {
-	lnode_t next = list_add(list);
+	return list_set_next(list, node, list_add(list));
+}
 
+lnode_t list_set_next(list_t *list, lnode_t node, lnode_t next)
+{
 	header_t *header = arr_get(list, node);
 	if (header == NULL) {
-		return -1;
+		return LIST_END;
 	}
 
 	lnode_t *target = &header->next;
-	while (*target != -1) {
+	while (*target != LIST_END) {
 		target = &((header_t *)arr_get(list, *target))->next;
 	}
 
@@ -76,7 +79,7 @@ lnode_t list_get_next(const list_t *list, lnode_t node)
 {
 	header_t *header = arr_get(list, node);
 	if (header == NULL) {
-		return -1;
+		return LIST_END;
 	}
 
 	return header->next;

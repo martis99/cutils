@@ -4,6 +4,7 @@
 #include "t_hashmap.h"
 #include "t_list.h"
 #include "t_log.h"
+#include "t_make.h"
 #include "t_md5.h"
 #include "t_print.h"
 #include "t_str.h"
@@ -25,6 +26,7 @@ TEST(tests)
 	RUN(t_hashmap);
 	RUN(t_list);
 	RUN(t_log);
+	RUN(t_make);
 	RUN(t_md5);
 	RUN(t_print);
 	RUN(t_str);

@@ -23,6 +23,8 @@ str_t strr();
 
 void str_free(str_t *str);
 
+void str_zero(str_t *str);
+
 int str_resize(str_t *str, size_t size);
 
 str_t *str_catc(str_t *str, const char *cstr, size_t len);
@@ -41,6 +43,10 @@ str_t str_cpy(str_t src);
 
 int str_split(str_t str, char c, str_t *l, str_t *r);
 int str_rsplit(str_t str, char c, str_t *l, str_t *r);
+
+int str_replace(str_t *str, str_t old, str_t new);
+int str_replaces(str_t *str, const str_t *old, const str_t *new, size_t cnt);
+int str_rreplaces(str_t *str, const str_t *old, const str_t *new, size_t cnt);
 
 // clang-format off
 #define STR(_str) strc(_str, sizeof(_str) - 1)

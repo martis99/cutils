@@ -20,6 +20,11 @@ size_t cstrf(char *cstr, size_t size, const char *fmt, ...)
 	return ret;
 }
 
+void cstr_zero(char *cstr, size_t size)
+{
+	m_memset(cstr, 0, size);
+}
+
 size_t cstr_len(const char *cstr)
 {
 	if (cstr == NULL) {
@@ -130,61 +135,20 @@ void *cstr_cpy(char *cstr, size_t size, const char *src, size_t len)
 	return m_memcpy(cstr, size, src, len * sizeof(char));
 }
 
-size_t cstr_replace(const char *src, size_t src_len, char *dst, size_t dst_len, const char *from, size_t from_len, const char *to, size_t to_len)
+size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old, size_t old_len, const char *new, size_t new_len, int *found)
 {
-	src_len	 = src_len == 0 ? cstr_len(src) : src_len;
-	from_len = from_len == 0 ? cstr_len(from) : from_len;
-	to_len	 = to_len == 0 ? cstr_len(to) : to_len;
-
-	size_t dst_i = 0;
-	for (size_t i = 0; i < src_len; i++) {
-		if (src_len - i > from_len && cstr_cmp(&src[i], from_len, from, from_len)) {
-			cstr_cpy(&dst[dst_i], dst_len, to, to_len);
-			i += from_len - 1;
-			dst_i += to_len;
-		} else {
-			dst[dst_i++] = src[i];
-		}
+	if (found) {
+		*found = 0;
 	}
 
-	return dst_i;
-}
-
-size_t cstr_replaces(const char *src, size_t src_len, char *dst, size_t dst_len, const char *const *from, const char *const *to, size_t len)
-{
-	src_len = src_len == 0 ? cstr_len(src) : src_len;
-
-	size_t dst_i = 0;
-	for (size_t i = 0; i < src_len; i++) {
-		bool found = 0;
-
-		for (size_t j = 0; j < len; j++) {
-			if (!from[j] || !to[j]) {
-				continue;
-			}
-
-			size_t from_len = cstr_len(from[j]);
-			size_t to_len	= cstr_len(to[j]);
-
-			if (src_len - i >= from_len && cstr_cmp(&src[i], from_len, from[j], from_len)) {
-				cstr_cpy(&dst[dst_i], dst_len, to[j], to_len);
-				i += from_len - 1;
-				dst_i += to_len;
-				found = 1;
-				break;
-			}
-		}
-
-		if (!found) {
-			dst[dst_i++] = src[i];
-		}
+	if (str == NULL) {
+		return 0;
 	}
 
-	return dst_i;
-}
+	if (old == NULL || new == NULL) {
+		return str_len;
+	}
 
-size_t cstr_inplace(char *str, size_t str_size, size_t str_len, const char *old, size_t old_len, const char *new, size_t new_len)
-{
 	str_len = str_len == 0 ? cstr_len(str) : str_len;
 	old_len = old_len == 0 ? cstr_len(old) : old_len;
 	new_len = new_len == 0 ? cstr_len(new) : new_len;
@@ -193,13 +157,17 @@ size_t cstr_inplace(char *str, size_t str_size, size_t str_len, const char *old,
 		return str_len;
 	}
 
-	for (size_t i = 0; i <= str_len - old_len; i++) {
+	for (size_t i = 0; str_len >= old_len && i <= str_len - old_len; i++) {
 		if (i > str_size) {
 			return 0;
 		}
 
-		if (!cstr_cmpn(&str[i], str_len, old, old_len, old_len)) {
+		if (cstr_cmpn(&str[i], str_len, old, old_len, old_len)) {
 			continue;
+		}
+
+		if (found) {
+			*found = 1;
 		}
 
 		if (new_len < old_len) {
@@ -234,15 +202,21 @@ size_t cstr_inplace(char *str, size_t str_size, size_t str_len, const char *old,
 	return str_len;
 }
 
-size_t cstr_inplaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt)
+size_t cstr_replaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt, int *found)
 {
 	for (size_t i = 0; i < cnt; i++) {
-		if (!old[i] || !new[i]) {
-			continue;
-		}
-
-		str_len = cstr_inplace(str, str_size, str_len, old[i], 0, new[i], 0);
+		str_len = cstr_replace(str, str_size, str_len, old[i], 0, new[i], 0, found);
 	}
+
+	return str_len;
+}
+
+size_t cstr_rreplaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt)
+{
+	int found = 0;
+	do {
+		str_len = cstr_replaces(str, str_size, str_len, old, new, cnt, &found);
+	} while (found);
 
 	return str_len;
 }

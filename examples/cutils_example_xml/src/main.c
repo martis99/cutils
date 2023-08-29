@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 	xml_t xml = { 0 };
 	xml_init(&xml, 8);
 
-	xml_tag_t parent = xml_add_tag(&xml, -1, STR("Parent"));
+	xml_tag_t parent = xml_add_tag(&xml, TREE_END, STR("Parent"));
 
 	xml_tag_t child1 = xml_add_tag(&xml, parent, STR("EmptyChild"));
 	xml_tag_t child2 = xml_add_tag_val(&xml, parent, STR("Child"), STR("Value"));

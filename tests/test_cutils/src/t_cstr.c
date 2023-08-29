@@ -110,6 +110,39 @@ TEST(t_cstr_cpy_null)
 	END;
 }
 
+TEST(t_cstr_replace_null)
+{
+	START;
+
+	char buf[64] = { 0 };
+
+	EXPECT_EQ(cstr_replace(NULL, 0, 0, NULL, 0, NULL, 0, NULL), 0);
+	EXPECT_EQ(cstr_replace(buf, 64, 4, NULL, 0, NULL, 0, NULL), 4);
+	END;
+}
+
+TEST(t_cstr_replaces_null)
+{
+	START;
+
+	char buf[64] = { 0 };
+
+	EXPECT_EQ(cstr_replaces(NULL, 0, 0, NULL, NULL, 0, NULL), 0);
+	EXPECT_EQ(cstr_replaces(buf, 64, 4, NULL, NULL, 0, NULL), 4);
+	END;
+}
+
+TEST(t_cstr_rreplaces_null)
+{
+	START;
+
+	char buf[64] = { 0 };
+
+	EXPECT_EQ(cstr_rreplaces(NULL, 0, 0, NULL, NULL, 0), 0);
+	EXPECT_EQ(cstr_rreplaces(buf, 64, 4, NULL, NULL, 0), 4);
+	END;
+}
+
 TEST(t_cstr_null)
 {
 	SSTART;
@@ -123,6 +156,9 @@ TEST(t_cstr_null)
 	RUN(t_cstr_rchr_null);
 	RUN(t_cstr_cstr_null);
 	RUN(t_cstr_cpy_null);
+	RUN(t_cstr_replace_null);
+	RUN(t_cstr_replaces_null);
+	RUN(t_cstr_rreplaces_null);
 	SEND;
 }
 
@@ -251,6 +287,141 @@ TEST(t_cstr_cstr)
 	END;
 }
 
+TEST(t_cstr_replace_short)
+{
+	START;
+
+	char cstr[32] = "ab<char>de";
+
+	size_t len = cstr_replace(cstr, 32, 10, "<char>", 6, "c", 1, NULL);
+
+	EXPECT_EQ(len, 5);
+	EXPECT_STR(cstr, "abcde");
+
+	END;
+}
+
+TEST(t_cstr_replace_long)
+{
+	START;
+
+	char cstr[32] = "ab<c>op";
+
+	size_t len = cstr_replace(cstr, 32, 7, "<c>", 3, "cdefghijklm", 11, NULL);
+
+	EXPECT_EQ(len, 15);
+	EXPECT_STR(cstr, "abcdefghijklmop");
+
+	END;
+}
+
+TEST(t_cstr_replace_short_multi)
+{
+	START;
+
+	char cstr[32] = "<char>ab<char>de<char>";
+
+	size_t len = cstr_replace(cstr, 32, 22, "<char>", 6, "c", 1, NULL);
+
+	EXPECT_EQ(len, 7);
+	EXPECT_STR(cstr, "cabcdec");
+
+	END;
+}
+
+TEST(t_cstr_replace_long_multi)
+{
+	START;
+
+	char cstr[64] = "<c>ab<c>op<c>";
+
+	size_t len = cstr_replace(cstr, 64, 13, "<c>", 3, "cdefghijklm", 11, NULL);
+
+	EXPECT_EQ(len, 37);
+	EXPECT_STR(cstr, "cdefghijklmabcdefghijklmopcdefghijklm");
+
+	END;
+}
+
+TEST(t_cstr_replace_overflow)
+{
+	START;
+
+	char cstr[12] = "ab<c>de";
+
+	size_t len = cstr_replace(cstr, 12, 7, "<c>", 3, "cdefghijklm", 11, NULL);
+
+	EXPECT_EQ(len, 0);
+	EXPECT_STR(cstr, "ab<c>de");
+
+	END;
+}
+
+TEST(t_cstr_replaces)
+{
+	START;
+
+	char cstr[32] = "ab<char>d<none><ignore>e<str>";
+
+	const char *from[] = {
+		"<char>",
+		"<ignore>",
+		"<none>",
+		"<str>",
+	};
+
+	const char *to[] = {
+		"c",
+		NULL,
+		"",
+		"string",
+	};
+
+	size_t len = cstr_replaces(cstr, 32, 29, from, to, 4, NULL);
+
+	EXPECT_EQ(len, 19);
+	EXPECT_STR(cstr, "abcd<ignore>estring");
+
+	END;
+}
+
+TEST(t_cstr_rreplaces)
+{
+	START;
+
+	char cstr[32] = "<string> world";
+
+	const char *from[] = {
+		"<word>",
+		"<string>",
+	};
+
+	const char *to[] = {
+		"hello",
+		"string:<word>",
+	};
+
+	size_t len = cstr_rreplaces(cstr, 32, 14, from, to, 2);
+
+	EXPECT_EQ(len, 18);
+	EXPECT_STR(cstr, "string:hello world");
+
+	END;
+}
+
+STEST(t_cstr_replace)
+{
+	SSTART;
+	RUN(t_cstr_replace_short);
+	RUN(t_cstr_replace_long);
+	RUN(t_cstr_replace_short_multi);
+	RUN(t_cstr_replace_long_multi);
+	RUN(t_cstr_replace_overflow);
+	RUN(t_cstr_replaces);
+	RUN(t_cstr_rreplaces);
+	SEND;
+}
+
 STEST(t_cstr)
 {
 	SSTART;
@@ -266,5 +437,6 @@ STEST(t_cstr)
 	RUN(t_cstr_chr);
 	RUN(t_cstr_rchr);
 	RUN(t_cstr_cstr);
+	RUN(t_cstr_replace);
 	SEND;
 }

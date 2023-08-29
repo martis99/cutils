@@ -1,0 +1,5 @@
+NAME: cutils_example_make
+TYPE: EXE
+SOURCE: src
+DEPENDS: cutils
+INCLUDES: cutils

@@ -6,6 +6,8 @@
 
 #include <stdio.h>
 
+#define TREE_END LIST_END
+
 typedef lnode_t tnode_t;
 typedef list_t tree_t;
 
@@ -43,10 +45,12 @@ tree_it tree_it_begin(const tree_t *tree, tnode_t node);
 void tree_it_next(tree_it *it);
 
 #define tree_foreach(_tree, _start, _node, _depth) \
-	for (tree_it _it = tree_it_begin(_tree, _start); ((_depth = _it.top - 1) >= 0) && ((_node = _it.stack[_it.top - 1]) != -1); tree_it_next(&_it))
+	for (tree_it _it = tree_it_begin(_tree, _start); ((_depth = _it.top - 1) >= 0) && ((_node = _it.stack[_it.top - 1]) != TREE_END); tree_it_next(&_it))
 
 #define tree_foreach_all(_tree, _node) for (_node = 0; _node < (_tree)->cnt; _node++)
 
-#define tree_foreach_child(_tree, _parent, _node) for (_node = tree_get_child(_tree, _parent); _node != -1; _node = tree_get_next(_tree, _node))
+#define tree_foreach_child(_tree, _parent, _node) for (_node = tree_get_child(_tree, _parent); _node < (_tree)->cnt; _node = tree_get_next(_tree, _node))
+
+#define tree_add_child_node(_tree, _node) _node == TREE_END ? _node = tree_add(_tree) : tree_add_child(_tree, _node);
 
 #endif

@@ -266,7 +266,7 @@ TEST(remove_last)
 
 	list_remove(&list, n2);
 
-	EXPECT_EQ(list_get_next(&list, n1), -1);
+	EXPECT_EQ(list_get_next(&list, n1), LIST_END);
 
 	list_free(&list);
 

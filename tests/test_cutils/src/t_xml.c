@@ -9,7 +9,7 @@
 
 #define TEST_FILE "test_xml.xml"
 
-TEST(init_free)
+TEST(t_init_free)
 {
 	START;
 
@@ -36,9 +36,9 @@ TEST(add_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag(&xml, -1, STR("Project"));
+	xml_add_tag(&xml, TREE_END, STR("Project"));
 
-	FILE *nf = file_reopen(TEST_FILE, "wb+", file);
+	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
 
 	char buf[1024] = { 0 };
@@ -63,7 +63,7 @@ TEST(add_child_val, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
+	xml_add_tag_val(&xml, TREE_END, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -90,7 +90,7 @@ TEST(add_child_val_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
+	xml_add_tag_val(&xml, TREE_END, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -117,7 +117,7 @@ TEST(add_child_val_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val(&xml, -1, STR("Project"), strf("Name%d", 1));
+	xml_add_tag_val(&xml, TREE_END, STR("Project"), strf("Name%d", 1));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -144,7 +144,7 @@ TEST(add_child_val_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	xml_add_tag_val(&xml, -1, STR("Project"), STR("Name"));
+	xml_add_tag_val(&xml, TREE_END, STR("Project"), STR("Name"));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -173,7 +173,7 @@ TEST(add_child_val_r_heap, FILE *file)
 
 	char name[] = "Name";
 
-	xml_add_tag_val(&xml, -1, STR("Project"), strn(CSTR(name), sizeof(name)));
+	xml_add_tag_val(&xml, TREE_END, STR("Project"), strn(CSTR(name), sizeof(name)));
 
 	file_reopen(TEST_FILE, "wb+", file);
 	xml_print(&xml, 0, file);
@@ -200,7 +200,7 @@ TEST(add_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -228,7 +228,7 @@ TEST(add_attr_c, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -256,7 +256,7 @@ TEST(add_attr_f, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_attr(&xml, project, STR("Name"), strf("Project%d", 2));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -284,7 +284,7 @@ TEST(add_attr_r_stack, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -314,7 +314,7 @@ TEST(add_attr_r_heap, FILE *file)
 
 	char name[] = "Project3";
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_attr(&xml, project, STR("Name"), strn(CSTR(name), sizeof(name)));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -342,7 +342,7 @@ TEST(add_child_val_attr, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag_val(&xml, -1, STR("Project"), STR("Value"));
+	const xml_tag_t project = xml_add_tag_val(&xml, TREE_END, STR("Project"), STR("Value"));
 	xml_add_attr(&xml, project, STR("Name"), STR("Project1"));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -370,7 +370,7 @@ TEST(add_child_child, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	xml_add_tag(&xml, project, STR("Child"));
 
 	file_reopen(TEST_FILE, "wb+", file);
@@ -400,7 +400,7 @@ TEST(remove_tag_empty, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	const xml_tag_t child	= xml_add_tag(&xml, project, STR("Child"));
 
 	xml_remove_tag(&xml, child);
@@ -432,7 +432,7 @@ TEST(remove_tag_with_attr_heap, FILE *file)
 
 	char name[] = "Project3";
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	const xml_tag_t child	= xml_add_tag(&xml, project, STR("Child"));
 	xml_add_attr(&xml, child, STR("Name"), strn(CSTR(name), sizeof(name)));
 
@@ -463,7 +463,7 @@ TEST(remove_tag_middle, FILE *file)
 
 	xml_init(&xml, 4);
 
-	const xml_tag_t project = xml_add_tag(&xml, -1, STR("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STR("Project"));
 	const xml_tag_t child1	= xml_add_tag(&xml, project, STR("Child1"));
 	const xml_tag_t child2	= xml_add_tag(&xml, project, STR("Child2"));
 	const xml_tag_t child3	= xml_add_tag(&xml, project, STR("Child3"));
@@ -513,7 +513,7 @@ TEST(add_attr_tests, FILE *file)
 	SEND;
 }
 
-TEST(add, FILE *file)
+TEST(t_add, FILE *file)
 {
 	SSTART;
 	RUN(add_child_tests, file);
@@ -523,7 +523,7 @@ TEST(add, FILE *file)
 	SEND;
 }
 
-TEST(removet, FILE *file)
+TEST(t_remove, FILE *file)
 {
 	SSTART;
 	RUN(remove_tag_empty, file);
@@ -538,12 +538,11 @@ STEST(t_xml)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	RUN(init_free, file);
-	RUN(add, file);
-	RUN(removet, file);
+	RUN(t_init_free, file);
+	RUN(t_add, file);
+	RUN(t_remove, file);
 
 	file_close(file);
-
 	file_delete(TEST_FILE);
 
 	SEND;

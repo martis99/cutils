@@ -5,6 +5,8 @@
 
 #include <stdio.h>
 
+#define ARR_END -1
+
 typedef struct arr_s {
 	void *data;
 	uint cap;

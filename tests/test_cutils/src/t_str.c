@@ -111,6 +111,38 @@ TEST(t_str_rsplit_null)
 	END;
 }
 
+TEST(t_str_replace_null)
+{
+	START;
+
+	str_t buf = { 0 };
+
+	EXPECT_EQ(str_replace(NULL, buf, buf), 0);
+	END;
+}
+
+TEST(t_str_replaces_null)
+{
+	START;
+
+	str_t buf = { 0 };
+
+	EXPECT_EQ(str_replaces(NULL, NULL, NULL, 0), 0);
+	EXPECT_EQ(str_replaces(&buf, NULL, NULL, 0), 0);
+	END;
+}
+
+TEST(t_str_rreplaces_null)
+{
+	START;
+
+	str_t buf = { 0 };
+
+	EXPECT_EQ(str_rreplaces(NULL, NULL, NULL, 0), 0);
+	EXPECT_EQ(str_rreplaces(&buf, NULL, NULL, 0), 0);
+	END;
+}
+
 TEST(t_str_null)
 {
 	SSTART;
@@ -124,6 +156,9 @@ TEST(t_str_null)
 	RUN(t_str_cat_null);
 	RUN(t_str_split_null);
 	RUN(t_str_rsplit_null);
+	RUN(t_str_replace_null);
+	RUN(t_str_replaces_null);
+	RUN(t_str_rreplaces_null);
 	SEND;
 }
 
@@ -482,6 +517,78 @@ TEST(t_str_rsplit)
 	END;
 }
 
+TEST(t_str_replace)
+{
+	START;
+
+	char buf[32] = "ab<char>de";
+
+	str_t str = strb(buf, 32, 10);
+
+	int found = str_replace(&str, STR("<char>"), STR("c"));
+
+	EXPECT_EQ(found, 1);
+	EXPECT_STR(str.data, "abcde");
+
+	END;
+}
+
+TEST(t_str_replaces)
+{
+	START;
+
+	char buf[32] = "ab<char>d<none><ignore>e<str>";
+
+	str_t str = strb(buf, 32, 29);
+
+	const str_t from[] = {
+		STR("<char>"),
+		STR("<ignore>"),
+		STR("<none>"),
+		STR("<str>"),
+	};
+
+	const str_t to[] = {
+		STR("c"),
+		strb(NULL, 0, 0),
+		STR(""),
+		STR("string"),
+	};
+
+	int found = str_replaces(&str, from, to, 4);
+
+	EXPECT_EQ(found, 1);
+	EXPECT_STR(str.data, "abcd<ignore>estring");
+
+	END;
+}
+
+TEST(t_str_rreplaces)
+{
+	START;
+
+	char buf[32] = "<string> world";
+
+	str_t str = strb(buf, 32, 14);
+
+	const str_t from[] = {
+		STR("<word>"),
+		STR("<string>"),
+	};
+
+	const str_t to[] = {
+		STR("hello"),
+		STR("string:<word>"),
+	};
+
+	int found = str_rreplaces(&str, from, to, 2);
+
+	EXPECT_EQ(found, 1);
+	EXPECT_STR(str.data, "string:hello world");
+
+	END;
+}
+
 STEST(t_str)
 {
 	SSTART;
@@ -501,5 +608,8 @@ STEST(t_str)
 	RUN(t_str_split_buf);
 	RUN(t_str_split_own);
 	RUN(t_str_rsplit);
+	RUN(t_str_replace);
+	RUN(t_str_replaces);
+	RUN(t_str_rreplaces);
 	SEND;
 }
