@@ -45,14 +45,14 @@ int main(int argc, char **argv)
 
 	make_print(&make, stdout);
 
-	make_set_ext(&make, STR("SLNDIR"), MSTR("./"));
-	make_set_ext(&make, STR("CONFIG"), MSTR("Debug"));
-	make_set_ext(&make, STR("PLATFORM"), MSTR("x64"));
-	make_set_ext(&make, STR("TOOL"), MSTR("cland"));
+	make_ext_set_val(&make, STR("SLNDIR"), MSTR("./"));
+	make_ext_set_val(&make, STR("CONFIG"), MSTR("Debug"));
+	make_ext_set_val(&make, STR("PLATFORM"), MSTR("x64"));
+	make_ext_set_val(&make, STR("TOOL"), MSTR("cland"));
 
 	make_expand(&make);
 
-	str_t target_path = make_get_expanded(&make, STR("TARGET"));
+	str_t target_path = make_var_get_expanded(&make, STR("TARGET"));
 
 	printf("TARGET: %.*s\n\n", (int)target_path.len, target_path.data);
 

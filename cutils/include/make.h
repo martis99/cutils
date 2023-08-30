@@ -7,9 +7,12 @@
 
 #include <stdio.h>
 
+#define MAKE_END LIST_END
+
 typedef lnode_t make_str_t;
 
 typedef lnode_t make_act_t;
+typedef make_act_t make_empty_t;
 typedef make_act_t make_var_t;
 typedef make_act_t make_rule_t;
 typedef make_act_t make_cmd_t;
@@ -44,7 +47,7 @@ typedef struct make_s {
 make_t *make_init(make_t *make, uint acts_cnt, uint strs_cnt);
 void make_free(make_t *make);
 
-make_var_t make_create_var_r(make_t *make, str_t name, make_var_type_t type, int ext);
+make_empty_t make_create_empty(make_t *make);
 make_var_t make_create_var(make_t *make, str_t name, make_var_type_t type);
 make_var_t make_create_var_ext(make_t *make, str_t name, make_var_type_t type);
 make_rule_t make_create_rule(make_t *make, make_str_data_t target);
@@ -52,20 +55,16 @@ make_cmd_t make_create_cmd(make_t *make, str_t cmd);
 make_if_t make_create_if(make_t *make, make_str_data_t l, make_str_data_t r);
 
 make_act_t make_add_act(make_t *make, make_act_t act);
-
-make_str_t make_var_add_val(make_t *make, make_var_t var, make_str_data_t val);
-
+make_var_t make_var_add_val(make_t *make, make_var_t var, make_str_data_t val);
 make_str_t make_rule_add_depend(make_t *make, make_rule_t rule, make_str_data_t depend);
 make_act_t make_rule_add_act(make_t *make, make_rule_t rule, make_act_t act);
-
 make_act_t make_if_add_true_act(make_t *make, make_if_t mif, make_act_t act);
 make_act_t make_if_add_false_act(make_t *make, make_if_t mif, make_act_t act);
 
-make_str_t make_set_ext(make_t *make, str_t name, make_str_data_t val);
+make_str_t make_ext_set_val(make_t *make, str_t name, make_str_data_t val);
 
 int make_expand(make_t *make);
-
-str_t make_get_expanded(make_t *make, str_t var);
+str_t make_var_get_expanded(make_t *make, str_t var);
 
 int make_print(const make_t *make, FILE *file);
 
