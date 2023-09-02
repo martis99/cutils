@@ -26,6 +26,10 @@ static inline xml_attr_data_t *get_attr(const list_t *attrs, xml_attr_t attr)
 
 xml_t *xml_init(xml_t *xml, uint cap)
 {
+	if (xml == NULL) {
+		return NULL;
+	}
+
 	if (tree_init(&xml->tags, cap, sizeof(xml_tag_data_t)) == NULL) {
 		return NULL;
 	}
@@ -39,6 +43,10 @@ xml_t *xml_init(xml_t *xml, uint cap)
 
 void xml_free(xml_t *xml)
 {
+	if (xml == NULL) {
+		return;
+	}
+
 	xml_tag_t tag;
 	tree_foreach_all(&xml->tags, tag)
 	{
@@ -61,6 +69,10 @@ void xml_free(xml_t *xml)
 
 xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 {
+	if (xml == NULL) {
+		return TREE_END;
+	}
+
 	xml_tag_t child	     = tree_add_child_node(&xml->tags, tag);
 	xml_tag_data_t *data = get_tag(&xml->tags, child);
 	if (data == NULL) {
@@ -72,6 +84,7 @@ xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 		.attrs = LIST_END,
 		.val   = val,
 	};
+
 	return child;
 }
 
@@ -80,19 +93,28 @@ xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, str_t name)
 	return xml_add_tag_val(xml, tag, name, str_null());
 }
 
-void xml_remove_tag(xml_t *xml, xml_tag_t tag)
+int xml_remove_tag(xml_t *xml, xml_tag_t tag)
 {
-	tree_remove(&xml->tags, tag);
+	if (xml == NULL) {
+		return 1;
+	}
+
+	return tree_remove(&xml->tags, tag);
 }
 
 bool xml_has_child(const xml_t *xml, xml_tag_t tag)
 {
+	if (xml == NULL) {
+		return 0;
+	}
+
 	return tree_has_child(&xml->tags, tag);
 }
 
-static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
+static inline xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 {
 	xml_tag_data_t *data = get_tag(&xml->tags, tag);
+
 	if (data == NULL) {
 		return LIST_END;
 	}
@@ -102,8 +124,13 @@ static xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 {
+	if (xml == NULL) {
+		return LIST_END;
+	}
+
 	xml_attr_t attr	      = add_attr(xml, tag);
 	xml_attr_data_t *data = get_attr(&xml->attrs, attr);
+
 	if (data == NULL) {
 		return LIST_END;
 	}
@@ -118,47 +145,54 @@ xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 
 static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth)
 {
-	xml_tag_data_t *data = get_tag(&xml->tags, tag);
+	if (xml == NULL) {
+		return 1;
+	}
+
+	const xml_tag_data_t *data = get_tag(&xml->tags, tag);
+
 	if (data == NULL) {
 		return 1;
 	}
 
-	c_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
+	int ret = 0;
+	ret |= !c_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
 	if (data->attrs != LIST_END) {
 		xml_attr_data_t *attr;
 		list_foreach(&xml->attrs, 0, attr)
 		{
-			c_fprintf(file, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
+			ret |= !c_fprintf(file, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
 		}
 	}
 
 	if (tree_get_child(&xml->tags, tag) != TREE_END) {
-		c_fprintf(file, ">\n");
+		ret |= !c_fprintf(file, ">\n");
 
 		xml_tag_t child;
 		tree_foreach_child(&xml->tags, tag, child)
 		{
-			xml_tag_print(xml, child, file, depth + 1);
+			ret |= xml_tag_print(xml, child, file, depth + 1);
 		}
 
-		c_fprintf(file, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
+		ret |= !c_fprintf(file, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
 	} else if (data->val.data) {
 		if (data->val.len > 0 && data->val.data[data->val.len - 1] == '\n') {
-			c_fprintf(file, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
+			ret |= !c_fprintf(file, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
 		} else {
-			c_fprintf(file, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
+			ret |= !c_fprintf(file, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
 		}
 	} else {
-		c_fprintf(file, " />\n");
+		ret |= !c_fprintf(file, " />\n");
 	}
 
-	return 0;
+	return ret;
 }
 
 int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file)
 {
-	c_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	xml_tag_print(xml, tag, file, 0);
-	return 0;
+	int ret = 0;
+	ret |= !c_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	ret |= xml_tag_print(xml, tag, file, 0);
+	return ret;
 }

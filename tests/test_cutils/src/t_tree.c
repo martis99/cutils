@@ -1,16 +1,21 @@
 #include "t_tree.h"
 
+#include "file.h"
+#include "print.h"
 #include "tree.h"
 
 #include "test.h"
 
-TEST(init_free)
+#define TEST_FILE "t_tree.txt"
+
+TEST(t_tree_init_free)
 {
 	START;
 
 	tree_t tree = { 0 };
 
-	tree_init(&tree, 1, sizeof(int));
+	EXPECT_EQ(tree_init(NULL, 1, sizeof(int)), NULL);
+	EXPECT_NE(tree_init(&tree, 1, sizeof(int)), NULL);
 
 	EXPECT_NE(tree.data, NULL);
 	EXPECT_EQ(tree.cap, 1);
@@ -18,6 +23,7 @@ TEST(init_free)
 	EXPECT_NE(tree.size, 0);
 
 	tree_free(&tree);
+	tree_free(NULL);
 
 	EXPECT_EQ(tree.data, NULL);
 	EXPECT_EQ(tree.cap, 0);
@@ -27,36 +33,35 @@ TEST(init_free)
 	END;
 }
 
-TEST(add)
+TEST(t_tree_add)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
-	tnode_t node = tree_add(&tree);
+	EXPECT_EQ(tree_add(NULL), TREE_END);
+	EXPECT_NE(tree_add(&tree), TREE_END);
 
 	EXPECT_EQ(tree.cnt, 1);
 	EXPECT_EQ(tree.cap, 1);
-	EXPECT_EQ(node, 0);
 
 	tree_free(&tree);
 
 	END;
 }
 
-TEST(add_child)
+TEST(t_tree_add_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
-	const tnode_t child = tree_add_child(&tree, tree_add(&tree));
+	EXPECT_EQ(tree_add_child(NULL, TREE_END), TREE_END);
+	EXPECT_EQ(tree_add_child(&tree, TREE_END), TREE_END);
+	EXPECT_NE(tree_add_child(&tree, tree_add(&tree)), TREE_END);
 
-	EXPECT_EQ(child, 1);
 	EXPECT_EQ(tree.cnt, 2);
 	EXPECT_EQ(tree.cap, 2);
 
@@ -65,12 +70,11 @@ TEST(add_child)
 	END;
 }
 
-TEST(add_childs)
+TEST(t_tree_add_childs)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
@@ -86,12 +90,11 @@ TEST(add_childs)
 	END;
 }
 
-TEST(add_child_realloc)
+TEST(t_tree_add_child_realloc)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	*(int *)tree_get_data(&tree, tree_add(&tree)) = 1;
@@ -111,17 +114,17 @@ TEST(add_child_realloc)
 	END;
 }
 
-TEST(add_next)
+TEST(t_tree_add_next)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
-	tnode_t next = tree_add_next(&tree, tree_add(&tree));
+	EXPECT_EQ(tree_add_next(NULL, TREE_END), TREE_END);
+	EXPECT_EQ(tree_add_next(&tree, TREE_END), TREE_END);
+	EXPECT_NE(tree_add_next(&tree, tree_add(&tree)), TREE_END);
 
-	EXPECT_EQ(next, 1);
 	EXPECT_EQ(tree.cnt, 2);
 	EXPECT_EQ(tree.cap, 2);
 
@@ -130,12 +133,11 @@ TEST(add_next)
 	END;
 }
 
-TEST(add_nexts)
+TEST(t_tree_add_nexts)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_next(&tree, tree_add(&tree));
@@ -151,12 +153,11 @@ TEST(add_nexts)
 	END;
 }
 
-TEST(add_next_realloc)
+TEST(t_tree_add_next_realloc)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	*(int *)tree_get_data(&tree, tree_add(&tree)) = 1;
@@ -176,12 +177,11 @@ TEST(add_next_realloc)
 	END;
 }
 
-TEST(add_grand_child)
+TEST(t_tree_add_grand_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t child  = tree_add_child(&tree, tree_add(&tree));
@@ -197,7 +197,7 @@ TEST(add_grand_child)
 	END;
 }
 
-TEST(add_multiple_childs)
+TEST(t_tree_add_multiple_childs)
 {
 	START;
 
@@ -220,16 +220,32 @@ TEST(add_multiple_childs)
 	END;
 }
 
-TEST(get_data)
+TEST(t_tree_adds)
+{
+	SSTART;
+	RUN(t_tree_add);
+	RUN(t_tree_add_child);
+	RUN(t_tree_add_childs);
+	RUN(t_tree_add_child_realloc);
+	RUN(t_tree_add_next);
+	RUN(t_tree_add_nexts);
+	RUN(t_tree_add_next_realloc);
+	RUN(t_tree_add_grand_child);
+	RUN(t_tree_add_multiple_childs);
+	SEND;
+}
+
+TEST(t_tree_get_data)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
-	*(int *)tree_get_data(&tree, tree_add(&tree)) = 1;
+	EXPECT_EQ(tree_get_data(NULL, TREE_END), NULL);
+	EXPECT_EQ(tree_get_data(&tree, TREE_END), NULL);
 
+	*(int *)tree_get_data(&tree, tree_add(&tree)) = 1;
 	EXPECT_EQ(*(int *)tree_get_data(&tree, 0), 1);
 
 	tree_free(&tree);
@@ -237,34 +253,53 @@ TEST(get_data)
 	END;
 }
 
-TEST(get_child)
+TEST(t_tree_has_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 4, sizeof(int));
+
+	EXPECT_EQ(tree_has_child(NULL, TREE_END), 0);
+	EXPECT_EQ(tree_has_child(&tree, TREE_END), 0);
 
 	const tnode_t n1  = tree_add_child(&tree, tree_add(&tree));
 	const tnode_t n2  = tree_add_child(&tree, 0);
 	const tnode_t n12 = tree_add_child(&tree, n1);
 
-	const tnode_t child1 = tree_get_child(&tree, 0);
-
-	EXPECT_EQ(n1, 1);
-	EXPECT_EQ(child1, 1);
+	EXPECT_EQ(tree_has_child(&tree, 0), 1);
 
 	tree_free(&tree);
 
 	END;
 }
 
-TEST(get_child_data)
+TEST(t_tree_get_child)
 {
 	START;
 
 	tree_t tree = { 0 };
+	tree_init(&tree, 4, sizeof(int));
 
+	EXPECT_EQ(tree_get_child(NULL, TREE_END), TREE_END);
+	EXPECT_EQ(tree_get_child(&tree, TREE_END), TREE_END);
+
+	const tnode_t n1  = tree_add_child(&tree, tree_add(&tree));
+	const tnode_t n2  = tree_add_child(&tree, 0);
+	const tnode_t n12 = tree_add_child(&tree, n1);
+
+	EXPECT_NE(tree_get_child(&tree, 0), TREE_END);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(t_tree_get_child_data)
+{
+	START;
+
+	tree_t tree = { 0 };
 	tree_init(&tree, 2, sizeof(int));
 
 	*(int *)tree_get_data(&tree, tree_add(&tree))	       = 1;
@@ -278,12 +313,11 @@ TEST(get_child_data)
 	END;
 }
 
-TEST(get_next)
+TEST(t_tree_get_next)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_next(&tree, tree_add(&tree));
@@ -302,19 +336,44 @@ TEST(get_next)
 	END;
 }
 
-TEST(remove_next)
+TEST(t_tree_get)
+{
+	SSTART;
+	RUN(t_tree_get_data);
+	RUN(t_tree_has_child);
+	RUN(t_tree_get_child);
+	RUN(t_tree_get_child_data);
+	RUN(t_tree_get_next);
+	SEND;
+}
+
+TEST(t_tree_remove)
 {
 	START;
 
 	tree_t tree = { 0 };
+	tree_init(&tree, 3, sizeof(int));
 
+	EXPECT_EQ(tree_remove(NULL, TREE_END), 1);
+	EXPECT_EQ(tree_remove(&tree, TREE_END), 1);
+
+	tree_free(&tree);
+
+	END;
+}
+
+TEST(t_tree_remove_next)
+{
+	START;
+
+	tree_t tree = { 0 };
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
 	const tnode_t n2 = tree_add_child(&tree, 0);
 	const tnode_t n3 = tree_add_child(&tree, 0);
 
-	tree_remove(&tree, n2);
+	EXPECT_EQ(tree_remove(&tree, n2), 0);
 
 	EXPECT_EQ(tree_get_next(&tree, n1), n3);
 
@@ -323,25 +382,33 @@ TEST(remove_next)
 	END;
 }
 
-TEST(remove_child)
+TEST(t_tree_remove_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
 	const tnode_t n2 = tree_add_child(&tree, 0);
 	const tnode_t n3 = tree_add_child(&tree, 0);
 
-	tree_remove(&tree, n1);
+	EXPECT_EQ(tree_remove(&tree, n1), 0);
 
 	EXPECT_EQ(tree_get_child(&tree, 0), n2);
 
 	tree_free(&tree);
 
 	END;
+}
+
+TEST(t_tree_removes)
+{
+	SSTART;
+	RUN(t_tree_remove);
+	RUN(t_tree_remove_next);
+	RUN(t_tree_remove_child);
+	SEND;
 }
 
 static int iterate_pre_root_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
@@ -357,22 +424,23 @@ static int iterate_pre_root_cb(const tree_t *tree, tnode_t node, void *value, in
 	return ret + RES;
 }
 
-TEST(iterate_pre_root)
+TEST(t_tree_iterate_pre_root)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	tree_add(&tree);
 
 	int cnt = 0;
 
-	int ret = tree_iterate_pre(&tree, 0, iterate_pre_root_cb, 0, &cnt);
+	EXPECT_EQ(tree_iterate_pre(NULL, TREE_END, NULL, 0, &cnt), 0);
+	EXPECT_EQ(tree_iterate_pre(&tree, TREE_END, NULL, 0, &cnt), 0);
+	EXPECT_EQ(tree_iterate_pre(&tree, 0, NULL, 0, &cnt), 0);
+	EXPECT_EQ(tree_iterate_pre(&tree, 0, iterate_pre_root_cb, 0, &cnt), 0);
 
 	EXPECT_EQ(cnt, 1);
-	EXPECT_EQ(ret, 0);
 
 	tree_free(&tree);
 
@@ -400,12 +468,11 @@ static int iterate_pre_child_cb(const tree_t *tree, tnode_t node, void *value, i
 	return ret + RES;
 }
 
-TEST(iterate_pre_child)
+TEST(t_tree_iterate_pre_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
 	const tnode_t child = tree_add_child(&tree, tree_add(&tree));
@@ -448,12 +515,11 @@ static int iterate_pre_childs_cb(const tree_t *tree, tnode_t node, void *value, 
 	return ret + RES;
 }
 
-TEST(iterate_pre_childs)
+TEST(t_tree_iterate_pre_childs)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
@@ -498,12 +564,11 @@ static int iterate_pre_grand_child_cb(const tree_t *tree, tnode_t node, void *va
 	return ret + RES;
 }
 
-TEST(iterate_pre_grand_child)
+TEST(t_tree_iterate_pre_grand_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
@@ -534,12 +599,11 @@ static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, void *value,
 	return ret + RES;
 }
 
-TEST(iterate_childs_root)
+TEST(t_tree_iterate_childs_root)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	tree_add(&tree);
@@ -568,12 +632,11 @@ static int iterate_childs_child_cb(const tree_t *tree, tnode_t node, void *value
 	return ret + RES;
 }
 
-TEST(iterate_childs_child)
+TEST(t_tree_iterate_childs_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
 	const tnode_t child = tree_add_child(&tree, tree_add(&tree));
@@ -606,12 +669,11 @@ static int iterate_childs_childs_cb(const tree_t *tree, tnode_t node, void *valu
 	return ret + RES;
 }
 
-TEST(iterate_childs_childs)
+TEST(t_tree_iterate_childs_childs)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
@@ -646,12 +708,11 @@ static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, void 
 	return ret + RES;
 }
 
-TEST(iterate_childs_grand_child)
+TEST(t_tree_iterate_childs_grand_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 4, sizeof(int));
 
 	const tnode_t n1 = tree_add_child(&tree, tree_add(&tree));
@@ -673,12 +734,60 @@ TEST(iterate_childs_grand_child)
 	END;
 }
 
-TEST(foreach_root)
+TEST(t_tree_iterate)
+{
+	SSTART;
+	RUN(t_tree_iterate_pre_root);
+	RUN(t_tree_iterate_pre_child);
+	RUN(t_tree_iterate_pre_childs);
+	RUN(t_tree_iterate_pre_grand_child);
+	RUN(t_tree_iterate_childs_root);
+	RUN(t_tree_iterate_childs_child);
+	RUN(t_tree_iterate_childs_childs);
+	RUN(t_tree_iterate_childs_grand_child);
+	SEND;
+}
+
+TEST(t_tree_it_begin)
+{
+	SSTART;
+
+	tree_t tree = { 0 };
+	tree_init(&tree, 1, sizeof(int));
+
+	tnode_t node;
+
+	tree_it_begin(NULL, TREE_END);
+	tree_it_begin(&tree, TREE_END);
+	tree_it_begin(&tree, node);
+
+	tree_free(&tree);
+
+	SEND;
+}
+
+TEST(t_tree_it_next)
+{
+	SSTART;
+
+	tree_t tree = { 0 };
+	tree_init(&tree, 1, sizeof(int));
+
+	tree_it it = { 0 };
+
+	tree_it_next(NULL);
+	tree_it_next(&it);
+
+	tree_free(&tree);
+
+	SEND;
+}
+
+TEST(t_tree_foreach_root)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	tnode_t root;
@@ -688,6 +797,16 @@ TEST(foreach_root)
 	int depth;
 
 	int i = 0;
+	tree_foreach(NULL, TREE_END, node, depth)
+	{
+		i++;
+	}
+
+	tree_foreach(&tree, TREE_END, node, depth)
+	{
+		i++;
+	}
+
 	tree_foreach(&tree, 0, node, depth)
 	{
 		const int *value = tree_get_data(&tree, node);
@@ -703,12 +822,11 @@ TEST(foreach_root)
 	END;
 }
 
-TEST(foreach_child)
+TEST(t_tree_foreach_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
 	tnode_t root;
@@ -734,12 +852,11 @@ TEST(foreach_child)
 	END;
 }
 
-TEST(foreach_childs)
+TEST(t_tree_foreach_childs)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	tnode_t root;
@@ -766,12 +883,11 @@ TEST(foreach_childs)
 	END;
 }
 
-TEST(foreach_grand_child)
+TEST(t_tree_foreach_grand_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	tnode_t root, n1;
@@ -798,12 +914,11 @@ TEST(foreach_grand_child)
 	END;
 }
 
-TEST(foreach_child_root)
+TEST(t_tree_foreach_child_root)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 1, sizeof(int));
 
 	tree_add(&tree);
@@ -825,12 +940,11 @@ TEST(foreach_child_root)
 	END;
 }
 
-TEST(foreach_child_child)
+TEST(t_tree_foreach_child_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 2, sizeof(int));
 
 	*(int *)tree_get_data(&tree, tree_add_child(&tree, tree_add(&tree))) = 0;
@@ -852,12 +966,11 @@ TEST(foreach_child_child)
 	END;
 }
 
-TEST(foreach_child_childs)
+TEST(t_tree_foreach_child_childs)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 3, sizeof(int));
 
 	*(int *)tree_get_data(&tree, tree_add_child(&tree, tree_add(&tree))) = 0;
@@ -880,12 +993,11 @@ TEST(foreach_child_childs)
 	END;
 }
 
-TEST(foreach_child_grand_child)
+TEST(t_tree_foreach_child_grand_child)
 {
 	START;
 
 	tree_t tree = { 0 };
-
 	tree_init(&tree, 4, sizeof(int));
 
 	tnode_t n1;
@@ -910,75 +1022,90 @@ TEST(foreach_child_grand_child)
 	END;
 }
 
-TEST(addt)
+TEST(t_tree_foreach)
 {
 	SSTART;
-	RUN(add);
-	RUN(add_child);
-	RUN(add_childs);
-	RUN(add_child_realloc);
-	RUN(add_next);
-	RUN(add_nexts);
-	RUN(add_next_realloc);
-	RUN(add_grand_child);
-	RUN(add_multiple_childs);
+	RUN(t_tree_it_begin);
+	RUN(t_tree_it_next);
+	RUN(t_tree_foreach_root);
+	RUN(t_tree_foreach_child);
+	RUN(t_tree_foreach_childs);
+	RUN(t_tree_foreach_grand_child);
+	RUN(t_tree_foreach_child_root);
+	RUN(t_tree_foreach_child_child);
+	RUN(t_tree_foreach_child_childs);
+	RUN(t_tree_foreach_child_grand_child);
 	SEND;
 }
 
-TEST(get)
+static int print_tree(FILE *file, void *data, int ret)
 {
-	SSTART;
-	RUN(get_data);
-	RUN(get_child);
-	RUN(get_child_data);
-	RUN(get_next);
-	SEND;
+	c_fprintf(file, "%d\n", *(int *)data);
+	return ret;
 }
 
-TEST(removet)
+TEST(t_tree_print, FILE *file)
 {
 	SSTART;
-	RUN(remove_next);
-	RUN(remove_child);
-	SEND;
-}
 
-TEST(iterate_pre)
-{
-	SSTART;
-	RUN(iterate_pre_root);
-	RUN(iterate_pre_child);
-	RUN(iterate_pre_childs);
-	RUN(iterate_pre_grand_child);
-	RUN(foreach_root);
-	RUN(foreach_child);
-	RUN(foreach_childs);
-	RUN(foreach_grand_child);
-	SEND;
-}
+	tree_t tree = { 0 };
+	tree_init(&tree, 4, sizeof(int));
 
-TEST(iterate_childs)
-{
-	SSTART;
-	RUN(iterate_childs_root);
-	RUN(iterate_childs_child);
-	RUN(iterate_childs_childs);
-	RUN(iterate_childs_grand_child);
-	RUN(foreach_child_root);
-	RUN(foreach_child_child);
-	RUN(foreach_child_childs);
-	RUN(foreach_child_grand_child);
+	tnode_t root;
+	*(int *)tree_get_data(&tree, root = tree_add(&tree)) = 0;
+
+	tnode_t n1, n2, n11, n12, n121;
+
+	*(int *)tree_get_data(&tree, (n1 = tree_add_child(&tree, 0))) = 1;
+	*(int *)tree_get_data(&tree, (n2 = tree_add_child(&tree, 0))) = 2;
+
+	*(int *)tree_get_data(&tree, (n11 = tree_add_child(&tree, n1))) = 11; //TODO: bug when this line is removed 121 is not printed
+	*(int *)tree_get_data(&tree, (n12 = tree_add_child(&tree, n1))) = 12;
+
+	*(int *)tree_get_data(&tree, (n121 = tree_add_child(&tree, n12))) = 121;
+
+	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, NULL, 0), 0);
+	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, NULL, 0), 0);
+	EXPECT_EQ(tree_print(&tree, root, NULL, NULL, 0), 0);
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_EQ(tree_print(&tree, root, file, NULL, 0), 0);
+		EXPECT_EQ(tree_print(&tree, root, file, print_tree, 0), 0);
+
+		char buf[128] = { 0 };
+		file_read_ft(file, buf, sizeof(buf));
+
+		const char exp[] = "0\n"
+				   "├─1\n"
+				   "│ ├─11\n"
+				   "│ └─12\n"
+				   "│   └─121\n"
+				   "└─2\n";
+		EXPECT_STR(buf, exp);
+	}
+
+	tree_free(&tree);
+
 	SEND;
 }
 
 STEST(t_tree)
 {
 	SSTART;
-	RUN(init_free);
-	RUN(addt);
-	RUN(get);
-	RUN(removet);
-	RUN(iterate_pre);
-	RUN(iterate_childs);
+
+	FILE *file = file_open(TEST_FILE, "wb+");
+
+	RUN(t_tree_init_free);
+	RUN(t_tree_adds);
+	RUN(t_tree_get);
+	RUN(t_tree_removes);
+	RUN(t_tree_iterate);
+	RUN(t_tree_foreach);
+	RUN(t_tree_print, file);
+
+	file_close(file);
+	file_delete(TEST_FILE);
+
 	SEND;
 }

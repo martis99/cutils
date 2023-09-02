@@ -15,7 +15,7 @@ list_t *list_init(list_t *list, uint cap, size_t size);
 void list_free(list_t *list);
 
 lnode_t list_add(list_t *list);
-void list_remove(list_t *list, lnode_t node);
+int list_remove(list_t *list, lnode_t node);
 
 lnode_t list_add_next(list_t *list, lnode_t node);
 lnode_t list_set_next(list_t *list, lnode_t node, lnode_t next);

@@ -15,7 +15,7 @@ tree_t *tree_init(tree_t *tree, uint cap, size_t size);
 void tree_free(tree_t *tree);
 
 tnode_t tree_add(tree_t *tree);
-void tree_remove(tree_t *tree, tnode_t node);
+int tree_remove(tree_t *tree, tnode_t node);
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node);
 tnode_t tree_get_child(const tree_t *tree, tnode_t node);
