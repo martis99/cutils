@@ -755,11 +755,9 @@ TEST(t_tree_it_begin)
 	tree_t tree = { 0 };
 	tree_init(&tree, 1, sizeof(int));
 
-	tnode_t node = { 0 };
-
 	tree_it_begin(NULL, TREE_END);
 	tree_it_begin(&tree, TREE_END);
-	tree_it_begin(&tree, node);
+	tree_it_begin(&tree, tree_add(&tree));
 
 	tree_free(&tree);
 
