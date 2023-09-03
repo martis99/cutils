@@ -9,10 +9,6 @@ typedef struct header_s {
 
 static inline lnode_t init_node(list_t *list, lnode_t node)
 {
-	if (list == NULL) {
-		return LIST_END;
-	}
-
 	header_t *ptr = arr_get(list, node);
 	if (ptr == NULL) {
 		return LIST_END;
@@ -110,7 +106,7 @@ void *list_get_data(const list_t *list, lnode_t node)
 
 int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret)
 {
-	if (list == NULL) {
+	if (list == NULL || cb == NULL) {
 		return ret;
 	}
 

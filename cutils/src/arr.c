@@ -6,7 +6,7 @@
 
 arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 {
-	if (arr == NULL) {
+	if (arr == NULL || cap == 0) {
 		return NULL;
 	}
 

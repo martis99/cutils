@@ -119,7 +119,9 @@ static inline xml_attr_t add_attr(xml_t *xml, xml_tag_t tag)
 		return LIST_END;
 	}
 
-	return list_add_next_node(&xml->attrs, get_tag(&xml->tags, tag)->attrs);
+	xml_attr_t attr;
+	list_add_next_node(&xml->attrs, get_tag(&xml->tags, tag)->attrs, attr);
+	return attr;
 }
 
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)

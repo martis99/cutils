@@ -37,7 +37,7 @@ TEST(t_xml_add_tag)
 	xml_t xml = { 0 };
 	xml_init(&xml, 4);
 
-	EXPECT_EQ(xml_add_tag(NULL, TREE_END, STRH("")), TREE_END);
+	EXPECT_EQ(xml_add_tag(NULL, TREE_END, str_null()), TREE_END);
 	EXPECT_NE(xml_add_tag(&xml, TREE_END, STRH("")), TREE_END);
 
 	xml_free(&xml);
@@ -52,7 +52,7 @@ TEST(t_xml_add_tag_val)
 	xml_t xml = { 0 };
 	xml_init(&xml, 4);
 
-	EXPECT_EQ(xml_add_tag_val(NULL, TREE_END, STRH(""), STRH("")), TREE_END);
+	EXPECT_EQ(xml_add_tag_val(NULL, TREE_END, str_null(), str_null()), TREE_END);
 	EXPECT_NE(xml_add_tag_val(&xml, TREE_END, STRH(""), STRH("")), TREE_END);
 
 	xml_free(&xml);
@@ -102,8 +102,8 @@ TEST(t_xml_add_attr)
 	xml_t xml = { 0 };
 	xml_init(&xml, 4);
 
-	EXPECT_EQ(xml_add_attr(NULL, TREE_END, STRH(""), STRH("")), LIST_END);
-	EXPECT_EQ(xml_add_attr(&xml, TREE_END, STRH(""), STRH("")), LIST_END);
+	EXPECT_EQ(xml_add_attr(NULL, TREE_END, str_null(), str_null()), LIST_END);
+	EXPECT_EQ(xml_add_attr(&xml, TREE_END, str_null(), str_null()), LIST_END);
 	EXPECT_EQ(xml_add_attr(&xml, xml_add_tag(&xml, TREE_END, STRH("")), STRH(""), STRH("")), 0);
 
 	xml_free(&xml);

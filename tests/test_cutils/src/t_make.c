@@ -5,7 +5,7 @@
 
 #include "test.h"
 
-#define TEST_FILE "Makefile.m"
+#define TEST_FILE "t_make.txt"
 
 TEST(t_make_init_free)
 {
@@ -14,6 +14,7 @@ TEST(t_make_init_free)
 	make_t make = { 0 };
 
 	EXPECT_EQ(make_init(NULL, 8, 8), NULL);
+	EXPECT_EQ(make_init(&make, 0, 0), NULL);
 	EXPECT_NE(make_init(&make, 8, 8), NULL);
 
 	EXPECT_NE(make.acts.data, NULL);
@@ -35,7 +36,7 @@ TEST(t_make_create_empty)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_empty(NULL), MAKE_END);
 	EXPECT_NE(make_create_empty(&make), MAKE_END);
@@ -49,7 +50,7 @@ TEST(t_make_create_var)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_var(NULL, STR(""), -1), MAKE_END);
 	EXPECT_NE(make_create_var(&make, STR(""), -1), MAKE_END);
@@ -66,7 +67,7 @@ TEST(t_make_create_var_ext)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_var_ext(NULL, STR(""), -1), MAKE_END);
 	EXPECT_NE(make_create_var_ext(&make, STR(""), -1), MAKE_END);
@@ -83,7 +84,7 @@ TEST(t_make_create_rule)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_rule(NULL, MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_create_rule(&make, (make_str_data_t){ .type = -1, .var = MAKE_END }), MAKE_END);
@@ -100,7 +101,7 @@ TEST(t_make_create_cmd)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_cmd(NULL, STR("")), MAKE_END);
 	EXPECT_NE(make_create_cmd(&make, STR("")), MAKE_END);
@@ -115,7 +116,7 @@ TEST(t_make_create_if)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_create_if(NULL, MVAR(MAKE_END), MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_create_if(&make, MVAR(MAKE_END), MVAR(MAKE_END)), MAKE_END);
@@ -143,7 +144,7 @@ TEST(t_make_add_act)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_add_act(NULL, MAKE_END), MAKE_END);
 	EXPECT_EQ(make_add_act(&make, MAKE_END), MAKE_END);
@@ -159,7 +160,7 @@ TEST(t_make_var_add_val)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_var_add_val(NULL, MAKE_END, MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_var_add_val(&make, MAKE_END, MVAR(MAKE_END)), MAKE_END);
@@ -178,7 +179,7 @@ TEST(t_make_rule_add_depend)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_rule_add_depend(NULL, MAKE_END, MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_rule_add_depend(&make, MAKE_END, MVAR(MAKE_END)), MAKE_END);
@@ -196,7 +197,7 @@ TEST(t_make_rule_add_act)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_rule_add_act(NULL, MAKE_END, MAKE_END), MAKE_END);
 	EXPECT_EQ(make_rule_add_act(&make, MAKE_END, MAKE_END), MAKE_END);
@@ -214,7 +215,7 @@ TEST(t_make_if_add_true_act)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_if_add_true_act(NULL, MAKE_END, MAKE_END), MAKE_END);
 	EXPECT_EQ(make_if_add_true_act(&make, MAKE_END, MAKE_END), MAKE_END);
@@ -232,7 +233,7 @@ TEST(t_make_if_add_false_act)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_if_add_false_act(NULL, MAKE_END, MAKE_END), MAKE_END);
 	EXPECT_EQ(make_if_add_false_act(&make, MAKE_END, MAKE_END), MAKE_END);
@@ -262,7 +263,7 @@ TEST(t_make_ext_set_val)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_create_var_ext(&make, STR("EXT"), MAKE_VAR_INST);
 
@@ -281,7 +282,7 @@ TEST(t_make_expand)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_expand(NULL), 1);
 	EXPECT_EQ(make_expand(&make), 0);
@@ -296,7 +297,7 @@ TEST(t_make_var_get_expanded)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_var_get_expanded(NULL, STR("")).data, NULL);
 	EXPECT_EQ(make_var_get_expanded(&make, STR("")).data, NULL);
@@ -311,7 +312,7 @@ TEST(t_make_print, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_print(NULL, NULL), 1);
 	EXPECT_EQ(make_print(&make, NULL), 0);
@@ -334,7 +335,7 @@ TEST(t_make_dbg, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	EXPECT_EQ(make_dbg(NULL, NULL), 1);
 	EXPECT_EQ(make_dbg(&make, NULL), 0);
@@ -354,7 +355,7 @@ TEST(t_make_expand_print_empty, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_add_act(&make, make_create_empty(&make));
 
@@ -385,7 +386,7 @@ TEST(t_make_expand_print_var_inst_empty, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_INST));
 
@@ -420,7 +421,7 @@ TEST(t_make_expand_print_var_inst, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_var_add_val(&make, make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_INST)), MSTR("VAL"));
 
@@ -451,7 +452,7 @@ TEST(t_make_expand_print_var_inst2, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_var_t var = make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_INST));
 	make_var_add_val(&make, var, MSTR("VAL1"));
@@ -484,7 +485,7 @@ TEST(t_make_expand_print_var_app, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_var_add_val(&make, make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_INST)), MSTR("VAL1"));
 	make_var_add_val(&make, make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_APP)), MSTR("VAL2"));
@@ -521,7 +522,7 @@ TEST(t_make_expand_print_var_ext_inst, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_var_add_val(&make, make_add_act(&make, make_create_var_ext(&make, STR("VAR"), MAKE_VAR_INST)), MSTR("VAL"));
 
@@ -552,7 +553,7 @@ TEST(t_make_expand_print_if_empty, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_add_act(&make, make_create_if(&make, MSTR("L"), MSTR("R")));
 
@@ -584,7 +585,7 @@ TEST(t_make_expand_print_var_if_true, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	const make_var_t cond	= make_create_var_ext(&make, STR("COND"), MAKE_VAR_INST);
 	const make_if_t if_cond = make_add_act(&make, make_create_if(&make, MVAR(cond), MSTR("A")));
@@ -633,7 +634,7 @@ TEST(t_make_expand_print_var_if_false, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	const make_var_t cond	= make_create_var_ext(&make, STR("COND"), MAKE_VAR_INST);
 	const make_if_t if_cond = make_add_act(&make, make_create_if(&make, MVAR(cond), MSTR("A")));
@@ -685,7 +686,7 @@ TEST(t_make_print_rule_empty, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_add_act(&make, make_create_rule(&make, MSTR("rule")));
 
@@ -715,7 +716,7 @@ TEST(t_make_print_rule_depend, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_rule_t rule = make_add_act(&make, make_create_rule(&make, MSTR("rule")));
 	make_rule_add_depend(&make, rule, MSTR("depend"));
@@ -746,7 +747,7 @@ TEST(t_make_print_rule_depends, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_rule_t rule = make_add_act(&make, make_create_rule(&make, MSTR("rule")));
 	make_rule_add_depend(&make, rule, MSTR("depend1"));
@@ -778,7 +779,7 @@ TEST(t_make_print_rule_acts, FILE *file)
 	START;
 
 	make_t make = { 0 };
-	make_init(&make, 8, 8);
+	make_init(&make, 1, 1);
 
 	make_rule_t rule = make_add_act(&make, make_create_rule(&make, MSTR("rule")));
 	make_rule_add_act(&make, rule, make_create_cmd(&make, STR("cmd1")));
