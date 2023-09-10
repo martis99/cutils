@@ -73,7 +73,8 @@ xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 		return TREE_END;
 	}
 
-	xml_tag_t child	     = tree_add_child_node(&xml->tags, tag);
+	xml_tag_t child;
+	tree_add_child_node(&xml->tags, tag, child);
 	xml_tag_data_t *data = get_tag(&xml->tags, child);
 	if (data == NULL) {
 		return TREE_END;
