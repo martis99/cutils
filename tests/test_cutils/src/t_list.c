@@ -355,7 +355,7 @@ TEST(t_list_print, FILE *file)
 	SSTART;
 
 	list_t list = { 0 };
-	list_init(&list, 1, sizeof(int));
+	list_init(&list, 16, sizeof(int));
 
 	const lnode_t node = list_add(&list);
 
