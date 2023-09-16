@@ -340,7 +340,8 @@ make_var_t make_var_add_val(make_t *make, make_var_t var, make_str_data_t val)
 		return MAKE_END;
 	}
 
-	const make_str_t str	= list_add_next_node(&make->strs, make_var_get(make, var)->values);
+	make_str_t str;
+	list_add_next_node(&make->strs, make_var_get(make, var)->values, str);
 	make_str_data_t *target = list_get_data(&make->strs, str);
 
 	if (target == NULL) {
@@ -364,7 +365,8 @@ make_str_t make_rule_add_depend(make_t *make, make_rule_t rule, make_str_data_t 
 		return MAKE_END;
 	}
 
-	const make_str_t str	= list_add_next_node(&make->strs, make_rule_get(make, rule)->depends);
+	make_str_t str;
+	list_add_next_node(&make->strs, make_rule_get(make, rule)->depends, str);
 	make_str_data_t *target = list_get_data(&make->strs, str);
 
 	if (target == NULL) {
@@ -434,7 +436,8 @@ make_str_t make_ext_set_val(make_t *make, str_t name, make_str_data_t val)
 		return MAKE_END;
 	}
 
-	const make_str_t str	= list_add_node(&make->strs, make_var_get(make, act)->values);
+	make_str_t str;
+	list_add_node(&make->strs, make_var_get(make, act)->values, str);
 	make_str_data_t *target = list_get_data(&make->strs, str);
 
 	if (target == NULL) {

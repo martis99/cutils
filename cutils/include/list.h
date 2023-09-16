@@ -30,9 +30,21 @@ int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, i
 
 #define list_foreach_all(_list, _val) for (lnode_t _i = 0; _i < (_list)->cnt && (_val = list_get_data(_list, _i)); _i++)
 
-#define list_add_node(_list, _node) _node == LIST_END ? _node = list_add(_list) : _node;
+#define list_add_node(_list, _start, _node) \
+	if (_start == LIST_END) {           \
+		_node  = list_add(_list);   \
+		_start = _node;             \
+	} else {                            \
+		_node = _start;             \
+	}
 
-#define list_add_next_node(_list, _node) _node == LIST_END ? _node = list_add(_list) : list_add_next(_list, _node);
+#define list_add_next_node(_list, _start, _node)      \
+	if (_start == LIST_END) {                     \
+		_node  = list_add(_list);             \
+		_start = _node;                       \
+	} else {                                      \
+		_node = list_add_next(_list, _start); \
+	}
 
 #define list_set_next_node(_list, _node, _next) _node == LIST_END ? _node = _next : list_set_next(_list, _node, _next);
 

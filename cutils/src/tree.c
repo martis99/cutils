@@ -60,7 +60,8 @@ tnode_t tree_add_child(tree_t *tree, tnode_t node)
 		return TREE_END;
 	}
 
-	tnode_t child = list_add_next_node(tree, get_node(tree, node)->child);
+	tnode_t child;
+	list_add_next_node(tree, get_node(tree, node)->child, child);
 	return init_node(tree, child);
 }
 
