@@ -168,9 +168,13 @@ void c_ur(FILE *file)
 	}
 
 #if defined(C_WIN)
-	int mode = c_set_u16(file);
-	fwprintf_s(file, L"\u2514\u2500");
-	c_unset_u16(file, mode);
+	if (file == stdout || file == stderr) {
+		int mode = c_set_u16(file);
+		fwprintf_s(file, L"\u2514\u2500");
+		c_unset_u16(file, mode);
+	} else {
+		fprintf_s(file, "└─");
+	}
 #else
 	fprintf(file, "└─");
 #endif
@@ -183,9 +187,13 @@ void c_v(FILE *file)
 	}
 
 #if defined(C_WIN)
-	int mode = c_set_u16(file);
-	fwprintf_s(file, L"\u2502 ");
-	c_unset_u16(file, mode);
+	if (file == stdout || file == stderr) {
+		int mode = c_set_u16(file);
+		fwprintf_s(file, L"\u2502 ");
+		c_unset_u16(file, mode);
+	} else {
+		fprintf_s(file, "│ ");
+	}
 #else
 	fprintf(file, "│ ");
 #endif
@@ -198,9 +206,13 @@ void c_vr(FILE *file)
 	}
 
 #if defined(C_WIN)
-	int mode = c_set_u16(file);
-	fwprintf_s(file, L"\u251C\u2500");
-	c_unset_u16(file, mode);
+	if (file == stdout || file == stderr) {
+		int mode = c_set_u16(file);
+		fwprintf_s(file, L"\u251C\u2500");
+		c_unset_u16(file, mode);
+	} else {
+		fprintf_s(file, "├─");
+	}
 #else
 	fprintf(file, "├─");
 #endif
