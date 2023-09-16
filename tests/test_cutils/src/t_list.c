@@ -359,7 +359,7 @@ TEST(t_list_print, FILE *file)
 
 	const lnode_t node = list_add(&list);
 
-	*(int *)list_get_data(&list, node)			 = 0;
+	//*(int *)list_get_data(&list, node)			 = 0;
 	//*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
 	//*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
 
