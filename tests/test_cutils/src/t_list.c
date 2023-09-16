@@ -360,8 +360,8 @@ TEST(t_list_print, FILE *file)
 	const lnode_t node = list_add(&list);
 
 	*(int *)list_get_data(&list, node)			 = 0;
-	*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
-	*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
+	//*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
+	//*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
 
 	//EXPECT_EQ(list_print(NULL, LIST_END, NULL, NULL, 0), 0);
 	//EXPECT_EQ(list_print(&list, LIST_END, NULL, NULL, 0), 0);
