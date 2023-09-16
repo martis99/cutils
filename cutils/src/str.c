@@ -277,37 +277,37 @@ int str_rsplit(str_t str, char c, str_t *l, str_t *r)
 	return 0;
 }
 
-int str_replace(str_t *str, str_t old, str_t new)
+int str_replace(str_t *str, str_t from, str_t to)
 {
 	if (str == NULL) {
 		return 0;
 	}
 
 	int found = 0;
-	str->len  = cstr_replace((char *)str->data, str->size, str->len, old.data, old.len, new.data, new.len, &found);
+	str->len  = cstr_replace((char *)str->data, str->size, str->len, from.data, from.len, to.data, to.len, &found);
 	return found;
 }
 
-int str_replaces(str_t *str, const str_t *old, const str_t *new, size_t cnt)
+int str_replaces(str_t *str, const str_t *from, const str_t *to, size_t cnt)
 {
-	if (old == NULL || new == NULL) {
+	if (from == NULL || to == NULL) {
 		return 0;
 	}
 
 	int found = 0;
 	for (size_t i = 0; i < cnt; i++) {
-		found |= str_replace(str, old[i], new[i]);
+		found |= str_replace(str, from[i], to[i]);
 	}
 
 	return found;
 }
 
-int str_rreplaces(str_t *str, const str_t *old, const str_t *new, size_t cnt)
+int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt)
 {
 	int ret	  = 0;
 	int found = 0;
 	do {
-		ret |= found = str_replaces(str, old, new, cnt);
+		ret |= found = str_replaces(str, from, to, cnt);
 	} while (found);
 	return ret;
 }

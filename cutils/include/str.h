@@ -44,11 +44,12 @@ str_t str_cpy(str_t src);
 int str_split(str_t str, char c, str_t *l, str_t *r);
 int str_rsplit(str_t str, char c, str_t *l, str_t *r);
 
-int str_replace(str_t *str, str_t old, str_t new);
-int str_replaces(str_t *str, const str_t *old, const str_t *new, size_t cnt);
-int str_rreplaces(str_t *str, const str_t *old, const str_t *new, size_t cnt);
+int str_replace(str_t *str, str_t from, str_t to);
+int str_replaces(str_t *str, const str_t *from, const str_t *to, size_t cnt);
+int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt);
 
 // clang-format off
 #define STR(_str) strc(_str, sizeof(_str) - 1)
+#define STRH(_str) strn(_str, sizeof(_str) - 1, sizeof(_str))
 // clang-format on
 #endif
