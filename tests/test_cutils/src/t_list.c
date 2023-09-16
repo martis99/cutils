@@ -350,7 +350,7 @@ static int print_list(FILE *file, void *data, int ret)
 	return ret;
 }
 
-TEST(t_list_print, FILE *file)
+TEST(t_list_print)
 {
 	SSTART;
 
@@ -390,17 +390,17 @@ STEST(t_list)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
+	//FILE *file = file_open(TEST_FILE, "wb+");
 
 	RUN(t_list_init_free);
 	RUN(t_list_add_remove);
 	RUN(t_list_next);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);
-	RUN(t_list_print, file);
+	RUN(t_list_print);
 
-	file_close(file);
-	file_delete(TEST_FILE);
+	//file_close(file);
+	//file_delete(TEST_FILE);
 
 	SEND;
 }
