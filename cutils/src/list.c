@@ -38,11 +38,15 @@ lnode_t list_add(list_t *list)
 	return init_node(list, node);
 }
 
-void list_remove(list_t *list, lnode_t node)
+int list_remove(list_t *list, lnode_t node)
 {
+	if (list == NULL) {
+		return 1;
+	}
+
 	header_t *header = arr_get(list, node);
 	if (header == NULL) {
-		return;
+		return 1;
 	}
 
 	for (uint i = 0; i < list->cnt; i++) {
@@ -51,10 +55,15 @@ void list_remove(list_t *list, lnode_t node)
 			prev->next = header->next;
 		}
 	}
+
+	return 0;
 }
 
 lnode_t list_add_next(list_t *list, lnode_t node)
 {
+	if (arr_get(list, node) == NULL) {
+		return LIST_END;
+	}
 	return list_set_next(list, node, list_add(list));
 }
 
@@ -97,6 +106,10 @@ void *list_get_data(const list_t *list, lnode_t node)
 
 int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret)
 {
+	if (list == NULL || cb == NULL) {
+		return ret;
+	}
+
 	void *value;
 	list_foreach(list, node, value)
 	{
