@@ -6,6 +6,10 @@
 
 arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 {
+	if (arr == NULL || cap == 0) {
+		return NULL;
+	}
+
 	arr->data = m_malloc(cap * size);
 	if (arr->data == NULL) {
 		return NULL;
@@ -20,6 +24,10 @@ arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 
 void arr_free(arr_t *arr)
 {
+	if (arr == NULL) {
+		return;
+	}
+
 	m_free(arr->data, arr->cap * arr->size);
 	arr->data = NULL;
 	arr->cap  = 0;
@@ -27,7 +35,7 @@ void arr_free(arr_t *arr)
 	arr->size = 0;
 }
 
-static int arr_resize(arr_t *arr)
+static inline int arr_resize(arr_t *arr)
 {
 	if (arr->cnt < arr->cap) {
 		return 0;
@@ -47,6 +55,10 @@ static int arr_resize(arr_t *arr)
 
 uint arr_add(arr_t *arr)
 {
+	if (arr == NULL) {
+		return ARR_END;
+	}
+
 	if (arr_resize(arr)) {
 		return ARR_END;
 	}
@@ -59,7 +71,7 @@ uint arr_add(arr_t *arr)
 
 void *arr_get(const arr_t *arr, uint index)
 {
-	if (index >= arr->cnt) {
+	if (arr == NULL || index >= arr->cnt) {
 		return NULL;
 	}
 
@@ -68,7 +80,7 @@ void *arr_get(const arr_t *arr, uint index)
 
 void *arr_set(arr_t *arr, uint index, const void *value)
 {
-	if (value == NULL) {
+	if (arr == NULL || value == NULL) {
 		return NULL;
 	}
 
@@ -83,12 +95,21 @@ void *arr_set(arr_t *arr, uint index, const void *value)
 uint arr_app(arr_t *arr, const void *value)
 {
 	uint index = arr_add(arr);
-	arr_set(arr, index, value);
+
+	if (arr_set(arr, index, value) == NULL) {
+		return ARR_END;
+	}
+
 	return index;
 }
 
 uint arr_index(const arr_t *arr, const void *value)
 {
+	if (arr == NULL || value == NULL) {
+		return ARR_END;
+		;
+	}
+
 	for (uint i = 0; i < arr->cnt; i++) {
 		if (m_memcmp(arr_get(arr, i), value, arr->size) == 0) {
 			return i;
@@ -100,6 +121,10 @@ uint arr_index(const arr_t *arr, const void *value)
 
 uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
 {
+	if (arr == NULL || value == NULL) {
+		return ARR_END;
+	}
+
 	for (uint i = 0; i < arr->cnt; i++) {
 		if (cb(arr_get(arr, i), value)) {
 			return i;
@@ -111,7 +136,7 @@ uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
 
 arr_t *arr_add_all(arr_t *arr, const arr_t *src)
 {
-	if (arr->cap - arr->cnt < src->cnt || arr->size != src->size) {
+	if (arr == NULL || src == NULL || arr->cap - arr->cnt < src->cnt || arr->size != src->size) {
 		return NULL;
 	}
 
@@ -124,7 +149,7 @@ arr_t *arr_add_all(arr_t *arr, const arr_t *src)
 
 arr_t *arr_add_unique(arr_t *arr, const arr_t *src)
 {
-	if (arr->size != src->size) {
+	if (arr == NULL || src == NULL || arr->size != src->size) {
 		return NULL;
 	}
 
@@ -143,7 +168,7 @@ arr_t *arr_add_unique(arr_t *arr, const arr_t *src)
 
 arr_t *arr_merge_all(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 {
-	if (arr1->size != arr2->size) {
+	if (arr1 == NULL || arr2 == NULL || arr1->size != arr2->size) {
 		return NULL;
 	}
 
@@ -164,7 +189,7 @@ arr_t *arr_merge_all(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 
 arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 {
-	if (arr1->size != arr2->size) {
+	if (arr1 == NULL || arr2 == NULL || arr1->size != arr2->size) {
 		return NULL;
 	}
 
@@ -185,6 +210,10 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 
 int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret)
 {
+	if (arr == NULL) {
+		return 1;
+	}
+
 	void *value;
 	arr_foreach(arr, value)
 	{
