@@ -354,10 +354,10 @@ TEST(t_list_print, FILE *file)
 {
 	SSTART;
 
-	list_t list = { 0 };
-	list_init(&list, 16, sizeof(int));
+	//list_t list = { 0 };
+	//list_init(&list, 16, sizeof(int));
 
-	const lnode_t node = list_add(&list);
+	//const lnode_t node = list_add(&list);
 
 	//*(int *)list_get_data(&list, node)			 = 0;
 	//*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
@@ -381,7 +381,7 @@ TEST(t_list_print, FILE *file)
 		EXPECT_STR(buf, exp);
 	}*/
 
-	list_free(&list);
+	//list_free(&list);
 
 	SEND;
 }
