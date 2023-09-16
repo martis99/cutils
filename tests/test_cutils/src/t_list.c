@@ -397,7 +397,7 @@ STEST(t_list)
 	RUN(t_list_next);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);
-	//RUN(t_list_print, file);
+	RUN(t_list_print, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);
