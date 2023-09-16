@@ -22,7 +22,7 @@ void xml_free(xml_t *xml);
 xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, str_t name);
 xml_tag_t xml_add_tag_val(xml_t *xml, xml_tag_t tag, str_t name, str_t val);
 
-void xml_remove_tag(xml_t *xml, xml_tag_t tag);
+int xml_remove_tag(xml_t *xml, xml_tag_t tag);
 bool xml_has_child(const xml_t *xml, xml_tag_t tag);
 
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val);
