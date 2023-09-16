@@ -38,8 +38,12 @@ tnode_t tree_add(tree_t *tree)
 	return init_node(tree, list_add(tree));
 }
 
-void tree_remove(tree_t *tree, tnode_t node)
+int tree_remove(tree_t *tree, tnode_t node)
 {
+	if (tree == NULL) {
+		return 1;
+	}
+
 	for (uint i = 0; i < tree->cnt; i++) {
 		header_t *data = get_node(tree, i);
 		if (data == NULL) {
@@ -50,7 +54,7 @@ void tree_remove(tree_t *tree, tnode_t node)
 		}
 	}
 
-	list_remove(tree, node);
+	return list_remove(tree, node);
 }
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node)
@@ -95,11 +99,13 @@ void *tree_get_data(const tree_t *tree, tnode_t node)
 
 static int node_iterate_pre(const tree_t *tree, tnode_t node, tree_iterate_cb cb, int ret, void *priv, int depth, int last)
 {
-	if (node >= tree->cnt) {
+	if (tree == NULL || node >= tree->cnt) {
 		return ret;
 	}
 
-	ret = cb(tree, node, tree_get_data(tree, node), ret, depth, last, priv);
+	if (cb) {
+		ret = cb(tree, node, tree_get_data(tree, node), ret, depth, last, priv);
+	}
 
 	tnode_t child = tree_get_child(tree, node);
 	tnode_t next;
@@ -134,6 +140,10 @@ int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb
 
 int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, int ret)
 {
+	if (tree == NULL || cb == NULL) {
+		return ret;
+	}
+
 	tnode_t cur;
 	int depth;
 	tree_foreach(tree, node, cur, depth)

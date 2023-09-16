@@ -15,7 +15,7 @@ tree_t *tree_init(tree_t *tree, uint cap, size_t size);
 void tree_free(tree_t *tree);
 
 tnode_t tree_add(tree_t *tree);
-void tree_remove(tree_t *tree, tnode_t node);
+int tree_remove(tree_t *tree, tnode_t node);
 
 tnode_t tree_add_child(tree_t *tree, tnode_t node);
 tnode_t tree_get_child(const tree_t *tree, tnode_t node);
@@ -51,6 +51,12 @@ void tree_it_next(tree_it *it);
 
 #define tree_foreach_child(_tree, _parent, _node) for (_node = tree_get_child(_tree, _parent); _node < (_tree)->cnt; _node = tree_get_next(_tree, _node))
 
-#define tree_add_child_node(_tree, _node) _node == TREE_END ? _node = tree_add(_tree) : tree_add_child(_tree, _node);
+#define tree_add_child_node(_tree, _start, _node)      \
+	if (_start == TREE_END) {                      \
+		_node  = tree_add(_tree);              \
+		_start = _node;                        \
+	} else {                                       \
+		_node = tree_add_child(_tree, _start); \
+	}
 
 #endif
