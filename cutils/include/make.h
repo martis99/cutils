@@ -44,7 +44,7 @@ typedef struct make_s {
 	make_act_t g_acts;
 } make_t;
 
-make_t *make_init(make_t *make, uint acts_cnt, uint strs_cnt);
+make_t *make_init(make_t *make, uint acts_cap, uint strs_cap);
 void make_free(make_t *make);
 
 make_empty_t make_create_empty(make_t *make);

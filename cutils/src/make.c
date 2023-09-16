@@ -109,17 +109,17 @@ static int make_str_check(const make_t *make, make_str_data_t str)
 	}
 }
 
-make_t *make_init(make_t *make, uint acts_cnt, uint strs_cnt)
+make_t *make_init(make_t *make, uint acts_cap, uint strs_cap)
 {
 	if (make == NULL) {
 		return NULL;
 	}
 
-	if (list_init(&make->acts, acts_cnt, sizeof(make_act_data_t)) == NULL) {
+	if (list_init(&make->acts, acts_cap, sizeof(make_act_data_t)) == NULL) {
 		return NULL;
 	}
 
-	if (list_init(&make->strs, strs_cnt, sizeof(make_str_data_t)) == NULL) {
+	if (list_init(&make->strs, strs_cap, sizeof(make_str_data_t)) == NULL) {
 		return NULL;
 	}
 
