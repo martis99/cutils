@@ -352,7 +352,7 @@ static int print_list(FILE *file, void *data, int ret)
 
 TEST(t_list_print, FILE *file)
 {
-	SSTART;
+	START;
 
 	list_t list = { 0 };
 	list_init(&list, 1, sizeof(int));
@@ -383,7 +383,7 @@ TEST(t_list_print, FILE *file)
 
 	list_free(&list);
 
-	SEND;
+	END;
 }
 
 STEST(t_list)
