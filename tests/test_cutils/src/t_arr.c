@@ -358,7 +358,7 @@ static int print_arr(FILE *file, void *data, int ret)
 	return ret + 1;
 }
 
-TEST(t_arr_print, FILE *file)
+TEST(t_arr_print)
 {
 	START;
 
@@ -411,7 +411,7 @@ STEST(t_arr)
 	RUN(t_arr_merge_all);
 	RUN(t_arr_merge_unique);
 	RUN(t_arr_foreach);
-	RUN(t_arr_print, file);
+	RUN(t_arr_print);
 
 	file_close(file);
 	file_delete(TEST_FILE);
