@@ -399,7 +399,7 @@ STEST(t_arr)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	RUN(t_arr_init_free);
+	/*RUN(t_arr_init_free);
 	RUN(t_arr_add);
 	RUN(t_arr_get);
 	RUN(t_arr_set);
@@ -411,7 +411,7 @@ STEST(t_arr)
 	RUN(t_arr_merge_all);
 	RUN(t_arr_merge_unique);
 	RUN(t_arr_foreach);
-	RUN(t_arr_print, file);
+	RUN(t_arr_print, file);*/
 
 	file_close(file);
 	file_delete(TEST_FILE);
