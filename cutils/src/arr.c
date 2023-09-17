@@ -94,6 +94,10 @@ void *arr_set(arr_t *arr, uint index, const void *value)
 
 uint arr_app(arr_t *arr, const void *value)
 {
+	if (value == NULL) {
+		return ARR_END;
+	}
+
 	uint index = arr_add(arr);
 
 	if (arr_set(arr, index, value) == NULL) {
@@ -107,7 +111,6 @@ uint arr_index(const arr_t *arr, const void *value)
 {
 	if (arr == NULL || value == NULL) {
 		return ARR_END;
-		;
 	}
 
 	for (uint i = 0; i < arr->cnt; i++) {
@@ -121,7 +124,7 @@ uint arr_index(const arr_t *arr, const void *value)
 
 uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
 {
-	if (arr == NULL || value == NULL) {
+	if (arr == NULL || value == NULL || cb == NULL) {
 		return ARR_END;
 	}
 
@@ -210,8 +213,8 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 
 int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret)
 {
-	if (arr == NULL) {
-		return 1;
+	if (arr == NULL || cb == NULL) {
+		return ret;
 	}
 
 	void *value;
