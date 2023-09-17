@@ -362,8 +362,8 @@ TEST(t_arr_print, FILE *file)
 {
 	START;
 
-	arr_t arr = { 0 };
-	arr_init(&arr, 1, sizeof(int));
+	//arr_t arr = { 0 };
+	//arr_init(&arr, 1, sizeof(int));
 
 	//*(int *)arr_get(&arr, arr_add(&arr)) = 0;
 	//*(int *)arr_get(&arr, arr_add(&arr)) = 1;
@@ -388,7 +388,7 @@ TEST(t_arr_print, FILE *file)
 		//EXPECT_STR(buf, exp);
 	}
 
-	arr_free(&arr);
+	//arr_free(&arr);
 
 	END;
 }
