@@ -369,7 +369,7 @@ TEST(t_arr_print)
 	//*(int *)arr_get(&arr, arr_add(&arr)) = 1;
 	//*(int *)arr_get(&arr, arr_add(&arr)) = 2;
 
-	//EXPECT_EQ(arr_print(NULL, NULL, NULL, 0), 0);
+	EXPECT_EQ(arr_print(NULL, NULL, NULL, 0), 0);
 	//EXPECT_EQ(arr_print(&arr, NULL, NULL, 0), 0);
 	//EXPECT_EQ(arr_print(&arr, file, NULL, 0), 0);
 	//EXPECT_EQ(arr_print(&arr, file, print_arr, 0), 3);
