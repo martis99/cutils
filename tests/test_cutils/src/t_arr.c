@@ -416,5 +416,7 @@ STEST(t_arr)
 	//file_close(file);
 	//file_delete(TEST_FILE);
 
+	printf("debug\n");
+
 	SEND;
 }
