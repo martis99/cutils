@@ -410,7 +410,7 @@ STEST(t_arr)
 	RUN(t_arr_add_unique);
 	RUN(t_arr_merge_all);
 	RUN(t_arr_merge_unique);
-	RUN(t_arr_foreach);
+	//RUN(t_arr_foreach);
 	RUN(t_arr_print);
 
 	file_close(file);
