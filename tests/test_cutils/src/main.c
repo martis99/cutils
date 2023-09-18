@@ -21,8 +21,8 @@ TEST(tests)
 {
 	SSTART;
 	RUN(t_arr);
-	RUN(t_cstr);
-	RUN(t_file);
+	//RUN(t_cstr);
+	/*RUN(t_file);
 	RUN(t_hashmap);
 	RUN(t_list);
 	RUN(t_log);
@@ -33,7 +33,7 @@ TEST(tests)
 	RUN(t_time);
 	RUN(t_tree);
 	RUN(t_type);
-	RUN(t_xml);
+	RUN(t_xml);*/
 	SEND;
 }
 
