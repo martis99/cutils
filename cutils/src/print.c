@@ -142,6 +142,7 @@ int c_set_u16(FILE *file)
 	}
 
 #if defined(C_WIN)
+	fflush(file);
 	return _setmode(_fileno(file), _O_U16TEXT);
 #else
 	return 0;
@@ -155,6 +156,7 @@ int c_unset_u16(FILE *file, int mode)
 	}
 
 #if defined(C_WIN)
+	fflush(file);
 	return _setmode(_fileno(file), mode);
 #else
 	return 0;

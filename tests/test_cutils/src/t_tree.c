@@ -750,7 +750,7 @@ TEST(t_tree_iterate)
 
 TEST(t_tree_it_begin)
 {
-	SSTART;
+	START;
 
 	tree_t tree = { 0 };
 	tree_init(&tree, 1, sizeof(int));
@@ -761,12 +761,12 @@ TEST(t_tree_it_begin)
 
 	tree_free(&tree);
 
-	SEND;
+	END;
 }
 
 TEST(t_tree_it_next)
 {
-	SSTART;
+	START;
 
 	tree_t tree = { 0 };
 	tree_init(&tree, 1, sizeof(int));
@@ -778,7 +778,7 @@ TEST(t_tree_it_next)
 
 	tree_free(&tree);
 
-	SEND;
+	END;
 }
 
 TEST(t_tree_foreach_root)
@@ -1044,7 +1044,7 @@ static int print_tree(FILE *file, void *data, int ret)
 
 TEST(t_tree_print, FILE *file)
 {
-	SSTART;
+	START;
 
 	tree_t tree = { 0 };
 	tree_init(&tree, 1, sizeof(int));
@@ -1083,7 +1083,7 @@ TEST(t_tree_print, FILE *file)
 
 	tree_free(&tree);
 
-	SEND;
+	END;
 }
 
 STEST(t_tree)
