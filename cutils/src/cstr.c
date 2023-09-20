@@ -20,9 +20,9 @@ size_t cstrf(char *cstr, size_t size, const char *fmt, ...)
 	return ret;
 }
 
-void cstr_zero(char *cstr, size_t size)
+void *cstr_zero(char *cstr, size_t size)
 {
-	m_memset(cstr, 0, size);
+	return mem_set(cstr, 0, size);
 }
 
 size_t cstr_len(const char *cstr)
@@ -37,10 +37,14 @@ size_t cstr_len(const char *cstr)
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-size_t cstr_catn(char *cstr, size_t size, size_t cstr_len, const char *src, size_t src_len, size_t len)
+size_t cstr_catn(char *cstr, size_t cstr_size, size_t cstr_len, const char *src, size_t src_len, size_t len)
 {
 	if (cstr == NULL) {
 		return 0;
+	}
+
+	if (cstr_len > cstr_size) {
+		return cstr_size;
 	}
 
 	if (src == NULL) {
@@ -49,21 +53,20 @@ size_t cstr_catn(char *cstr, size_t size, size_t cstr_len, const char *src, size
 
 	size_t cat_len = MIN(src_len, len);
 
-	if (cstr_len + cat_len > size) {
+	if (cstr_len + cat_len >= cstr_size) {
 		return cstr_len;
 	}
 
-#if defined(C_WIN)
-	strncat_s(cstr, size, src, cat_len);
-#else
-	strncat(cstr, src, cat_len);
-#endif
-	return cstr_len + cat_len;
+	mem_cpy(cstr + cstr_len, cstr_size - cstr_len, src, cat_len);
+	cstr_len += cat_len;
+	cstr[cstr_len] = '\0';
+
+	return cstr_len;
 }
 
-size_t cstr_cat(char *cstr, size_t size, size_t cstr_len, const char *src, size_t src_len)
+size_t cstr_cat(char *cstr, size_t cstr_size, size_t cstr_len, const char *src, size_t src_len)
 {
-	return cstr_catn(cstr, size, cstr_len, src, src_len, src_len);
+	return cstr_catn(cstr, cstr_size, cstr_len, src, src_len, src_len);
 }
 
 int cstr_cmpn(const char *cstr, size_t cstr_len, const char *src, size_t src_len, size_t len)
@@ -76,7 +79,7 @@ int cstr_cmpn(const char *cstr, size_t cstr_len, const char *src, size_t src_len
 		return 1;
 	}
 
-	int ret = m_memcmp(cstr, src, MIN(MIN(cstr_len, src_len), len));
+	int ret = mem_cmp(cstr, src, MIN(MIN(cstr_len, src_len), len));
 
 	if (ret != 0 || (cstr_len >= len && src_len >= len)) {
 		return ret;
@@ -124,15 +127,11 @@ char *cstr_cstr(const char *cstr, const char *src)
 
 void *cstr_cpy(char *cstr, size_t size, const char *src, size_t len)
 {
-	if (cstr == NULL || src == NULL) {
+	if (cstr == NULL || src == NULL || len > size) {
 		return NULL;
 	}
 
-	if (len > size) {
-		return NULL;
-	}
-
-	return m_memcpy(cstr, size, src, len * sizeof(char));
+	return mem_cpy(cstr, size, src, len * sizeof(char));
 }
 
 size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old, size_t old_len, const char *new, size_t new_len, int *found)
@@ -143,6 +142,10 @@ size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old,
 
 	if (str == NULL) {
 		return 0;
+	}
+
+	if (str_len > str_size) {
+		return str_size;
 	}
 
 	if (old == NULL || new == NULL) {
@@ -158,10 +161,6 @@ size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old,
 	}
 
 	for (size_t i = 0; str_len >= old_len && i <= str_len - old_len; i++) {
-		if (i > str_size) {
-			return 0;
-		}
-
 		if (cstr_cmpn(&str[i], str_len, old, old_len, old_len)) {
 			continue;
 		}
@@ -183,20 +182,12 @@ size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old,
 			}
 		}
 
-		if (i + new_len > str_size) {
-			return 0;
-		}
-
 		for (size_t j = 0; j < new_len; j++) {
 			str[i + j] = new[j];
 		}
 
 		str_len += new_len - old_len;
 		i = i + new_len - 1;
-
-		if (str_len > str_size) {
-			return 0;
-		}
 	}
 
 	return str_len;
@@ -204,6 +195,10 @@ size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old,
 
 size_t cstr_replaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt, int *found)
 {
+	if (old == NULL || new == NULL) {
+		return str_len;
+	}
+
 	for (size_t i = 0; i < cnt; i++) {
 		str_len = cstr_replace(str, str_size, str_len, old[i], 0, new[i], 0, found);
 	}
@@ -221,11 +216,19 @@ size_t cstr_rreplaces(char *str, size_t str_size, size_t str_len, const char *co
 	return str_len;
 }
 
-void wcstrn_cat(wchar_t *dst, size_t size, const wchar_t *src, size_t cnt)
+wchar_t *wcstr_catn(wchar_t *wcstr, size_t wcstr_size, const wchar_t *src, size_t cnt)
 {
+	if (wcstr == NULL) {
+		return NULL;
+	}
+
+	if (src == NULL) {
+		return wcstr;
+	}
+
 #if defined(C_WIN)
-	wcsncat_s(dst, size, src, cnt);
+	return wcsncat_s(wcstr, wcstr_size, src, cnt);
 #else
-	wcsncat(dst, src, cnt);
+	return wcsncat(wcstr, src, cnt);
 #endif
 }

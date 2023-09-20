@@ -6,19 +6,19 @@
 #include <memory.h>
 #include <stdlib.h>
 
-static m_stats_t *s_stats;
+static mem_stats_t *s_stats;
 
-void m_init(m_stats_t *stats)
+void mem_init(mem_stats_t *stats)
 {
 	s_stats = stats;
 }
 
-const m_stats_t *m_get_stats()
+const mem_stats_t *mem_get_stats()
 {
 	return s_stats;
 }
 
-void m_print(FILE *file)
+void mem_print(FILE *file)
 {
 	size_t mem_max = s_stats->mem_max;
 	char s	       = '\0';
@@ -42,7 +42,7 @@ void m_print(FILE *file)
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)
 
-void *m_malloc(size_t size)
+void *mem_alloc(size_t size)
 {
 	s_stats->mem += size;
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
@@ -51,7 +51,7 @@ void *m_malloc(size_t size)
 	return malloc(size);
 }
 
-void *m_calloc(size_t count, size_t size)
+void *mem_calloc(size_t count, size_t size)
 {
 	s_stats->mem += count * size;
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
@@ -60,7 +60,7 @@ void *m_calloc(size_t count, size_t size)
 	return calloc(count, size);
 }
 
-void *m_realloc(void *memory, size_t new_size, size_t old_size)
+void *mem_realloc(void *memory, size_t new_size, size_t old_size)
 {
 	s_stats->mem -= old_size;
 	s_stats->mem += new_size;
@@ -70,12 +70,16 @@ void *m_realloc(void *memory, size_t new_size, size_t old_size)
 	return realloc(memory, new_size);
 }
 
-void *m_memset(void *dst, int val, size_t size)
+void *mem_set(void *dst, int val, size_t size)
 {
+	if (dst == NULL) {
+		return NULL;
+	}
+
 	return memset(dst, val, size);
 }
 
-void *m_memcpy(void *dst, size_t dst_size, const void *src, size_t src_size)
+void *mem_cpy(void *dst, size_t dst_size, const void *src, size_t src_size)
 {
 #if defined(C_WIN)
 	memcpy_s(dst, dst_size, src, src_size);
@@ -85,12 +89,12 @@ void *m_memcpy(void *dst, size_t dst_size, const void *src, size_t src_size)
 	return dst;
 }
 
-int m_memcmp(const void *l, const void *r, size_t size)
+int mem_cmp(const void *l, const void *r, size_t size)
 {
 	return memcmp(l, r, size);
 }
 
-void m_free(void *memory, size_t size)
+void mem_free(void *memory, size_t size)
 {
 	s_stats->mem -= size;
 	free(memory);

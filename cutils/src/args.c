@@ -36,52 +36,48 @@ static param_handler_fn s_handlers[] = {
 };
 // clang-format on
 
-static inline void header(const char *name, const char *description)
+static inline void header(const char *name, const char *description, FILE *file)
 {
-	fprintf(stdout, "%s\n", description);
-	fprintf(stdout, "\n");
-	fprintf(stdout, "Usage\n");
-	fprintf(stdout, "  %s [options]\n", name);
-	fprintf(stdout, "\n");
+	fprintf(file, "%s\n", description);
+	fprintf(file, "\n");
+	fprintf(file, "Usage\n");
+	fprintf(file, "  %s [options]\n", name);
+	fprintf(file, "\n");
 }
 
-void args_usage(const char *name, const char *description)
+void args_usage(const char *name, const char *description, FILE *file)
 {
-	header(name, description);
-	fprintf(stdout, "Run 'build --help' for more information\n");
-	fflush(stdout);
+	header(name, description, file);
+	fprintf(file, "Run 'build --help' for more information\n");
+	fflush(file);
 }
 
-static inline void help(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size)
+static inline void help(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size, FILE *file)
 {
-	header(name, description);
-	fprintf(stdout, "Options\n");
+	header(name, description, file);
+	fprintf(file, "Options\n");
 
 	size_t args_len = args_size / sizeof(arg_t);
 	for (size_t i = 0; i < args_len; i++) {
-		fprintf(stdout, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
+		fprintf(file, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
 	}
-	fprintf(stdout, "\n");
+	fprintf(file, "\n");
 
 	size_t modes_len = modes_size / sizeof(mode_desc_t);
 	for (size_t mode = 0; mode < modes_len; mode++) {
-		fprintf(stdout, "%s\n", modes[mode].name);
+		fprintf(file, "%s\n", modes[mode].name);
 		for (size_t i = 0; i < modes[mode].len; i++) {
-			fprintf(stdout, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
+			fprintf(file, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
 		}
-		fprintf(stdout, "\n");
+		fprintf(file, "\n");
 	}
 
-	fflush(stdout);
+	fflush(file);
 }
 
 static inline int get_arg(const arg_t *args, size_t args_size, int argc, const char **argv, int *index, const char **param)
 {
 	int arg = -2;
-
-	if (*index > argc) {
-		return arg;
-	}
 
 	size_t args_len = args_size / sizeof(arg_t);
 	if (argv[*index][0] == '-') {
@@ -125,15 +121,15 @@ static inline int handle_param(const arg_t *args, size_t arg, const char *param,
 {
 	param_handler_fn handler = args[arg].handler ? args[arg].handler : s_handlers[args[arg].param];
 
-	if (handler != NULL) {
-		return handler(param, ret);
+	if (handler == NULL) {
+		return 0;
 	}
 
-	return 1;
+	return handler(param, ret);
 }
 
 int args_handle(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size, int argc, const char **argv,
-		void **params)
+		void **params, FILE *file)
 {
 	int ret = 0;
 
@@ -143,7 +139,7 @@ int args_handle(const char *name, const char *description, const arg_t *args, si
 
 		int arg = get_arg(args, args_size, argc, argv, &i, &param);
 		if (arg == -1) {
-			help(name, description, args, args_size, modes, modes_size);
+			help(name, description, args, args_size, modes, modes_size, file);
 			ret = 2;
 		} else if (arg == -2) {
 			ret = 1;
@@ -155,7 +151,7 @@ int args_handle(const char *name, const char *description, const arg_t *args, si
 	}
 
 	if (ret == 1) {
-		args_usage(name, description);
+		args_usage(name, description, file);
 	}
 
 	return ret;

@@ -10,7 +10,7 @@ str_t str_null()
 
 str_t strz(size_t size)
 {
-	char *data = m_malloc(size);
+	char *data = mem_alloc(size);
 	if (size > 0) {
 		data[0] = '\0';
 	}
@@ -43,8 +43,8 @@ str_t strn(const char *cstr, size_t len, size_t size)
 		return (str_t){ 0 };
 	}
 
-	char *data = m_malloc(size);
-	m_memcpy(data, size, cstr, len);
+	char *data = mem_alloc(size);
+	mem_cpy(data, size, cstr, len);
 	data[len] = '\0';
 
 	return (str_t){
@@ -64,7 +64,7 @@ str_t strv(const char *fmt, va_list args)
 	}
 
 	str.size = size + 1;
-	str.data = m_malloc(str.size);
+	str.data = mem_alloc(str.size);
 	if (str.data == NULL) {
 		return (str_t){ 0 };
 	}
@@ -105,7 +105,7 @@ void str_free(str_t *str)
 	}
 
 	if (!str->ref) {
-		m_free((char *)str->data, str->size);
+		mem_free((char *)str->data, str->size);
 	}
 
 	str->data = NULL;
@@ -128,7 +128,7 @@ void str_zero(str_t *str)
 
 int str_resize(str_t *str, size_t size)
 {
-	if (str->ref) {
+	if (str == NULL || str->ref) {
 		return 1;
 	}
 
@@ -136,7 +136,7 @@ int str_resize(str_t *str, size_t size)
 		return 0;
 	}
 
-	const char *data = m_realloc((char *)str->data, size, str->size);
+	const char *data = mem_realloc((char *)str->data, size, str->size);
 	if (data == NULL) {
 		return 1;
 	}
@@ -218,10 +218,6 @@ str_t str_cpy(str_t src)
 
 static int append(str_t *str, const char *cstr, size_t len)
 {
-	if (str == NULL) {
-		return 1;
-	}
-
 	if (str->ref && str->size == 0) {
 		if (str->data) {
 			return 1;

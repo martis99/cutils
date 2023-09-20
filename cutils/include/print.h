@@ -24,8 +24,8 @@ size_t c_swprintf(wchar *buf, size_t size, const wchar *fmt, ...);
 int c_set_u16(FILE *file);
 int c_unset_u16(FILE *file, int mode);
 
-void c_ur(FILE *file);
-void c_v(FILE *file);
-void c_vr(FILE *file);
+int c_ur(FILE *file);
+int c_v(FILE *file);
+int c_vr(FILE *file);
 
 #endif

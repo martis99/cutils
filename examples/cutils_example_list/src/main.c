@@ -10,8 +10,8 @@ static int print_list(FILE *file, void *data, int ret)
 
 int main(int argc, char **argv)
 {
-	m_stats_t m_stats = { 0 };
-	m_init(&m_stats);
+	mem_stats_t mem_stats = { 0 };
+	mem_init(&mem_stats);
 
 	list_t list = { 0 };
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
 	list_free(&list);
 
-	m_print(stdout);
+	mem_print(stdout);
 
 	return 0;
 }

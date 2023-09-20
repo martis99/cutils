@@ -10,7 +10,7 @@ arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 		return NULL;
 	}
 
-	arr->data = m_malloc(cap * size);
+	arr->data = mem_alloc(cap * size);
 	if (arr->data == NULL) {
 		return NULL;
 	}
@@ -28,7 +28,7 @@ void arr_free(arr_t *arr)
 		return;
 	}
 
-	m_free(arr->data, arr->cap * arr->size);
+	mem_free(arr->data, arr->cap * arr->size);
 	arr->data = NULL;
 	arr->cap  = 0;
 	arr->cnt  = 0;
@@ -45,7 +45,7 @@ static inline int arr_resize(arr_t *arr)
 
 	size_t old_size = arr->cap * node_size;
 	arr->cap *= 2;
-	arr->data = m_realloc(arr->data, arr->cap * node_size, old_size);
+	arr->data = mem_realloc(arr->data, arr->cap * node_size, old_size);
 	if (arr->data == NULL) {
 		return 1;
 	}
@@ -89,7 +89,7 @@ void *arr_set(arr_t *arr, uint index, const void *value)
 		return NULL;
 	}
 
-	return m_memcpy(dst, arr->size, value, arr->size);
+	return mem_cpy(dst, arr->size, value, arr->size);
 }
 
 uint arr_app(arr_t *arr, const void *value)
@@ -114,7 +114,7 @@ uint arr_index(const arr_t *arr, const void *value)
 	}
 
 	for (uint i = 0; i < arr->cnt; i++) {
-		if (m_memcmp(arr_get(arr, i), value, arr->size) == 0) {
+		if (mem_cmp(arr_get(arr, i), value, arr->size) == 0) {
 			return i;
 		}
 	}
@@ -143,7 +143,7 @@ arr_t *arr_add_all(arr_t *arr, const arr_t *src)
 		return NULL;
 	}
 
-	void *ret = m_memcpy((byte *)arr->data + arr->cnt * arr->size, arr->cap * arr->size - arr->cnt * arr->size, src->data, src->cnt * src->size);
+	void *ret = mem_cpy((byte *)arr->data + arr->cnt * arr->size, arr->cap * arr->size - arr->cnt * arr->size, src->data, src->cnt * src->size);
 
 	arr->cnt += src->cnt;
 

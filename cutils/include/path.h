@@ -14,16 +14,16 @@ typedef struct pathv_s {
 	const char *path;
 } pathv_t;
 
-int path_init(path_t *path, const char *dir, size_t len);
-int path_child_s(path_t *path, const char *dir, size_t len, char s);
-int path_child(path_t *path, const char *dir, size_t len);
-int path_parent(path_t *path);
-int path_set_len(path_t *path, size_t len);
+path_t *path_init(path_t *path, const char *dir, size_t len);
+path_t *path_child_s(path_t *path, const char *dir, size_t len, char s);
+path_t *path_child(path_t *path, const char *dir, size_t len);
+path_t *path_parent(path_t *path);
+path_t *path_set_len(path_t *path, size_t len);
 int path_ends(const path_t *path, const char *str, size_t len);
 int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t dest_len, path_t *out);
 
-int pathv_path(pathv_t *pathv, const path_t *path);
-int pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r);
-int pathv_folder(pathv_t *pathv, const path_t *path);
+pathv_t *pathv_path(pathv_t *pathv, const path_t *path);
+pathv_t *pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r);
+pathv_t *pathv_folder(pathv_t *pathv, const path_t *path);
 
 #endif

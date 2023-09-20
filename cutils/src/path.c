@@ -4,80 +4,101 @@
 
 #include "platform.h"
 
-int path_init(path_t *path, const char *dir, size_t len)
+#if defined(C_WIN)
+	#define SEP '\\'
+#else
+	#define SEP '/'
+#endif
+
+path_t *path_init(path_t *path, const char *dir, size_t len)
 {
-	if (len + 1 > P_MAX_PATH) {
-		return 1;
+	if (path == NULL || dir == NULL || len + 1 > P_MAX_PATH) {
+		return NULL;
 	}
 
-	m_memcpy(path->path, len, dir, len);
+	mem_cpy(path->path, len, dir, len);
 	path->len = len;
 
 	path->path[path->len] = '\0';
 
-	return 0;
+	return path;
 }
 
-int path_child_s(path_t *path, const char *dir, size_t len, char s)
+path_t *path_child_s(path_t *path, const char *dir, size_t len, char s)
 {
-	if (path->len + len + 2 > P_MAX_PATH) {
-		return 1;
+	if (path == NULL) {
+		return NULL;
+	}
+
+	if (dir == NULL || path->len + len + 2 > P_MAX_PATH) {
+		return path;
 	}
 
 	if (s != 0) {
 		path->path[path->len++] = s;
 	}
-	m_memcpy(path->path + path->len, len, dir, len);
+	mem_cpy(path->path + path->len, len, dir, len);
 	path->len += len;
 
 	path->path[path->len] = '\0';
 
-	return 0;
+	return path;
 }
 
-int path_child(path_t *path, const char *dir, size_t len)
+path_t *path_child(path_t *path, const char *dir, size_t len)
 {
-	char c;
-#if defined(C_WIN)
-	c = '\\';
-#else
-	c = '/';
-#endif
-	return path_child_s(path, dir, len, c);
+	return path_child_s(path, dir, len, SEP);
 }
 
-int path_parent(path_t *path)
+path_t *path_parent(path_t *path)
 {
+	if (path == NULL) {
+		return NULL;
+	}
+
 	size_t len = path->len;
 
 	while (len > 0 && path->path[len] != '\\' && path->path[len] != '/')
 		len--;
 
 	if (len == 0) {
-		return 1;
+		return NULL;
 	}
 
 	path->len = len;
 
 	path->path[path->len] = '\0';
 
-	return 0;
+	return path;
 }
 
-int path_set_len(path_t *path, size_t len)
+path_t *path_set_len(path_t *path, size_t len)
 {
+	if (path == NULL) {
+		return NULL;
+	}
+
 	path->len	      = len;
 	path->path[path->len] = '\0';
-	return 0;
+
+	return path;
 }
 
 int path_ends(const path_t *path, const char *str, size_t len)
 {
-	return path->len > len && m_memcmp(path->path + path->len - len, str, (size_t)len) == 0;
+	if (path == NULL) {
+		return 0;
+	}
+
+	return path->len > len && mem_cmp(path->path + path->len - len, str, (size_t)len) == 0;
 }
 
 int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t dest_len, path_t *out)
 {
+	if (path == NULL || dest == NULL || out == NULL) {
+		return 1;
+	}
+
 	size_t dif	  = 0;
 	size_t last_slash = 0;
 
@@ -99,7 +120,7 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 	for (size_t i = 0; i < dif; i++) {
 		out->path[out->len++] = '.';
 		out->path[out->len++] = '.';
-		out->path[out->len++] = '\\';
+		out->path[out->len++] = SEP;
 	}
 
 	if (out->len) {
@@ -110,23 +131,35 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 	return 0;
 }
 
-int pathv_path(pathv_t *pathv, const path_t *path)
+pathv_t *pathv_path(pathv_t *pathv, const path_t *path)
 {
+	if (pathv == NULL || path == NULL) {
+		return NULL;
+	}
+
 	*pathv = (pathv_t){ .path = path->path, .len = path->len };
-	return 0;
+	return pathv;
 }
 
-int pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r)
+pathv_t *pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r)
 {
+	if (pathv == NULL || l == NULL || r == NULL) {
+		return NULL;
+	}
+
 	*pathv = (pathv_t){
 		.path = l->path + r->len + 1,
 		.len  = l->len - r->len - 1,
 	};
-	return 0;
+	return pathv;
 }
 
-int pathv_folder(pathv_t *pathv, const path_t *path)
+pathv_t *pathv_folder(pathv_t *pathv, const path_t *path)
 {
+	if (pathv == NULL || path == NULL) {
+		return NULL;
+	}
+
 	size_t len = path->len;
 
 	while (len > 0 && path->path[len] != '\\' && path->path[len] != '/')
@@ -137,5 +170,5 @@ int pathv_folder(pathv_t *pathv, const path_t *path)
 		.len  = path->len - len - 1,
 	};
 
-	return 0;
+	return pathv;
 }

@@ -17,6 +17,10 @@
 
 FILE *file_open(const char *path, const char *mode)
 {
+	if (path == NULL || mode == NULL) {
+		return NULL;
+	}
+
 	FILE *file = NULL;
 
 #if defined(C_WIN)
@@ -31,7 +35,7 @@ FILE *file_open_v(const char *format, const char *mode, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == 0) {
 		return NULL;
 	}
 
@@ -49,6 +53,10 @@ FILE *file_open_f(const char *format, const char *mode, ...)
 
 FILE *file_reopen(const char *path, const char *mode, FILE *file)
 {
+	if (path == NULL || mode == NULL || file == NULL) {
+		return NULL;
+	}
+
 	FILE *new_file = NULL;
 
 #if defined(C_WIN)
@@ -63,12 +71,21 @@ FILE *file_reopen(const char *path, const char *mode, FILE *file)
 
 size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 {
+	if (file == NULL || data == NULL) {
+		return 0;
+	}
+
 	size_t cnt;
 	size = MIN(file_size(file), size);
+
+	if (size >= data_size) {
+		return 0;
+	}
+
 #if defined(C_WIN)
 	cnt = fread_s(data, data_size, size, 1, file);
 #else
-	cnt  = fread(data, size, 1, file);
+	cnt = fread(data, size, 1, file);
 #endif
 	if (cnt != 1) {
 		return 0;
@@ -79,6 +96,10 @@ size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 
 size_t file_read_ft(FILE *file, char *data, size_t data_size)
 {
+	if (data == NULL) {
+		return 0;
+	}
+
 	const size_t size = file_read(file, data_size, data, data_size);
 
 	size_t len = 0;
@@ -109,6 +130,10 @@ size_t file_read_t(const char *path, char *data, size_t data_size)
 
 size_t file_size(FILE *file)
 {
+	if (file == NULL) {
+		return 0;
+	}
+
 	fseek(file, 0L, SEEK_END);
 	size_t size = ftell(file);
 	fseek(file, 0L, SEEK_SET);
@@ -117,20 +142,32 @@ size_t file_size(FILE *file)
 
 int file_close(FILE *file)
 {
+	if (file == NULL) {
+		return EOF;
+	}
+
 	return fclose(file);
 }
 
 int file_delete(const char *path)
 {
+	if (path == NULL) {
+		return 1;
+	}
+
 #if defined(C_WIN)
 	return DeleteFileA(path) == 0 ? 1 : 0;
 #else
-	return remove(path);
+	return remove(path) == 0 ? 0 : 1;
 #endif
 }
 
 int file_exists(const char *path)
 {
+	if (path == NULL) {
+		return 0;
+	}
+
 #if defined(C_WIN)
 	int dwAttrib = GetFileAttributesA(path);
 	return dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
@@ -148,7 +185,7 @@ int file_exists_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == 0) {
 		return 0;
 	}
 
@@ -164,52 +201,20 @@ int file_exists_f(const char *format, ...)
 	return exists;
 }
 
-int folder_exists(const char *path)
-{
-#if defined(C_WIN)
-	int dwAttrib = GetFileAttributesA(path);
-	return dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
-#else
-	DIR *dir = opendir(path);
-	if (dir) {
-		closedir(dir);
-		return 1;
-	} else {
-		return 0;
-	}
-#endif
-}
-
-int folder_exists_v(const char *format, va_list args)
-{
-	char path[P_MAX_PATH] = { 0 };
-
-	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
-		return 0;
-	}
-
-	return folder_exists(path);
-}
-
-int folder_exists_f(const char *format, ...)
-{
-	va_list args;
-	va_start(args, format);
-	int exists = folder_exists_v(format, args);
-	va_end(args);
-	return exists;
-}
-
 int folder_create(const char *path)
 {
+	if (path == NULL) {
+		return 1;
+	}
+
 #if defined(C_WIN)
-	return CreateDirectoryA(path, NULL) || ERROR_ALREADY_EXISTS == GetLastError();
+	return CreateDirectoryA(path, NULL) == 0 ? 1 : 0 || ERROR_ALREADY_EXISTS == GetLastError();
 #else
 	struct stat st = { 0 };
 	if (stat(path, &st) == -1) {
 		mkdir(path, 0700);
 	}
-	return 1;
+	return 0;
 #endif
 }
 
@@ -217,8 +222,8 @@ int folder_create_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
-		return 0;
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == 0) {
+		return 1;
 	}
 
 	return folder_create(path);
@@ -238,7 +243,7 @@ int folder_delete(const char *path)
 #if defined(C_WIN)
 	return RemoveDirectoryA(path) == 0 ? 1 : 0;
 #else
-	return remove(path);
+	return remove(path) == 0 ? 0 : 1;
 #endif
 }
 
@@ -246,8 +251,8 @@ int folder_delete_v(const char *format, va_list args)
 {
 	char path[P_MAX_PATH] = { 0 };
 
-	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == -1) {
-		return 0;
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == 0) {
+		return 1;
 	}
 
 	return folder_delete(path);
@@ -262,8 +267,52 @@ int folder_delete_f(const char *format, ...)
 	return ret;
 }
 
+int folder_exists(const char *path)
+{
+	if (path == NULL) {
+		return 0;
+	}
+
+#if defined(C_WIN)
+	int dwAttrib = GetFileAttributesA(path);
+	return dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY);
+#else
+	DIR *dir = opendir(path);
+	if (dir) {
+		closedir(dir);
+		return 1;
+	} else {
+		return 0;
+	}
+#endif
+}
+
+int folder_exists_v(const char *format, va_list args)
+{
+	char path[P_MAX_PATH] = { 0 };
+
+	if (c_sprintv(path, sizeof(path) / sizeof(char), format, args) == 0) {
+		return 0;
+	}
+
+	return folder_exists(path);
+}
+
+int folder_exists_f(const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int exists = folder_exists_v(format, args);
+	va_end(args);
+	return exists;
+}
+
 int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_cb on_file, void *priv)
 {
+	if (path == NULL) {
+		return 1;
+	}
+
 #if defined(C_WIN)
 	WIN32_FIND_DATA file = { 0 };
 	HANDLE find	     = NULL;
@@ -283,7 +332,7 @@ int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_
 
 		files_foreach_cb cb = file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? on_folder : on_file;
 		if (cb) {
-			if (path_child(&child_path, (char *)file.cFileName, cstr_len((char *)file.cFileName))) {
+			if (path_child(&child_path, (char *)file.cFileName, cstr_len((char *)file.cFileName)) == NULL) {
 				child_path.len = path->len;
 				continue;
 			}
@@ -316,7 +365,7 @@ int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_
 			goto next;
 		}
 
-		if (path_child(&child_path, dp->d_name, cstr_len(dp->d_name))) {
+		if (path_child(&child_path, dp->d_name, cstr_len(dp->d_name)) == NULL) {
 			goto next;
 		}
 

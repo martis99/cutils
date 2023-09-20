@@ -3,6 +3,8 @@
 
 #include <stddef.h>
 
+#include "file.h"
+
 typedef enum param_e {
 	PARAM_NONE,
 	PARAM_INT,
@@ -37,8 +39,8 @@ typedef struct arg_s {
 	char c;
 } arg_t;
 
-void args_usage(const char *name, const char *description);
+void args_usage(const char *name, const char *description, FILE *file);
 int args_handle(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size, int argc, const char **argv,
-		void **params);
+		void **params, FILE *file);
 
 #endif

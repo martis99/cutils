@@ -47,7 +47,7 @@ enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
 void log_init(log_t *log);
 
-const char *log_level_string(int level);
+const char *log_level_str(int level);
 void log_set_level(int level);
 void log_set_quiet(int enable);
 int log_add_callback(log_LogFn fn, void *udata, int level);

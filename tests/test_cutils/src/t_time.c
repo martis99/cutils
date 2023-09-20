@@ -30,6 +30,7 @@ TEST(time_str)
 
 	char buf[C_TIME_BUF_SIZE] = { 0 };
 
+	c_time_str(NULL);
 	c_time_str(buf);
 
 	uint y, m, d, H, M, S, U;

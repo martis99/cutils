@@ -8,12 +8,12 @@
 size_t cstrv(char *cstr, size_t size, const char *fmt, va_list args);
 size_t cstrf(char *cstr, size_t size, const char *fmt, ...);
 
-void cstr_zero(char *cstr, size_t size);
+void *cstr_zero(char *cstr, size_t size);
 
 size_t cstr_len(const char *cstr);
 
-size_t cstr_catn(char *cstr, size_t size, size_t cstr_len, const char *src, size_t src_len, size_t len);
-size_t cstr_cat(char *cstr, size_t size, size_t cstr_len, const char *src, size_t src_len);
+size_t cstr_catn(char *cstr, size_t cstr_size, size_t cstr_len, const char *src, size_t src_len, size_t len);
+size_t cstr_cat(char *cstr, size_t cstr_size, size_t cstr_len, const char *src, size_t src_len);
 
 int cstr_cmpn(const char *cstr, size_t cstr_len, const char *src, size_t src_len, size_t len);
 int cstr_cmp(const char *cstr, size_t cstr_len, const char *src, size_t src_len);
@@ -30,7 +30,7 @@ size_t cstr_replace(char *str, size_t str_size, size_t str_len, const char *old,
 size_t cstr_replaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt, int *found);
 size_t cstr_rreplaces(char *str, size_t str_size, size_t str_len, const char *const *old, const char *const *new, size_t cnt);
 
-void wcstrn_cat(wchar_t *dst, size_t size, const wchar_t *src, size_t cnt);
+wchar_t *wcstr_catn(wchar_t *wcstr, size_t wcstr_size, const wchar_t *src, size_t cnt);
 
 #define CSTR(_str) _str, sizeof(_str) - 1
 

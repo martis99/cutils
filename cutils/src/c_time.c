@@ -45,6 +45,10 @@ u64 c_time()
 
 const char *c_time_str(char *buf)
 {
+	if (buf == NULL) {
+		return NULL;
+	}
+
 	struct tm *timeinfo;
 	const ctime_t now = get_time();
 #if defined(C_WIN)

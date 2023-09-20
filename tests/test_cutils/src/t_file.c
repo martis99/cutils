@@ -6,60 +6,37 @@
 
 #include "test.h"
 
-#define TEST_FILE "test_file.txt"
+#define TEST_FILE "t_file.txt"
 
-TEST(file_open_close)
+TEST(t_file_open_close)
 {
 	START;
 
+	EXPECT_EQ(file_open(NULL, NULL), NULL);
+	EXPECT_EQ(file_open(TEST_FILE, NULL), NULL);
 	FILE *file = file_open(TEST_FILE, "w+");
 
 	EXPECT_NE(file, 0);
 
-	const int ret = file_close(file);
-
-	EXPECT_EQ(ret, 0);
+	EXPECT_NE(file_close(NULL), 0);
+	EXPECT_EQ(file_close(file), 0);
 
 	file_delete(TEST_FILE);
 
 	END;
 }
 
-TEST(file_open_f_test)
+TEST(t_file_open_f)
 {
 	START;
 
+	EXPECT_EQ(
+		file_open_f(
+			"%s", "w+",
+			"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234abcde"),
+		NULL);
 	FILE *file = file_open_f("%s", "w+", TEST_FILE);
-
-	EXPECT_NE(file, 0);
-
-	file_close(file);
-
-	file_delete(TEST_FILE);
-
-	END;
-}
-
-TEST(file_exists_false)
-{
-	START;
-
-	int ret = file_exists(TEST_FILE);
-
-	EXPECT_EQ(ret, 0);
-
-	END;
-}
-
-TEST(file_exists_true)
-{
-	START;
-
-	FILE *file = file_open(TEST_FILE, "w+");
-
-	const int ret = file_exists(TEST_FILE);
-
-	EXPECT_EQ(ret, 1);
+	EXPECT_NE(file, NULL);
 
 	file_close(file);
 	file_delete(TEST_FILE);
@@ -67,41 +44,24 @@ TEST(file_exists_true)
 	END;
 }
 
-TEST(file_delete_test)
+TEST(t_file_reopen)
 {
 	START;
 
 	FILE *file = file_open(TEST_FILE, "w+");
 
-	file_close(file);
-
-	const int ret = file_delete(TEST_FILE);
-
-	EXPECT_EQ(ret, 0);
-
-	END;
-}
-
-TEST(file_size_test)
-{
-	START;
-
-	FILE *file = file_open(TEST_FILE, "w+");
-
-	c_fprintf(file, "Test");
-
-	const size_t size = file_size(file);
-
-	EXPECT_EQ(size, 4);
+	EXPECT_EQ(file_reopen(NULL, NULL, NULL), NULL);
+	EXPECT_EQ(file_reopen(TEST_FILE, NULL, NULL), NULL);
+	EXPECT_EQ(file_reopen(TEST_FILE, "w+", NULL), NULL);
+	EXPECT_EQ(file_reopen(TEST_FILE, "w+", file), file);
 
 	file_close(file);
-
 	file_delete(TEST_FILE);
 
 	END;
 }
 
-TEST(file_read_test)
+TEST(t_file_read)
 {
 	START;
 
@@ -111,19 +71,41 @@ TEST(file_read_test)
 
 	char data[64] = { 0 };
 
-	const size_t size = file_read(file, 10, data, sizeof(data));
-
-	EXPECT_EQ(size, 4);
+	EXPECT_EQ(file_read(NULL, 0, NULL, 0), 0);
+	EXPECT_EQ(file_read(file, 0, NULL, 0), 0);
+	EXPECT_EQ(file_read(file, 10, NULL, 0), 0);
+	EXPECT_EQ(file_read(file, 10, data, 0), 0);
+	EXPECT_EQ(file_read(file, 10, data, sizeof(data)), 4);
 	EXPECT_STR(data, "Test");
 
 	file_close(file);
+	file_delete(TEST_FILE);
+
+	END;
+}
+
+TEST(t_file_read_t)
+{
+	START;
+
+	FILE *file = file_open(TEST_FILE, "w+");
+	c_fprintf(file, "Test");
+	file_close(file);
+
+	char data[64] = { 0 };
+
+	EXPECT_EQ(file_read_t(NULL, NULL, 0), -1);
+	EXPECT_EQ(file_read_t(TEST_FILE, NULL, 0), 0);
+	EXPECT_EQ(file_read_t(TEST_FILE, data, 0), 0);
+	EXPECT_EQ(file_read_t(TEST_FILE, data, sizeof(data)), 4);
+	EXPECT_STR(data, "Test");
 
 	file_delete(TEST_FILE);
 
 	END;
 }
 
-TEST(file_read_ft_test)
+TEST(t_file_read_ft)
 {
 	START;
 
@@ -133,19 +115,19 @@ TEST(file_read_ft_test)
 
 	char data[64] = { 0 };
 
-	size_t len = file_read_ft(file, data, sizeof(data));
-
-	EXPECT_EQ(len, 4);
+	EXPECT_EQ(file_read_ft(NULL, NULL, 0), 0);
+	EXPECT_EQ(file_read_ft(file, NULL, 0), 0);
+	EXPECT_EQ(file_read_ft(file, data, 0), 0);
+	EXPECT_EQ(file_read_ft(file, data, sizeof(data)), 4);
 	EXPECT_STR(data, "Test");
 
 	file_close(file);
-
 	file_delete(TEST_FILE);
 
 	END;
 }
 
-TEST(file_read_ft_r_test)
+TEST(t_file_read_ft_r)
 {
 	START;
 
@@ -161,25 +143,125 @@ TEST(file_read_ft_r_test)
 	EXPECT_STR(data, "Test\nTest");
 
 	file_close(file);
-
 	file_delete(TEST_FILE);
 
 	END;
 }
 
-TEST(folder)
+TEST(t_file_size)
 {
 	START;
 
+	FILE *file = file_open(TEST_FILE, "w+");
+
+	c_fprintf(file, "Test");
+
+	EXPECT_EQ(file_size(NULL), 0);
+	EXPECT_EQ(file_size(file), 4);
+
+	file_close(file);
+	file_delete(TEST_FILE);
+
+	END;
+}
+
+TEST(t_file_delete)
+{
+	START;
+
+	FILE *file = file_open(TEST_FILE, "w+");
+
+	file_close(file);
+
+	EXPECT_NE(file_delete(NULL), 0);
+	EXPECT_EQ(file_delete(TEST_FILE), 0);
+
+	END;
+}
+
+TEST(t_file_exists)
+{
+	START;
+
+	EXPECT_EQ(file_exists(NULL), 0);
+	EXPECT_EQ(file_exists(TEST_FILE), 0);
+	EXPECT_EQ(
+		file_exists_f(
+			"%s",
+			"12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234abcde"),
+		0);
+
+	FILE *file = file_open(TEST_FILE, "w+");
+
+	EXPECT_EQ(file_exists(TEST_FILE), 1);
+	EXPECT_EQ(file_exists_f("%s", TEST_FILE), 1);
+
+	file_close(file);
+	file_delete(TEST_FILE);
+
+	END;
+}
+
+TEST(t_folder_create_delete)
+{
+	START;
+
+	EXPECT_EQ(folder_create(NULL), 1);
+	EXPECT_EQ(folder_create_f(NULL), 1);
+	EXPECT_EQ(folder_create_f("temp"), 0);
+
+	EXPECT_EQ(folder_delete(NULL), 1);
+	EXPECT_EQ(folder_delete_f(NULL), 1);
+	EXPECT_EQ(folder_delete_f("temp"), 0);
+
+	END;
+}
+
+TEST(t_folder_exists)
+{
+	START;
+
+	EXPECT_EQ(folder_exists(NULL), 0);
+	EXPECT_EQ(folder_exists("temp"), 0);
+	EXPECT_EQ(folder_exists_f(NULL), 0);
 	EXPECT_EQ(folder_exists_f("%s", "temp"), 0);
 
 	folder_create_f("%s", "temp");
 
+	EXPECT_EQ(folder_exists("temp"), 1);
 	EXPECT_EQ(folder_exists_f("%s", "temp"), 1);
 
 	folder_delete_f("%s", "temp");
 
+	EXPECT_EQ(folder_exists("temp"), 0);
 	EXPECT_EQ(folder_exists_f("%s", "temp"), 0);
+
+	END;
+}
+
+static int file_cb(path_t *path, const char *folder, void *priv)
+{
+	return 0;
+}
+
+static int file_err_cb(path_t *path, const char *folder, void *priv)
+{
+	return -1;
+}
+
+TEST(t_files_foreach)
+{
+	START;
+
+	path_t path = { 0 };
+	path_init(&path, CSTR("./"));
+	path_t not = { 0 };
+	path_init(&not, CSTR("not"));
+
+	EXPECT_EQ(files_foreach(NULL, NULL, NULL, NULL), 1);
+	EXPECT_EQ(files_foreach(&not, file_cb, file_cb, NULL), 1);
+	EXPECT_EQ(files_foreach(&path, file_cb, file_cb, NULL), 0);
+	EXPECT_EQ(files_foreach(&path, file_err_cb, file_err_cb, NULL), -1);
 
 	END;
 }
@@ -187,15 +269,18 @@ TEST(folder)
 STEST(t_file)
 {
 	SSTART;
-	RUN(file_open_close);
-	RUN(file_open_f_test);
-	RUN(file_exists_false);
-	RUN(file_exists_true);
-	RUN(file_delete_test);
-	RUN(file_size_test);
-	RUN(file_read_test);
-	RUN(file_read_ft_test);
-	RUN(file_read_ft_r_test);
-	RUN(folder);
+	RUN(t_file_open_close);
+	RUN(t_file_open_f);
+	RUN(t_file_reopen);
+	RUN(t_file_read);
+	RUN(t_file_read_t);
+	RUN(t_file_read_ft);
+	RUN(t_file_read_ft_r);
+	RUN(t_file_size);
+	RUN(t_file_delete);
+	RUN(t_file_exists);
+	RUN(t_folder_create_delete);
+	RUN(t_folder_exists);
+	RUN(t_files_foreach);
 	SEND;
 }

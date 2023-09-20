@@ -8,6 +8,8 @@
 
 #if defined(C_WIN)
 	#include <io.h>
+#else
+	#include <locale.h>
 #endif
 
 size_t c_printv(const char *fmt, va_list args)
@@ -74,6 +76,11 @@ size_t c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 	ret = vsnprintf(buf, size / sizeof(char), fmt, copy);
 #endif
 	va_end(copy);
+
+	if (size > 0 && ret > size) {
+		return 0;
+	}
+
 	return ret;
 }
 
@@ -163,59 +170,68 @@ int c_unset_u16(FILE *file, int mode)
 #endif
 }
 
-void c_ur(FILE *file)
+int c_ur(FILE *file)
 {
 	if (file == NULL) {
-		return;
+		return 0;
 	}
+
+	int ret;
 
 #if defined(C_WIN)
 	if (file == stdout || file == stderr) {
 		int mode = c_set_u16(file);
-		fwprintf_s(file, L"\u2514\u2500");
+		ret	 = fwprintf_s(file, L"\u2514\u2500");
 		c_unset_u16(file, mode);
 	} else {
-		fprintf_s(file, "└─");
+		ret = fprintf_s(file, "└─");
 	}
 #else
-	fprintf(file, "└─");
+	ret = fprintf(file, "└─");
 #endif
+	return ret;
 }
 
-void c_v(FILE *file)
+int c_v(FILE *file)
 {
 	if (file == NULL) {
-		return;
+		return 0;
 	}
+
+	int ret;
 
 #if defined(C_WIN)
 	if (file == stdout || file == stderr) {
 		int mode = c_set_u16(file);
-		fwprintf_s(file, L"\u2502 ");
+		ret	 = fwprintf_s(file, L"\u2502 ");
 		c_unset_u16(file, mode);
 	} else {
-		fprintf_s(file, "│ ");
+		ret = fprintf_s(file, "│ ");
 	}
 #else
-	fprintf(file, "│ ");
+	ret = fprintf(file, "│ ");
 #endif
+	return ret;
 }
 
-void c_vr(FILE *file)
+int c_vr(FILE *file)
 {
 	if (file == NULL) {
-		return;
+		return 0;
 	}
+
+	int ret;
 
 #if defined(C_WIN)
 	if (file == stdout || file == stderr) {
 		int mode = c_set_u16(file);
-		fwprintf_s(file, L"\u251C\u2500");
+		ret	 = fwprintf_s(file, L"\u251C\u2500");
 		c_unset_u16(file, mode);
 	} else {
-		fprintf_s(file, "├─");
+		ret = fprintf_s(file, "├─");
 	}
 #else
-	fprintf(file, "├─");
+	ret = fprintf(file, "├─");
 #endif
+	return ret;
 }

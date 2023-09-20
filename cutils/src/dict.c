@@ -1,20 +1,20 @@
-#include "hashmap.h"
+#include "dict.h"
 
 #include "mem.h"
 
 #include <stdlib.h>
 #include <string.h>
 
-#define HASHMAP_MAX_LOAD      0.75f
-#define HASHMAP_RESIZE_FACTOR 2
+#define DICT_MAX_LOAD	   0.75f
+#define DICT_RESIZE_FACTOR 2
 
-hashmap_t *hashmap_init(hashmap_t *map, int capacity)
+dict_t *dict_init(dict_t *map, int capacity)
 {
 	if (map == NULL) {
 		return NULL;
 	}
 
-	map->buckets = m_calloc(capacity, sizeof(struct bucket));
+	map->buckets = mem_calloc(capacity, sizeof(struct bucket));
 	if (map->buckets == NULL) {
 		return NULL;
 	}
@@ -27,16 +27,16 @@ hashmap_t *hashmap_init(hashmap_t *map, int capacity)
 	return map;
 }
 
-void hashmap_free(hashmap_t *map)
+void dict_free(dict_t *map)
 {
 	if (map == NULL) {
 		return;
 	}
 
-	m_free(map->buckets, map->capacity * sizeof(struct bucket));
+	mem_free(map->buckets, map->capacity * sizeof(struct bucket));
 }
 
-static struct bucket *resize_entry(hashmap_t *map, struct bucket *old_entry)
+static struct bucket *resize_entry(dict_t *map, struct bucket *old_entry)
 {
 	u32 index = old_entry->hash % map->capacity;
 	for (;;) {
@@ -51,13 +51,13 @@ static struct bucket *resize_entry(hashmap_t *map, struct bucket *old_entry)
 	}
 }
 
-static void hashmap_resize(hashmap_t *map)
+static void dict_resize(dict_t *map)
 {
 	struct bucket *old_buckets = map->buckets;
 	int old_capacity	   = map->capacity;
 
-	map->capacity *= HASHMAP_RESIZE_FACTOR;
-	map->buckets = m_calloc(map->capacity, sizeof(struct bucket));
+	map->capacity *= DICT_RESIZE_FACTOR;
+	map->buckets = mem_calloc(map->capacity, sizeof(struct bucket));
 
 	map->last = (struct bucket *)&map->first;
 
@@ -66,15 +66,15 @@ static void hashmap_resize(hashmap_t *map)
 		map->last	= map->last->next;
 	} while (map->last->next != NULL);
 
-	m_free(old_buckets, old_capacity * sizeof(struct bucket));
+	mem_free(old_buckets, old_capacity * sizeof(struct bucket));
 }
 
-#define HASHMAP_HASH_INIT 2166136261u
+#define DICT_HASH_INIT 2166136261u
 
 static inline u32 hash_data(const byte *data, size_t size)
 {
 	size_t nblocks = size / 8;
-	u64 hash       = HASHMAP_HASH_INIT;
+	u64 hash       = DICT_HASH_INIT;
 	for (size_t i = 0; i < nblocks; ++i) {
 		hash ^= (u64)data[0] << 0 | (u64)data[1] << 8 | (u64)data[2] << 16 | (u64)data[3] << 24 | (u64)data[4] << 32 | (u64)data[5] << 40 | (u64)data[6] << 48 |
 			(u64)data[7] << 56;
@@ -99,14 +99,14 @@ static inline u32 hash_data(const byte *data, size_t size)
 	return (u32)(hash ^ hash >> 32);
 }
 
-static struct bucket *find_entry(const hashmap_t *map, void *key, size_t ksize, u32 hash)
+static struct bucket *find_entry(const dict_t *map, void *key, size_t ksize, u32 hash)
 {
 	u32 index = hash % map->capacity;
 
 	for (;;) {
 		struct bucket *entry = &map->buckets[index];
 
-		if (entry->key == NULL || (entry->ksize == ksize && entry->hash == hash && m_memcmp(entry->key, key, ksize) == 0)) {
+		if (entry->key == NULL || (entry->ksize == ksize && entry->hash == hash && mem_cmp(entry->key, key, ksize) == 0)) {
 			return entry;
 		}
 
@@ -114,14 +114,14 @@ static struct bucket *find_entry(const hashmap_t *map, void *key, size_t ksize, 
 	}
 }
 
-void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *val)
+void dict_set(dict_t *map, void *key, size_t ksize, void *val)
 {
 	if (map == NULL || key == NULL) {
 		return;
 	}
 
-	if (map->count + 1 > HASHMAP_MAX_LOAD * map->capacity) {
-		hashmap_resize(map);
+	if (map->count + 1 > DICT_MAX_LOAD * map->capacity) {
+		dict_resize(map);
 	}
 
 	u32 hash	     = hash_data(key, ksize);
@@ -140,7 +140,7 @@ void hashmap_set(hashmap_t *map, void *key, size_t ksize, void *val)
 	entry->value = val;
 }
 
-int hashmap_get(const hashmap_t *map, void *key, size_t ksize, void **out_val)
+int dict_get(const dict_t *map, void *key, size_t ksize, void **out_val)
 {
 	if (map == NULL || key == NULL) {
 		return 1;

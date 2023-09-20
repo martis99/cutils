@@ -5,9 +5,68 @@
 
 #include "test.h"
 
-#define TEST_FILE "test_log.log"
+#define TEST_FILE "t_log.txt"
 
-TEST(log_trace_test, FILE *file)
+TEST(t_log_stdout)
+{
+	START;
+
+	log_set_quiet(0);
+
+	log_debug("t_log_stdout");
+
+	log_set_quiet(1);
+
+	END;
+}
+
+TEST(t_log_level_str)
+{
+	START;
+
+	EXPECT_STR(log_level_str(LOG_TRACE), "TRACE");
+	EXPECT_STR(log_level_str(LOG_DEBUG), "DEBUG");
+
+	END;
+}
+
+TEST(t_log_set_level)
+{
+	START;
+
+	log_set_level(LOG_TRACE);
+
+	END;
+}
+
+static void file_callback(log_event_t *ev)
+{
+	(void)ev;
+}
+
+TEST(t_log_add_callback)
+{
+	START;
+
+	for (int i = 0; i < 31; i++) {
+		EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 0);
+	}
+
+	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), -1);
+
+	END;
+}
+
+TEST(t_log_log)
+{
+	START;
+
+	log_log(LOG_TRACE, NULL, 0, NULL);
+
+	END;
+}
+
+TEST(t_log_trace, FILE *file)
 {
 	START;
 
@@ -22,7 +81,7 @@ TEST(log_trace_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u TRACE log_trace_test:%u: trace%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u TRACE t_log_trace:%u: trace%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -30,7 +89,7 @@ TEST(log_trace_test, FILE *file)
 	END;
 }
 
-TEST(log_debug_test, FILE *file)
+TEST(t_log_debug, FILE *file)
 {
 	START;
 
@@ -45,7 +104,7 @@ TEST(log_debug_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u DEBUG log_debug_test:%u: debug%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u DEBUG t_log_debug:%u: debug%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -53,7 +112,7 @@ TEST(log_debug_test, FILE *file)
 	END;
 }
 
-TEST(log_info_test, FILE *file)
+TEST(t_log_info, FILE *file)
 {
 	START;
 
@@ -68,7 +127,7 @@ TEST(log_info_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u INFO  log_info_test:%u: info%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u INFO  t_log_info:%u: info%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -76,7 +135,7 @@ TEST(log_info_test, FILE *file)
 	END;
 }
 
-TEST(log_warn_test, FILE *file)
+TEST(t_log_warn, FILE *file)
 {
 	START;
 
@@ -91,7 +150,7 @@ TEST(log_warn_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u WARN  log_warn_test:%u: warn%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u WARN  t_log_warn:%u: warn%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -99,7 +158,7 @@ TEST(log_warn_test, FILE *file)
 	END;
 }
 
-TEST(log_error_test, FILE *file)
+TEST(t_log_error, FILE *file)
 {
 	START;
 
@@ -114,7 +173,7 @@ TEST(log_error_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u ERROR log_error_test:%u: error%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u ERROR t_log_error:%u: error%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -122,7 +181,7 @@ TEST(log_error_test, FILE *file)
 	END;
 }
 
-TEST(log_fatal_test, FILE *file)
+TEST(t_log_fatal, FILE *file)
 {
 	START;
 
@@ -137,7 +196,7 @@ TEST(log_fatal_test, FILE *file)
 
 	uint y, m, d, H, M, S, U, line, x;
 
-	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u FATAL log_fatal_test:%u: fatal%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u FATAL t_log_fatal:%u: fatal%u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
 
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
@@ -149,6 +208,8 @@ STEST(t_log)
 {
 	SSTART;
 
+	RUN(t_log_log);
+
 	log_t lg = { 0 };
 	log_init(&lg);
 
@@ -157,12 +218,16 @@ STEST(t_log)
 	FILE *file = file_open(TEST_FILE, "wb+");
 	log_add_fp(file, 0);
 
-	RUN(log_trace_test, file);
-	RUN(log_debug_test, file);
-	RUN(log_info_test, file);
-	RUN(log_warn_test, file);
-	RUN(log_error_test, file);
-	RUN(log_fatal_test, file);
+	RUN(t_log_stdout);
+	RUN(t_log_level_str);
+	RUN(t_log_set_level);
+	RUN(t_log_add_callback);
+	RUN(t_log_trace, file);
+	RUN(t_log_debug, file);
+	RUN(t_log_info, file);
+	RUN(t_log_warn, file);
+	RUN(t_log_error, file);
+	RUN(t_log_fatal, file);
 
 	file_close(file);
 

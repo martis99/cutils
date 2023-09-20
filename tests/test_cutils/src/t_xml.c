@@ -7,7 +7,7 @@
 
 #include "test.h"
 
-#define TEST_FILE "test_xml.xml"
+#define TEST_FILE "t_xml.txt"
 
 TEST(t_xml_init_free)
 {
