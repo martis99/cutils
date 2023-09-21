@@ -163,7 +163,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth
 
 	if (data->attrs != LIST_END) {
 		xml_attr_data_t *attr;
-		list_foreach(&xml->attrs, 0, attr)
+		list_foreach(&xml->attrs, data->attrs, attr)
 		{
 			ret |= !c_fprintf(file, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
 		}

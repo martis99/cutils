@@ -43,7 +43,7 @@ static inline int arr_resize(arr_t *arr)
 		return 0;
 	}
 
-	size_t new_cap = MAX(1, arr->cap * 2);
+	uint new_cap = MAX(1, arr->cap * 2);
 
 	void *data = mem_realloc(arr->data, new_cap * arr->size, arr->cap * arr->size);
 	if (data == NULL) {
