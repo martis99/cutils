@@ -196,14 +196,88 @@ int str_cmp(str_t str, str_t src)
 	return str_cmpc(str, src.data, src.len);
 }
 
+int str_eqnc(str_t str, const char *cstr, size_t cstr_len, size_t len)
+{
+	return cstr_eqn(str.data, str.len, cstr, cstr_len, len);
+}
+
 int str_eqc(str_t str, const char *cstr, size_t cstr_len)
 {
 	return cstr_eq(str.data, str.len, cstr, cstr_len);
 }
 
+int str_eqn(str_t str, str_t src, size_t len)
+{
+	return str_eqnc(str, src.data, src.len, len);
+}
+
 int str_eq(str_t str, str_t src)
 {
 	return str_eqc(str, src.data, src.len);
+}
+
+int str_chr(str_t str, str_t *l, str_t *r, char c)
+{
+	const char *res = cstr_chr(str.data, c);
+
+	if (!res || res >= str.data + str.len) {
+		return 1;
+	}
+
+	const char *str_data = str.data;
+	size_t str_len	     = str.len;
+
+	if (l != NULL) {
+		*l = (str_t){
+			.data = str_data,
+			.size = 0,
+			.len  = (size_t)(res - str_data),
+			.ref  = 1,
+		};
+	}
+
+	if (r != NULL) {
+		*r = (str_t){
+			.data = res + 1,
+			.size = 0,
+			.len  = (size_t)(str_data + str_len - (res + 1)),
+			.ref  = 1,
+		};
+	}
+
+	return 0;
+}
+
+int str_cstr(str_t str, str_t *l, str_t *r, const char *s, size_t s_len)
+{
+	const char *res = cstr_cstr(str.data, s);
+
+	if (!res || res >= str.data + str.len) {
+		return 1;
+	}
+
+	const char *str_data = str.data;
+	size_t str_len	     = str.len;
+
+	if (l != NULL) {
+		*l = (str_t){
+			.data = str_data,
+			.size = 0,
+			.len  = (size_t)(res - str_data),
+			.ref  = 1,
+		};
+	}
+
+	if (r != NULL) {
+		*r = (str_t){
+			.data = res + s_len,
+			.size = 0,
+			.len  = (size_t)(str_data + str_len - (res + s_len)),
+			.ref  = 1,
+		};
+	}
+
+	return 0;
 }
 
 str_t str_cpy(str_t src)

@@ -93,6 +93,11 @@ int cstr_cmp(const char *cstr, size_t cstr_len, const char *src, size_t src_len)
 	return cstr_cmpn(cstr, cstr_len, src, src_len, MAX(cstr_len, src_len));
 }
 
+int cstr_eqn(const char *cstr, size_t cstr_len, const char *src, size_t src_len, size_t len)
+{
+	return cstr_cmpn(cstr, cstr_len, src, src_len, len) == 0;
+}
+
 int cstr_eq(const char *cstr, size_t cstr_len, const char *src, size_t src_len)
 {
 	return cstr_cmp(cstr, cstr_len, src, src_len) == 0;

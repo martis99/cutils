@@ -18,6 +18,7 @@ size_t cstr_cat(char *cstr, size_t cstr_size, size_t cstr_len, const char *src, 
 int cstr_cmpn(const char *cstr, size_t cstr_len, const char *src, size_t src_len, size_t len);
 int cstr_cmp(const char *cstr, size_t cstr_len, const char *src, size_t src_len);
 
+int cstr_eqn(const char *cstr, size_t cstr_len, const char *src, size_t src_len, size_t len);
 int cstr_eq(const char *cstr, size_t cstr_len, const char *src, size_t src_len);
 
 void *cstr_cpy(char *cstr, size_t size, const char *src, size_t len);

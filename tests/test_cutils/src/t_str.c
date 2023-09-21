@@ -305,6 +305,20 @@ TEST(t_str_cmp)
 	END;
 }
 
+TEST(t_str_eqnc)
+{
+	START;
+
+	str_t str = strn("abc", 3, 16);
+
+	EXPECT_EQ(str_eqnc(str, NULL, 0, 0), 0);
+	EXPECT_EQ(str_eqnc(str, "abc", 3, 3), 1);
+
+	str_free(&str);
+
+	END;
+}
+
 TEST(t_str_eqc)
 {
 	START;
@@ -315,6 +329,22 @@ TEST(t_str_eqc)
 	EXPECT_EQ(str_eqc(str, "abc", 3), 1);
 
 	str_free(&str);
+
+	END;
+}
+
+TEST(t_str_eqn)
+{
+	START;
+
+	str_t str = strn("abc", 3, 16);
+	str_t src = strn("abc", 3, 16);
+
+	EXPECT_EQ(str_eqn(str, src, 0), 1);
+	EXPECT_EQ(str_eqn(str, src, 3), 1);
+
+	str_free(&str);
+	str_free(&src);
 
 	END;
 }
@@ -330,6 +360,46 @@ TEST(t_str_eq)
 
 	str_free(&str);
 	str_free(&src);
+
+	END;
+}
+
+TEST(t_str_chr)
+{
+	START;
+
+	str_t str = strc("a:b:c", 5);
+	str_t l	  = { 0 };
+	str_t r	  = { 0 };
+
+	EXPECT_EQ(str_chr(str, NULL, NULL, 0), 1);
+	EXPECT_EQ(str_chr(str, NULL, NULL, ':'), 0);
+	EXPECT_EQ(str_chr(str, &l, &r, ':'), 0);
+
+	EXPECT_STRN(l.data, "a", 1);
+	EXPECT_EQ(l.len, 1);
+	EXPECT_STRN(r.data, "b:c", 3);
+	EXPECT_EQ(r.len, 3);
+
+	END;
+}
+
+TEST(t_str_cstr)
+{
+	START;
+
+	str_t str = strc("a:=b:=c", 7);
+	str_t l	  = { 0 };
+	str_t r	  = { 0 };
+
+	EXPECT_EQ(str_cstr(str, NULL, NULL, NULL, 0), 1);
+	EXPECT_EQ(str_cstr(str, NULL, NULL, ":=", 2), 0);
+	EXPECT_EQ(str_cstr(str, &l, &r, ":=", 2), 0);
+
+	EXPECT_STRN(l.data, "a", 1);
+	EXPECT_EQ(l.len, 1);
+	EXPECT_STRN(r.data, "b:=c", 4);
+	EXPECT_EQ(r.len, 4);
 
 	END;
 }
@@ -557,8 +627,12 @@ STEST(t_str)
 	RUN(t_str_cmpc);
 	RUN(t_str_cmpn);
 	RUN(t_str_cmp);
+	RUN(t_str_eqnc);
 	RUN(t_str_eqc);
+	RUN(t_str_eqn);
 	RUN(t_str_eq);
+	RUN(t_str_chr);
+	RUN(t_str_cstr);
 	RUN(t_str_cpy);
 	RUN(t_str_split);
 	RUN(t_str_split_ref);

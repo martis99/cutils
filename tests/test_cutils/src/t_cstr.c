@@ -132,6 +132,29 @@ TEST(t_cstr_cmp)
 	END;
 }
 
+TEST(t_cstr_eqn)
+{
+	START;
+
+	EXPECT_EQ(cstr_eqn(NULL, 0, NULL, 0, 0), 1);
+	EXPECT_EQ(cstr_eqn("abc", 0, NULL, 0, 0), 0);
+	EXPECT_EQ(cstr_eqn("abc", 3, NULL, 0, 0), 0);
+	EXPECT_EQ(cstr_eqn(NULL, 0, "abc", 0, 0), 0);
+	EXPECT_EQ(cstr_eqn(NULL, 0, "abc", 3, 0), 0);
+
+	EXPECT_EQ(cstr_eqn("a", 1, "a", 1, 1), 1);
+	EXPECT_EQ(cstr_eqn("b", 1, "a", 1, 1), 0);
+	EXPECT_EQ(cstr_eqn("a", 1, "b", 1, 1), 0);
+	EXPECT_EQ(cstr_eqn("a", 1, "b", 0, 1), 0);
+	EXPECT_EQ(cstr_eqn("ac", 2, "b", 1, 2), 0);
+	EXPECT_EQ(cstr_eqn("ac", 2, "bcd", 3, 2), 0);
+	EXPECT_EQ(cstr_eqn("a", 1, "b", 0, 0), 1);
+	EXPECT_EQ(cstr_eqn("a", 1, "b", 1, 0), 1);
+	EXPECT_EQ(cstr_eqn("b", 1, "a", 1, 0), 1);
+
+	END;
+}
+
 TEST(t_cstr_eq)
 {
 	START;
@@ -370,6 +393,7 @@ STEST(t_cstr)
 	RUN(t_cstr_cat);
 	RUN(t_cstr_cmpn);
 	RUN(t_cstr_cmp);
+	RUN(t_cstr_eqn);
 	RUN(t_cstr_eq);
 	RUN(t_cstr_cpy);
 	RUN(t_cstr_chr);

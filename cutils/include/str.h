@@ -36,8 +36,13 @@ int str_cmpc(str_t str, const char *cstr, size_t cstr_len);
 int str_cmpn(str_t str, str_t src, size_t len);
 int str_cmp(str_t str, str_t src);
 
+int str_eqnc(str_t str, const char *cstr, size_t cstr_len, size_t len);
 int str_eqc(str_t str, const char *cstr, size_t cstr_len);
+int str_eqn(str_t str, str_t s, size_t len);
 int str_eq(str_t str, str_t s);
+
+int str_chr(str_t str, str_t *l, str_t *r, char c);
+int str_cstr(str_t str, str_t *l, str_t *r, const char *s, size_t s_len);
 
 str_t str_cpy(str_t src);
 
@@ -50,6 +55,7 @@ int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt);
 
 // clang-format off
 #define STR(_str) strc(_str, sizeof(_str) - 1)
+#define STRS(_str) (str_t){ .data = _str, .size = 0, .len = sizeof(_str) - 1, .ref = 1 }
 #define STRH(_str) strn(_str, sizeof(_str) - 1, sizeof(_str))
 // clang-format on
 #endif
