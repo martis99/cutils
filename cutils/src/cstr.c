@@ -227,7 +227,8 @@ wchar_t *wcstr_catn(wchar_t *wcstr, size_t wcstr_size, const wchar_t *src, size_
 	}
 
 #if defined(C_WIN)
-	return wcsncat_s(wcstr, wcstr_size, src, cnt);
+	wcsncat_s(wcstr, wcstr_size / sizeof(wchar_t), src, cnt);
+	return wcstr;
 #else
 	return wcsncat(wcstr, src, cnt);
 #endif

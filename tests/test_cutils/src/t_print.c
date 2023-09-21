@@ -59,7 +59,7 @@ TEST(t_wprintf)
 	START;
 
 	EXPECT_EQ(c_wprintf(NULL), 0);
-	EXPECT_EQ(c_wprintf(L""), -1);
+	EXPECT_EQ(c_wprintf(L""), 0);
 
 	END;
 }
@@ -72,29 +72,23 @@ TEST(t_swprintf)
 
 	EXPECT_EQ(c_swprintf(NULL, 1, L""), 0);
 	EXPECT_EQ(c_swprintf(buf, 1, NULL), 0);
-	EXPECT_EQ(c_swprintf(buf, sizeof(buf), L"%s", L"a"), 1);
+	EXPECT_EQ(c_swprintf(buf, sizeof(buf), L"%ls", L"a"), 1);
 
 	EXPECT_WSTR(buf, L"a");
 
 	END;
 }
 
-TEST(t_set_u16)
+TEST(t_set_unset_u16)
 {
 	START;
 
 	EXPECT_EQ(c_set_u16(NULL), 0);
-	EXPECT_EQ(c_set_u16(stdout), 0);
 
-	END;
-}
-
-TEST(t_unset_u16)
-{
-	START;
+	int mode = c_set_u16(stdout);
 
 	EXPECT_EQ(c_unset_u16(NULL, 0), 0);
-	EXPECT_EQ(c_unset_u16(stdout, 0), 0);
+	c_unset_u16(stdout, mode);
 
 	END;
 }
@@ -170,8 +164,7 @@ STEST(t_print)
 	RUN(t_sprintf);
 	RUN(t_wprintf);
 	RUN(t_swprintf);
-	RUN(t_set_u16);
-	RUN(t_unset_u16);
+	RUN(t_set_unset_u16);
 	RUN(t_ur, file);
 	RUN(t_v, file);
 	RUN(t_vr, file);

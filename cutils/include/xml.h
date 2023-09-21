@@ -16,7 +16,7 @@ typedef struct xml_s {
 	list_t attrs;
 } xml_t;
 
-xml_t *xml_init(xml_t *xml, uint cap);
+xml_t *xml_init(xml_t *xml, uint tags_cap, uint attrs_cap);
 void xml_free(xml_t *xml);
 
 xml_tag_t xml_add_tag(xml_t *xml, xml_tag_t tag, str_t name);

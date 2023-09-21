@@ -46,9 +46,6 @@ int tree_remove(tree_t *tree, tnode_t node)
 
 	for (uint i = 0; i < tree->cnt; i++) {
 		header_t *data = get_node(tree, i);
-		if (data == NULL) {
-			continue;
-		}
 		if (data->child == node) {
 			data->child = list_get_next(tree, node);
 		}

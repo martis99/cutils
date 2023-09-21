@@ -24,17 +24,17 @@ static inline xml_attr_data_t *get_attr(const list_t *attrs, xml_attr_t attr)
 	return list_get_data(attrs, attr);
 }
 
-xml_t *xml_init(xml_t *xml, uint cap)
+xml_t *xml_init(xml_t *xml, uint tags_cap, uint attrs_cap)
 {
 	if (xml == NULL) {
 		return NULL;
 	}
 
-	if (tree_init(&xml->tags, cap, sizeof(xml_tag_data_t)) == NULL) {
+	if (tree_init(&xml->tags, tags_cap, sizeof(xml_tag_data_t)) == NULL) {
 		return NULL;
 	}
 
-	if (list_init(&xml->attrs, cap, sizeof(xml_attr_data_t)) == NULL) {
+	if (list_init(&xml->attrs, attrs_cap, sizeof(xml_attr_data_t)) == NULL) {
 		return NULL;
 	}
 

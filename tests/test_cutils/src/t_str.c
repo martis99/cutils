@@ -1,5 +1,6 @@
 #include "t_str.h"
 
+#include "mem.h"
 #include "str.h"
 
 #include "test.h"
@@ -58,6 +59,10 @@ TEST(t_strf)
 	START;
 
 	strf(NULL);
+
+	mem_oom(1);
+	EXPECT_EQ(strf("%s", "a").data, NULL);
+	mem_oom(0);
 
 	str_t str = strf("%s", "a");
 
@@ -163,6 +168,9 @@ TEST(t_str_resize)
 
 	EXPECT_EQ(str_resize(NULL, 0), 1);
 	EXPECT_EQ(str_resize(&str, 8), 0);
+	mem_oom(1);
+	EXPECT_EQ(str_resize(&str, 32), 1);
+	mem_oom(0);
 	EXPECT_EQ(str_resize(&str, 32), 0);
 
 	str_free(&str);
@@ -175,15 +183,18 @@ TEST(t_str_catc)
 	START;
 
 	str_t ref = strc("abc", 3);
-	str_t str = strn("abc", 3, 16);
+	str_t str = strn("abc", 3, 4);
 
 	EXPECT_EQ(str_catc(NULL, "", 0), NULL);
 	EXPECT_EQ(str_catc(&str, NULL, 0), NULL);
 	EXPECT_EQ(str_catc(&ref, "def", 2), NULL);
+	mem_oom(1);
+	EXPECT_EQ(str_catc(&str, "def", 2), NULL);
+	mem_oom(0);
 	EXPECT_EQ(str_catc(&str, "def", 2), &str);
 
 	EXPECT_STR(str.data, "abcde");
-	EXPECT_EQ(str.size, 16);
+	EXPECT_EQ(str.size, 6);
 	EXPECT_EQ(str.len, 5);
 	EXPECT_EQ(str.ref, 0);
 
@@ -354,6 +365,8 @@ TEST(t_str_split)
 	EXPECT_EQ(str_split(str, 0, NULL, &str), 1);
 	EXPECT_EQ(str_split(str, 'b', NULL, &ref), 1);
 
+	str_free(&str);
+
 	END;
 }
 
@@ -386,7 +399,7 @@ TEST(t_str_split_buf)
 	str_t l	  = strb(lbuf, sizeof(lbuf), 6);
 	str_t r	  = strb(rbuf, sizeof(rbuf), 6);
 
-	str_split(str, ' ', &l, &r);
+	EXPECT_EQ(str_split(str, ' ', &l, &r), 0);
 
 	EXPECT_STRN(l.data, "buf1: abc", 9);
 	EXPECT_EQ(l.len, 9);
@@ -401,10 +414,13 @@ TEST(t_str_split_own)
 	START;
 
 	str_t str = strc("abc defgh ijkl", 14);
-	str_t l	  = strz(18);
-	str_t r	  = strz(18);
+	str_t l	  = strz(0);
+	str_t r	  = strz(0);
 
-	str_split(str, ' ', &l, &r);
+	mem_oom(1);
+	EXPECT_EQ(str_split(str, ' ', &l, &r), 1);
+	mem_oom(0);
+	EXPECT_EQ(str_split(str, ' ', &l, &r), 0);
 
 	EXPECT_STRN(l.data, "abc", 3);
 	EXPECT_EQ(l.len, 3);

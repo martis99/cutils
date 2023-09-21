@@ -467,16 +467,8 @@ static int replace_refs(make_t *make, str_t *res)
 static str_t make_str(const make_t *make, const make_str_data_t *str)
 {
 	switch (str->type) {
-	case MAKE_STR_STR: return str->str;
-	case MAKE_STR_VAR: {
-		make_var_data_t *ref = make_var_get(make, str->var);
-		if (ref == NULL) {
-			return str_null();
-		}
-
-		return ref->ref;
-	}
-	default: return str_null();
+	case MAKE_STR_VAR: return make_var_get(make, str->var)->ref;
+	default: return str->str;
 	}
 }
 
@@ -498,10 +490,6 @@ static int make_var_expand(make_t *make, make_var_data_t *var)
 	switch (var->type) {
 	case MAKE_VAR_APP: {
 		make_var_data_t *inst = make_var_get(make, make_var_get_name(make, var->name));
-		if (inst == NULL) {
-			return 1;
-		}
-
 		str_cat(&inst->value, STR(" "));
 		str_cat(&inst->value, var->value);
 		break;

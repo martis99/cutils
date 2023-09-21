@@ -10,11 +10,7 @@ typedef struct header_s {
 static inline lnode_t init_node(list_t *list, lnode_t node)
 {
 	header_t *ptr = arr_get(list, node);
-	if (ptr == NULL) {
-		return LIST_END;
-	}
-
-	ptr->next = LIST_END;
+	ptr->next     = LIST_END;
 	return node;
 }
 

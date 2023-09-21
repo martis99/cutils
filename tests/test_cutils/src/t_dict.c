@@ -1,6 +1,7 @@
 #include "t_dict.h"
 
 #include "dict.h"
+#include "mem.h"
 
 #include "test.h"
 
@@ -11,7 +12,10 @@ TEST(t_dict_init_free)
 	dict_t dict = { 0 };
 
 	EXPECT_EQ(dict_init(NULL, 0), NULL);
-	EXPECT_EQ(dict_init(&dict, 0), &dict);
+	mem_oom(1);
+	EXPECT_EQ(dict_init(&dict, 1), NULL);
+	mem_oom(0);
+	EXPECT_EQ(dict_init(&dict, 1), &dict);
 
 	dict_free(NULL);
 	dict_free(&dict);

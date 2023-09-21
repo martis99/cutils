@@ -2,6 +2,7 @@
 
 #include "cstr.h"
 #include "path.h"
+#include "platform.h"
 
 #include "test.h"
 
@@ -108,10 +109,17 @@ TEST(t_path_calc_rel)
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), NULL, 0, NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), CSTR("a/b/c/d/"), NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), CSTR("a/b/c/d/"), &path), 0);
+#if defined(C_WIN)
+	EXPECT_STR(path.path, "\\d/");
+#else
 	EXPECT_STR(path.path, "/d/");
+#endif
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c"), CSTR("a/d/e/f"), &path), 0);
+#if defined(C_WIN)
+	EXPECT_STR(path.path, "..\\..\\d/e/f");
+#else
 	EXPECT_STR(path.path, "../../d/e/f");
-
+#endif
 	END;
 }
 

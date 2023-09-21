@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 	mem_init(&mem_stats);
 
 	xml_t xml = { 0 };
-	xml_init(&xml, 8);
+	xml_init(&xml, 8, 8);
 
 	xml_tag_t parent = xml_add_tag(&xml, TREE_END, STR("Parent"));
 

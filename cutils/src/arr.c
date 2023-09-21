@@ -6,7 +6,7 @@
 
 arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 {
-	if (arr == NULL || cap == 0) {
+	if (arr == NULL) {
 		return NULL;
 	}
 
@@ -35,20 +35,23 @@ void arr_free(arr_t *arr)
 	arr->size = 0;
 }
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 static inline int arr_resize(arr_t *arr)
 {
 	if (arr->cnt < arr->cap) {
 		return 0;
 	}
 
-	const size_t node_size = arr->size;
+	size_t new_cap = MAX(1, arr->cap * 2);
 
-	size_t old_size = arr->cap * node_size;
-	arr->cap *= 2;
-	arr->data = mem_realloc(arr->data, arr->cap * node_size, old_size);
-	if (arr->data == NULL) {
+	void *data = mem_realloc(arr->data, new_cap * arr->size, arr->cap * arr->size);
+	if (data == NULL) {
 		return 1;
 	}
+
+	arr->data = data;
+	arr->cap  = new_cap;
 
 	return 0;
 }
@@ -143,11 +146,11 @@ arr_t *arr_add_all(arr_t *arr, const arr_t *src)
 		return NULL;
 	}
 
-	void *ret = mem_cpy((byte *)arr->data + arr->cnt * arr->size, arr->cap * arr->size - arr->cnt * arr->size, src->data, src->cnt * src->size);
+	mem_cpy((byte *)arr->data + arr->cnt * arr->size, arr->cap * arr->size - arr->cnt * arr->size, src->data, src->cnt * src->size);
 
 	arr->cnt += src->cnt;
 
-	return ret;
+	return arr;
 }
 
 arr_t *arr_add_unique(arr_t *arr, const arr_t *src)
@@ -179,13 +182,8 @@ arr_t *arr_merge_all(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 		return NULL;
 	}
 
-	if (arr_add_all(arr, arr1) == NULL) {
-		return NULL;
-	}
-
-	if (arr_add_all(arr, arr2) == NULL) {
-		return NULL;
-	}
+	arr_add_all(arr, arr1);
+	arr_add_all(arr, arr2);
 
 	return arr;
 }
@@ -200,13 +198,8 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 		return NULL;
 	}
 
-	if (arr_add_unique(arr, arr1) == NULL) {
-		return NULL;
-	}
-
-	if (arr_add_unique(arr, arr2) == NULL) {
-		return NULL;
-	}
+	arr_add_unique(arr, arr1);
+	arr_add_unique(arr, arr2);
 
 	return arr;
 }

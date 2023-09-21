@@ -26,4 +26,6 @@ int mem_cmp(const void *l, const void *r, size_t size);
 
 void mem_free(void *memory, size_t size);
 
+void mem_oom(int oom);
+
 #endif

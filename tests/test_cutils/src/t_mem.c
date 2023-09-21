@@ -1,14 +1,51 @@
 #include "t_mem.h"
 
+#include "file.h"
 #include "mem.h"
 
 #include "test.h"
+
+#define TEST_FILE "t_mem.txt"
 
 TEST(t_mem_get_stats)
 {
 	START;
 
 	EXPECT_NE(mem_get_stats(), NULL);
+
+	END;
+}
+
+TEST(t_mem_print, FILE *file)
+{
+	START;
+
+	mem_stats_t *mem_stats = (mem_stats_t *)mem_get_stats();
+
+	size_t mem_max = mem_stats->mem_max;
+
+	mem_stats->mem_max = 10;
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		mem_print(file);
+	}
+
+	mem_stats->mem_max = 1024 + 10;
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		mem_print(file);
+	}
+
+	mem_stats->mem_max = 1024 * 1024 + 10;
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		mem_print(file);
+	}
+
+	mem_stats->mem_max = mem_max;
 
 	END;
 }
@@ -94,15 +131,34 @@ TEST(t_mem_cmp)
 	END;
 }
 
+TEST(t_mem_oom)
+{
+	START;
+
+	mem_oom(1);
+	mem_oom(0);
+
+	END;
+}
+
 STEST(t_mem)
 {
 	SSTART;
+
+	FILE *file = file_open(TEST_FILE, "wb+");
+
 	RUN(t_mem_get_stats);
+	RUN(t_mem_print, file);
 	RUN(t_mem_alloc);
 	RUN(t_mem_calloc);
 	RUN(t_mem_realloc);
 	RUN(t_mem_set);
 	RUN(t_mem_cpy);
 	RUN(t_mem_cmp);
+	RUN(t_mem_oom);
+
+	file_close(file);
+	file_delete(TEST_FILE);
+
 	SEND;
 }

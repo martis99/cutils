@@ -2,6 +2,7 @@
 
 #include "file.h"
 #include "list.h"
+#include "mem.h"
 #include "print.h"
 
 #include "test.h"
@@ -15,8 +16,10 @@ TEST(t_list_init_free)
 	list_t list = { 0 };
 
 	EXPECT_EQ(list_init(NULL, 0, sizeof(int)), NULL);
-	EXPECT_EQ(list_init(&list, 0, sizeof(int)), NULL);
-	EXPECT_NE(list_init(&list, 1, sizeof(int)), NULL);
+	mem_oom(1);
+	EXPECT_EQ(list_init(&list, 1, sizeof(int)), NULL);
+	mem_oom(0);
+	EXPECT_EQ(list_init(&list, 1, sizeof(int)), &list);
 
 	EXPECT_NE(list.data, NULL);
 	EXPECT_EQ(list.cap, 1);
@@ -42,7 +45,7 @@ TEST(t_list_add)
 	list_init(&list, 1, sizeof(int));
 
 	EXPECT_EQ(list_add(NULL), LIST_END);
-	EXPECT_NE(list_add(&list), LIST_END);
+	EXPECT_EQ(list_add(&list), 0);
 
 	EXPECT_EQ(list.cnt, 1);
 	EXPECT_EQ(list.cap, 1);
@@ -150,7 +153,7 @@ TEST(t_list_add_next)
 
 	EXPECT_EQ(list_add_next(NULL, LIST_END), LIST_END);
 	EXPECT_EQ(list_add_next(&list, LIST_END), LIST_END);
-	EXPECT_NE(list_add_next(&list, list_add(&list)), LIST_END);
+	EXPECT_EQ(list_add_next(&list, list_add(&list)), 1);
 
 	EXPECT_EQ(list.cnt, 2);
 	EXPECT_EQ(list.cap, 2);
@@ -216,7 +219,7 @@ TEST(t_list_set_next)
 	EXPECT_EQ(list_set_next(NULL, LIST_END, LIST_END), LIST_END);
 	EXPECT_EQ(list_set_next(&list, LIST_END, LIST_END), LIST_END);
 	EXPECT_EQ(list_set_next(&list, node, LIST_END), LIST_END);
-	EXPECT_NE(list_set_next(&list, node, list_add(&list)), LIST_END);
+	EXPECT_EQ(list_set_next(&list, node, list_add(&list)), 1);
 
 	EXPECT_EQ(list.cnt, 2);
 	EXPECT_EQ(list.cap, 2);

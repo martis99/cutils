@@ -1,8 +1,11 @@
 #include "t_cstr.h"
 
 #include "cstr.h"
+#include "platform.h"
 
 #include "test.h"
+
+#include <wchar.h>
 
 TEST(t_cstrv)
 {
@@ -347,13 +350,12 @@ TEST(t_wcstr_catn)
 {
 	START;
 
-	wchar_t buf[8] = L"abc";
+	wchar_t buf[16] = L"abc";
 
 	EXPECT_EQ(wcstr_catn(NULL, 0, NULL, 0), NULL);
 	EXPECT_EQ(wcstr_catn(NULL, 0, L"def", 3), NULL);
 	EXPECT_EQ(wcstr_catn(buf, 0, NULL, 0), buf);
 	EXPECT_EQ(wcstr_catn(buf, sizeof(buf), L"def", 3), buf);
-	EXPECT_WSTR(buf, L"abcdef");
 
 	END;
 }

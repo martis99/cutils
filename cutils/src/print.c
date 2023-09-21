@@ -102,6 +102,9 @@ size_t c_wprintv(const wchar *fmt, va_list args)
 	va_list copy;
 	va_copy(copy, args);
 	size_t ret = vwprintf(fmt, copy);
+	if (ret == -1) {
+		ret = 0;
+	}
 	va_end(copy);
 	return ret;
 }

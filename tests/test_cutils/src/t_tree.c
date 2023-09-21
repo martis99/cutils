@@ -15,8 +15,7 @@ TEST(t_tree_init_free)
 	tree_t tree = { 0 };
 
 	EXPECT_EQ(tree_init(NULL, 0, sizeof(int)), NULL);
-	EXPECT_EQ(tree_init(&tree, 0, sizeof(int)), NULL);
-	EXPECT_NE(tree_init(&tree, 1, sizeof(int)), NULL);
+	EXPECT_EQ(tree_init(&tree, 1, sizeof(int)), &tree);
 
 	EXPECT_NE(tree.data, NULL);
 	EXPECT_EQ(tree.cap, 1);
@@ -42,7 +41,7 @@ TEST(t_tree_add)
 	tree_init(&tree, 1, sizeof(int));
 
 	EXPECT_EQ(tree_add(NULL), TREE_END);
-	EXPECT_NE(tree_add(&tree), TREE_END);
+	EXPECT_EQ(tree_add(&tree), 0);
 
 	EXPECT_EQ(tree.cnt, 1);
 	EXPECT_EQ(tree.cap, 1);
@@ -61,7 +60,7 @@ TEST(t_tree_add_child)
 
 	EXPECT_EQ(tree_add_child(NULL, TREE_END), TREE_END);
 	EXPECT_EQ(tree_add_child(&tree, TREE_END), TREE_END);
-	EXPECT_NE(tree_add_child(&tree, tree_add(&tree)), TREE_END);
+	EXPECT_EQ(tree_add_child(&tree, tree_add(&tree)), 1);
 
 	EXPECT_EQ(tree.cnt, 2);
 	EXPECT_EQ(tree.cap, 2);
@@ -124,7 +123,7 @@ TEST(t_tree_add_next)
 
 	EXPECT_EQ(tree_add_next(NULL, TREE_END), TREE_END);
 	EXPECT_EQ(tree_add_next(&tree, TREE_END), TREE_END);
-	EXPECT_NE(tree_add_next(&tree, tree_add(&tree)), TREE_END);
+	EXPECT_EQ(tree_add_next(&tree, tree_add(&tree)), 1);
 
 	EXPECT_EQ(tree.cnt, 2);
 	EXPECT_EQ(tree.cap, 2);
@@ -288,7 +287,7 @@ TEST(t_tree_get_child)
 	const tnode_t n2  = tree_add_child(&tree, 0);
 	const tnode_t n12 = tree_add_child(&tree, n1);
 
-	EXPECT_NE(tree_get_child(&tree, 0), TREE_END);
+	EXPECT_EQ(tree_get_child(&tree, 0), 1);
 
 	tree_free(&tree);
 

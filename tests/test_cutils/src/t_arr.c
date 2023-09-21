@@ -2,6 +2,7 @@
 
 #include "arr.h"
 #include "file.h"
+#include "mem.h"
 #include "print.h"
 
 #include "test.h"
@@ -15,8 +16,10 @@ TEST(t_arr_init_free)
 	arr_t arr = { 0 };
 
 	EXPECT_EQ(arr_init(NULL, 0, sizeof(int)), NULL);
-	EXPECT_EQ(arr_init(&arr, 0, sizeof(int)), NULL);
-	EXPECT_NE(arr_init(&arr, 1, sizeof(int)), NULL);
+	mem_oom(1);
+	EXPECT_EQ(arr_init(&arr, 1, sizeof(int)), NULL);
+	mem_oom(0);
+	EXPECT_EQ(arr_init(&arr, 1, sizeof(int)), &arr);
 
 	EXPECT_NE(arr.data, NULL);
 	EXPECT_EQ(arr.cap, 1);
@@ -39,11 +42,14 @@ TEST(t_arr_add)
 	START;
 
 	arr_t arr = { 0 };
-	arr_init(&arr, 1, sizeof(int));
+	arr_init(&arr, 0, sizeof(int));
 
 	EXPECT_EQ(arr_add(NULL), ARR_END);
-	EXPECT_NE(arr_add(&arr), ARR_END);
-	EXPECT_NE(arr_add(&arr), ARR_END);
+	mem_oom(1);
+	EXPECT_EQ(arr_add(&arr), ARR_END);
+	mem_oom(0);
+	EXPECT_EQ(arr_add(&arr), 0);
+	EXPECT_EQ(arr_add(&arr), 1);
 	EXPECT_EQ(arr.cnt, 2);
 	EXPECT_EQ(arr.cap, 2);
 
@@ -99,19 +105,19 @@ TEST(t_arr_app)
 	START;
 
 	arr_t arr = { 0 };
-	arr_init(&arr, 2, sizeof(int));
-
-	EXPECT_EQ(arr_app(NULL, NULL), ARR_END);
-	EXPECT_EQ(arr_app(&arr, NULL), ARR_END);
+	arr_init(&arr, 0, sizeof(int));
 
 	const int v0 = 1;
 	const int v1 = 2;
 
-	uint i0 = arr_app(&arr, &v0);
-	uint i1 = arr_app(&arr, &v1);
+	EXPECT_EQ(arr_app(NULL, NULL), ARR_END);
+	EXPECT_EQ(arr_app(&arr, NULL), ARR_END);
+	mem_oom(1);
+	EXPECT_EQ(arr_app(&arr, &v0), ARR_END);
+	mem_oom(0);
 
-	EXPECT_EQ(i0, 0);
-	EXPECT_EQ(i1, 1);
+	EXPECT_EQ(arr_app(&arr, &v0), 0);
+	EXPECT_EQ(arr_app(&arr, &v1), 1);
 	EXPECT_EQ(*(int *)arr_get(&arr, 0), 1);
 	EXPECT_EQ(*(int *)arr_get(&arr, 1), 2);
 	EXPECT_EQ(arr.cnt, 2);
@@ -195,8 +201,8 @@ TEST(t_arr_add_all)
 
 	EXPECT_EQ(arr_add_all(NULL, &arr1), NULL);
 	EXPECT_EQ(arr_add_all(&arr, NULL), NULL);
-	EXPECT_NE(arr_add_all(&arr, &arr0), NULL);
-	EXPECT_NE(arr_add_all(&arr, &arr1), NULL);
+	EXPECT_EQ(arr_add_all(&arr, &arr0), &arr);
+	EXPECT_EQ(arr_add_all(&arr, &arr1), &arr);
 
 	EXPECT_EQ(arr.cnt, 4);
 	EXPECT_EQ(arr.cap, 4);
@@ -231,8 +237,8 @@ TEST(t_arr_add_unique)
 
 	EXPECT_EQ(arr_add_unique(NULL, &arr1), NULL);
 	EXPECT_EQ(arr_add_unique(&arr, NULL), NULL);
-	EXPECT_NE(arr_add_unique(&arr, &arr0), NULL);
-	EXPECT_NE(arr_add_unique(&arr, &arr1), NULL);
+	EXPECT_EQ(arr_add_unique(&arr, &arr0), &arr);
+	EXPECT_EQ(arr_add_unique(&arr, &arr1), &arr);
 
 	EXPECT_EQ(arr.cnt, 3);
 	EXPECT_EQ(arr.cap, 3);
@@ -270,7 +276,7 @@ TEST(t_arr_merge_all)
 	EXPECT_EQ(arr_merge_all(&arr, &arr0, NULL), NULL);
 	EXPECT_EQ(arr_merge_all(&arr, &arrs, &arr1), NULL);
 	EXPECT_EQ(arr_merge_all(&arr, &arr0, &arrs), NULL);
-	EXPECT_NE(arr_merge_all(&arr, &arr0, &arr1), NULL);
+	EXPECT_EQ(arr_merge_all(&arr, &arr0, &arr1), &arr);
 
 	EXPECT_EQ(arr.cnt, 4);
 	EXPECT_EQ(arr.cap, 4);

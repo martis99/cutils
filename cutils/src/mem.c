@@ -7,10 +7,12 @@
 #include <stdlib.h>
 
 static mem_stats_t *s_stats;
+static int s_oom;
 
 void mem_init(mem_stats_t *stats)
 {
 	s_stats = stats;
+	s_oom	= 0;
 }
 
 const mem_stats_t *mem_get_stats()
@@ -44,6 +46,10 @@ void mem_print(FILE *file)
 
 void *mem_alloc(size_t size)
 {
+	if (size > 0 && s_oom) {
+		return NULL;
+	}
+
 	s_stats->mem += size;
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
 	s_stats->allocs++;
@@ -53,6 +59,10 @@ void *mem_alloc(size_t size)
 
 void *mem_calloc(size_t count, size_t size)
 {
+	if (count * size > 0 && s_oom) {
+		return NULL;
+	}
+
 	s_stats->mem += count * size;
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
 	s_stats->allocs++;
@@ -62,6 +72,10 @@ void *mem_calloc(size_t count, size_t size)
 
 void *mem_realloc(void *memory, size_t new_size, size_t old_size)
 {
+	if (new_size > old_size && s_oom) {
+		return NULL;
+	}
+
 	s_stats->mem -= old_size;
 	s_stats->mem += new_size;
 	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
@@ -98,4 +112,9 @@ void mem_free(void *memory, size_t size)
 {
 	s_stats->mem -= size;
 	free(memory);
+}
+
+void mem_oom(int oom)
+{
+	s_oom = oom;
 }

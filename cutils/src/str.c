@@ -11,7 +11,7 @@ str_t str_null()
 str_t strz(size_t size)
 {
 	char *data = mem_alloc(size);
-	if (size > 0) {
+	if (data != NULL && size > 0) {
 		data[0] = '\0';
 	}
 
@@ -44,8 +44,10 @@ str_t strn(const char *cstr, size_t len, size_t size)
 	}
 
 	char *data = mem_alloc(size);
-	mem_cpy(data, size, cstr, len);
-	data[len] = '\0';
+	if (data != NULL) {
+		mem_cpy(data, size, cstr, len);
+		data[len] = '\0';
+	}
 
 	return (str_t){
 		.data = data,
@@ -156,7 +158,7 @@ str_t *str_catc(str_t *str, const char *cstr, size_t len)
 		return NULL;
 	}
 
-	if (!str->ref && str_resize(str, str->len + len)) {
+	if (!str->ref && str_resize(str, str->len + len + 1)) {
 		return NULL;
 	}
 
