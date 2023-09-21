@@ -1,4 +1,4 @@
-NAME: cutils_example_xml
+NAME: example_cutils
 TYPE: EXE
 SOURCE: src
 DEPENDS: cutils

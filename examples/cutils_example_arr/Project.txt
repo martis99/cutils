@@ -1,5 +1,0 @@
-NAME: cutils_example_arr
-TYPE: EXE
-SOURCE: src
-DEPENDS: cutils
-INCLUDES: cutils
