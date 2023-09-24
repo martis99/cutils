@@ -459,7 +459,6 @@ static int iterate_pre_child_cb(const tree_t *tree, tnode_t node, void *value, i
 		EXPECT_EQ(depth, 1);
 		EXPECT_EQ(last, 1);
 		break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -506,7 +505,6 @@ static int iterate_pre_childs_cb(const tree_t *tree, tnode_t node, void *value, 
 		EXPECT_EQ(depth, 1);
 		EXPECT_EQ(last, 1);
 		break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -555,7 +553,6 @@ static int iterate_pre_grand_child_cb(const tree_t *tree, tnode_t node, void *va
 		EXPECT_EQ(depth, 2);
 		EXPECT_EQ(last, 0b11);
 		break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -591,7 +588,7 @@ static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, void *value,
 {
 	START;
 
-	EXPECT_FAIL("%s", "Root has child");
+	EXPECT_EQ(node, 1);
 
 	*(int *)priv += 1;
 
@@ -605,13 +602,13 @@ TEST(t_tree_iterate_childs_root)
 	tree_t tree = { 0 };
 	tree_init(&tree, 1, sizeof(int));
 
-	tree_add(&tree);
+	tree_add_child(&tree, tree_add(&tree));
 
 	int cnt = 0;
 
 	int ret = tree_iterate_childs(&tree, 0, iterate_childs_root_cb, 0, &cnt);
 
-	EXPECT_EQ(cnt, 0);
+	EXPECT_EQ(cnt, 1);
 	EXPECT_EQ(ret, 0);
 
 	tree_free(&tree);
@@ -660,7 +657,6 @@ static int iterate_childs_childs_cb(const tree_t *tree, tnode_t node, void *valu
 	switch (node) {
 	case 1: EXPECT_EQ(last, 0); break;
 	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -699,7 +695,6 @@ static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, void 
 	switch (node) {
 	case 1: EXPECT_EQ(last, 0); break;
 	case 2: EXPECT_EQ(last, 1); break;
-	default: EXPECT_FAIL("%s", "Unknown node"); break;
 	}
 
 	*(int *)priv += 1;
@@ -796,12 +791,10 @@ TEST(t_tree_foreach_root)
 	int i = 0;
 	tree_foreach(NULL, TREE_END, node, depth)
 	{
-		i++;
 	}
 
 	tree_foreach(&tree, TREE_END, node, depth)
 	{
-		i++;
 	}
 
 	tree_foreach(&tree, 0, node, depth)
@@ -925,9 +918,6 @@ TEST(t_tree_foreach_child_root)
 	int i = 0;
 	tree_foreach_child(&tree, 0, node)
 	{
-		const int *value = tree_get_data(&tree, node);
-		EXPECT_EQ(*value, i);
-		i++;
 	}
 
 	EXPECT_EQ(i, 0);

@@ -110,6 +110,10 @@ int mem_cmp(const void *l, const void *r, size_t size)
 
 void mem_free(void *memory, size_t size)
 {
+	if (memory == NULL) {
+		return;
+	}
+
 	s_stats->mem -= size;
 	free(memory);
 }
