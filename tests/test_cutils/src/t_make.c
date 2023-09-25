@@ -838,6 +838,36 @@ TEST(t_make_print_rule_empty, FILE *file)
 	END;
 }
 
+TEST(t_make_print_rule_empty_var, FILE *file)
+{
+	START;
+
+	make_t make = { 0 };
+	make_init(&make, 1, 1, 1);
+
+	make_add_act(&make, make_create_rule(&make, MRULE(MVAR(MAKE_END)), 1));
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_EQ(make_print(&make, file), 0);
+
+		char buf[64] = { 0 };
+		file_read_ft(file, buf, sizeof(buf));
+
+		const char exp[] = ":\n"
+				   "\n";
+		EXPECT_STR(buf, exp);
+	}
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_EQ(make_dbg(&make, file), 0);
+	}
+
+	make_free(&make);
+
+	END;
+}
+
 TEST(t_make_print_rule_empty_action, FILE *file)
 {
 	START;
@@ -1023,6 +1053,7 @@ TEST(t_make_expand_print, FILE *file)
 	RUN(t_make_expand_print_var_if_true, file);
 	RUN(t_make_expand_print_var_if_false, file);
 	RUN(t_make_print_rule_empty, file);
+	RUN(t_make_print_rule_empty_var, file);
 	RUN(t_make_print_rule_empty_action, file);
 	RUN(t_make_print_rule_depend, file);
 	RUN(t_make_print_rule_depends, file);

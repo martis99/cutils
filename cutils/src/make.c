@@ -124,6 +124,15 @@ make_t *make_init(make_t *make, uint strs_cap, uint acts_cap, uint targets_cap)
 	return make;
 }
 
+static void make_str_free(make_str_data_t *str)
+{
+	if (str->type != MAKE_STR_STR) {
+		return;
+	}
+
+	str_free(&str->str);
+}
+
 static inline void make_var_free(make_var_data_t *var)
 {
 	str_free(&var->name);
@@ -133,9 +142,7 @@ static inline void make_var_free(make_var_data_t *var)
 
 static inline void make_rule_free(make_rule_data_t *rule)
 {
-	if (rule->target.target.type == MAKE_STR_STR) {
-		str_free(&rule->target.target.str);
-	}
+	make_str_free(&rule->target.target);
 	str_free(&rule->target.action);
 }
 
@@ -147,14 +154,10 @@ static inline void make_cmd_free(make_cmd_data_t *cmd)
 
 static inline void make_if_free(make_if_data_t *mif)
 {
-	if (mif->l.type == MAKE_STR_STR) {
-		str_free(&mif->l.str);
-	}
+	make_str_free(&mif->l);
 	str_free(&mif->l_value);
 
-	if (mif->r.type == MAKE_STR_STR) {
-		str_free(&mif->r.str);
-	}
+	make_str_free(&mif->r);
 	str_free(&mif->r_value);
 }
 
@@ -162,6 +165,12 @@ void make_free(make_t *make)
 {
 	if (make == NULL) {
 		return;
+	}
+
+	make_str_data_t *str;
+	list_foreach_all(&make->strs, str)
+	{
+		make_str_free(str);
 	}
 
 	make_act_data_t *act;
@@ -478,7 +487,13 @@ static int replace_refs(make_t *make, str_t *res)
 static str_t make_str(const make_t *make, make_str_data_t str)
 {
 	switch (str.type) {
-	case MAKE_STR_VAR: return make_var_get(make, str.var)->ref;
+	case MAKE_STR_VAR: {
+		make_var_data_t *data = make_var_get(make, str.var);
+		if (data == NULL) {
+			return str_null();
+		}
+		return data->ref;
+	}
 	default: return str.str;
 	}
 }
