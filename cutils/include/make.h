@@ -86,7 +86,7 @@ make_str_t make_ext_set_val(make_t *make, str_t name, make_str_data_t val);
 make_rule_t make_rule_get_target(const make_t *make, make_rule_target_data_t target);
 
 int make_expand(make_t *make);
-str_t make_var_get_expanded(make_t *make, str_t var);
+str_t make_var_get_expanded(const make_t *make, str_t var);
 
 int make_print(const make_t *make, FILE *file);
 

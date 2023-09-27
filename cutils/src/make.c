@@ -93,7 +93,7 @@ static make_var_t make_var_get_name(const make_t *make, str_t name)
 	const make_act_data_t *act;
 	list_foreach_all(&make->acts, act)
 	{
-		if (act->type == MAKE_ACT_VAR && act->var.type == MAKE_VAR_INST && str_eq(act->var.name, name)) {
+		if (act->type == MAKE_ACT_VAR && str_eq(act->var.name, name)) {
 			return _i;
 		}
 	}
@@ -645,7 +645,7 @@ int make_expand(make_t *make)
 	return ret;
 }
 
-str_t make_var_get_expanded(make_t *make, str_t var)
+str_t make_var_get_expanded(const make_t *make, str_t var)
 {
 	if (make == NULL) {
 		return str_null();

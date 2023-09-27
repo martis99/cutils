@@ -416,10 +416,6 @@ TEST(t_make_print, FILE *file)
 	make_add_act(&make, make_create_var(&make, STR(""), -1));
 	EXPECT_EQ(make_print(&make, file), 1);
 
-	/*make_rule_t rule = make_add_act(&make, make_create_rule(&make, MRULE(MSTR(STR("rule"))), 0));
-	make_rule_add_depend(&make, rule, MRULE(MSTR(STR("depend"))));
-	EXPECT_EQ(make_print(&make, file), 1);*/
-
 	make_free(&make);
 
 	END;
