@@ -26,12 +26,8 @@ path_t *path_init(path_t *path, const char *dir, size_t len)
 
 path_t *path_child_s(path_t *path, const char *dir, size_t len, char s)
 {
-	if (path == NULL) {
+	if (path == NULL || dir == NULL || path->len + len + 2 > P_MAX_PATH) {
 		return NULL;
-	}
-
-	if (dir == NULL || path->len + len + 2 > P_MAX_PATH) {
-		return path;
 	}
 
 	if (s != 0) {

@@ -125,7 +125,7 @@ uint arr_index(const arr_t *arr, const void *value)
 	return ARR_END;
 }
 
-uint arr_index_cmp(const arr_t *arr, const void *value, arr_index_cmp_cb cb)
+uint arr_index_cmp(const arr_t *arr, const void *value, arr_cmp_cb cb)
 {
 	if (arr == NULL || value == NULL || cb == NULL) {
 		return ARR_END;
@@ -200,6 +200,32 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2)
 
 	arr_add_unique(arr, arr1);
 	arr_add_unique(arr, arr2);
+
+	return arr;
+}
+
+arr_t *arr_sort(arr_t *arr, arr_cmp_cb cb)
+{
+	if (arr == NULL) {
+		return NULL;
+	}
+
+	if (cb == NULL) {
+		return arr;
+	}
+
+	void *value1;
+	arr_foreach(arr, value1)
+	{
+		void *value2;
+		uint j = _i + 1;
+		arr_foreach_i(arr, value2, j)
+		{
+			if (cb(value1, value2) > 0) {
+				mem_swap(value1, value2, arr->size);
+			}
+		}
+	}
 
 	return arr;
 }

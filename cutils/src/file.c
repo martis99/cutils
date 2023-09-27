@@ -1,10 +1,11 @@
 #include "file.h"
 
+#include "arr.h"
 #include "cstr.h"
+#include "mem.h"
 #include "path.h"
-#include "print.h"
-
 #include "platform.h"
+#include "print.h"
 
 #include <string.h>
 
@@ -307,21 +308,36 @@ int folder_exists_f(const char *format, ...)
 	return exists;
 }
 
+static int name_cmp_cb(const void *a, const void *b)
+{
+	return strcmp(a, b);
+}
+
 int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_cb on_file, void *priv)
 {
 	if (path == NULL) {
 		return 1;
 	}
 
+	int ret = 0;
+
+	arr_t files = { 0 };
+	arr_t dirs  = { 0 };
+
+	arr_init(&files, 32, sizeof(char) * P_MAX_PATH);
+	arr_init(&dirs, 32, sizeof(char) * P_MAX_PATH);
+
+	path_t child_path = *path;
+
 #if defined(C_WIN)
 	WIN32_FIND_DATA file = { 0 };
 	HANDLE find	     = NULL;
 
-	path_t child_path = *path;
 	path_child(&child_path, "*.*", 3);
 
 	if ((find = FindFirstFileA(child_path.path, (LPWIN32_FIND_DATAA)&file)) == INVALID_HANDLE_VALUE) {
-		return 1;
+		ret = 1;
+		goto exit;
 	}
 	child_path.len = path->len;
 
@@ -330,19 +346,11 @@ int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_
 			continue;
 		}
 
-		files_foreach_cb cb = file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? on_folder : on_file;
-		if (cb) {
-			if (path_child(&child_path, (char *)file.cFileName, cstr_len((char *)file.cFileName)) == NULL) {
-				child_path.len = path->len;
-				continue;
-			}
+		arr_t *arr = file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ? &dirs : &files;
 
-			int ret = cb(&child_path, (char *)file.cFileName, priv);
-
-			child_path.len = path->len;
-			if (ret < 0) {
-				return ret;
-			}
+		if (arr != NULL) {
+			char *dest = arr_get(arr, arr_add(arr));
+			mem_cpy(dest, P_MAX_PATH, (char *)file.cFileName, cstr_len((char *)file.cFileName) + 1);
 		}
 	} while (FindNextFileA(find, (LPWIN32_FIND_DATAA)&file));
 
@@ -352,41 +360,70 @@ int files_foreach(const path_t *path, files_foreach_cb on_folder, files_foreach_
 
 	DIR *dir = opendir(path->path);
 	if (!dir) {
-		return 1;
+		ret = 1;
+		goto exit;
 	}
 
-	path_t child_path = *path;
 	struct dirent *dp;
 
 	while ((dp = readdir(dir))) {
-		struct stat stbuf = { 0 };
-
 		if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0) {
-			goto next;
+			continue;
 		}
 
-		if (path_child(&child_path, dp->d_name, cstr_len(dp->d_name)) == NULL) {
-			goto next;
+		arr_t *arr = NULL;
+		switch (dp->d_type) {
+		case 4: arr = &dirs; break;
+		case 8: arr = &files; break;
 		}
 
-		if (stat(child_path.path, &stbuf)) {
-			goto next;
+		if (arr != NULL) {
+			char *dest = arr_get(arr, arr_add(arr));
+			mem_cpy(dest, P_MAX_PATH, dp->d_name, cstr_len(dp->d_name) + 1);
 		}
+	}
 
-		files_foreach_cb cb = folder_exists(child_path.path) ? on_folder : on_file;
-		if (cb) {
-			int ret = cb(&child_path, dp->d_name, priv);
+	closedir(dir);
+#endif
+
+	const char *name;
+	if (on_file) {
+		arr_sort(&files, name_cmp_cb);
+		arr_foreach(&files, name)
+		{
+			path_child(&child_path, name, cstr_len(name));
+
+			ret = on_file(&child_path, name, priv);
 
 			child_path.len = path->len;
 			if (ret < 0) {
-				return ret;
+				goto exit;
 			}
+
+			child_path.len = path->len;
 		}
-next:
-		child_path.len = path->len;
 	}
 
-#endif
+	if (on_folder) {
+		arr_sort(&dirs, name_cmp_cb);
+		arr_foreach(&dirs, name)
+		{
+			path_child(&child_path, name, cstr_len(name));
 
-	return 0;
+			ret = on_folder(&child_path, name, priv);
+
+			child_path.len = path->len;
+			if (ret < 0) {
+				goto exit;
+			}
+
+			child_path.len = path->len;
+		}
+	}
+
+exit:
+	arr_free(&files);
+	arr_free(&dirs);
+
+	return ret;
 }

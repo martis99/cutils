@@ -6,6 +6,8 @@
 
 #include "test.h"
 
+#include <string.h>
+
 #define TEST_FILE "t_file.txt"
 
 TEST(t_file_open_close)
@@ -249,19 +251,75 @@ static int file_err_cb(path_t *path, const char *folder, void *priv)
 	return -1;
 }
 
+static int file_cnt_cb(path_t *path, const char *folder, void *priv)
+{
+	int *index = (int *)priv;
+
+	const char *file = NULL;
+	switch (*index) {
+	case 0: file = "d.txt"; break;
+	case 1: file = "e.txt"; break;
+	case 2: file = "f.txt"; break;
+	}
+
+	(*index)++;
+	return file != NULL && strcmp(folder, file) == 0 ? 0 : -1;
+}
+
+static int folder_cnt_cb(path_t *path, const char *folder, void *priv)
+{
+	int *index = (int *)priv;
+
+	const char *file = NULL;
+	switch (*index) {
+	case 3: file = "a"; break;
+	case 4: file = "b"; break;
+	case 5: file = "c"; break;
+	}
+
+	(*index)++;
+	return file != NULL && strcmp(folder, file) == 0 ? 0 : -1;
+}
+
 TEST(t_files_foreach)
 {
 	START;
 
 	path_t path = { 0 };
-	path_init(&path, CSTR("./"));
+	path_init(&path, CSTR("./tmp"));
 	path_t not = { 0 };
 	path_init(&not, CSTR("not"));
+
+	folder_create("tmp");
+
+	folder_create("tmp/a");
+	folder_create("tmp/b");
+	folder_create("tmp/c");
+
+	file_close(file_open("tmp/d.txt", "w"));
+	file_close(file_open("tmp/e.txt", "w"));
+	file_close(file_open("tmp/f.txt", "w"));
+
+	int index = 0;
 
 	EXPECT_EQ(files_foreach(NULL, NULL, NULL, NULL), 1);
 	EXPECT_EQ(files_foreach(&not, file_cb, file_cb, NULL), 1);
 	EXPECT_EQ(files_foreach(&path, file_cb, file_cb, NULL), 0);
-	EXPECT_EQ(files_foreach(&path, file_err_cb, file_err_cb, NULL), -1);
+	EXPECT_EQ(files_foreach(&path, file_err_cb, file_cb, NULL), -1);
+	EXPECT_EQ(files_foreach(&path, file_cb, file_err_cb, NULL), -1);
+	EXPECT_EQ(files_foreach(&path, folder_cnt_cb, file_cnt_cb, &index), 0);
+
+	file_delete("tmp/f.txt");
+	file_delete("tmp/e.txt");
+	file_delete("tmp/d.txt");
+
+	folder_delete("tmp/c");
+	folder_delete("tmp/b");
+	folder_delete("tmp/a");
+
+	folder_delete("tmp");
+
+	EXPECT_EQ(index, 6);
 
 	END;
 }

@@ -172,6 +172,7 @@ void make_free(make_t *make)
 	{
 		make_str_free(str);
 	}
+	list_free(&make->strs);
 
 	make_act_data_t *act;
 	list_foreach_all(&make->acts, act)
@@ -183,9 +184,14 @@ void make_free(make_t *make)
 		case MAKE_ACT_IF: make_if_free(&act->mif); break;
 		}
 	}
-
-	list_free(&make->strs);
 	list_free(&make->acts);
+
+	make_rule_target_data_t *target;
+	list_foreach_all(&make->targets, target)
+	{
+		make_str_free(&target->target);
+		str_free(&target->action);
+	}
 	list_free(&make->targets);
 
 	make->g_acts = MAKE_END;

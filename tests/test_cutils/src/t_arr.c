@@ -1,6 +1,7 @@
 #include "t_arr.h"
 
 #include "arr.h"
+#include "cstr.h"
 #include "file.h"
 #include "mem.h"
 #include "print.h"
@@ -332,6 +333,38 @@ TEST(t_arr_merge_unique)
 	END;
 }
 
+static int t_arr_sort_cb(const void *a, const void *b)
+{
+	return cstr_cmp(a, 1, b, 1);
+}
+
+TEST(t_arr_sort)
+{
+	START;
+
+	arr_t arr = { 0 };
+
+	arr_init(&arr, 2, sizeof(char) * 2);
+
+	arr_app(&arr, "d");
+	arr_app(&arr, "c");
+	arr_app(&arr, "b");
+	arr_app(&arr, "a");
+
+	EXPECT_EQ(arr_sort(NULL, NULL), NULL);
+	EXPECT_EQ(arr_sort(&arr, NULL), &arr);
+	EXPECT_EQ(arr_sort(&arr, t_arr_sort_cb), &arr);
+
+	EXPECT_STR(arr_get(&arr, 0), "a");
+	EXPECT_STR(arr_get(&arr, 1), "b");
+	EXPECT_STR(arr_get(&arr, 2), "c");
+	EXPECT_STR(arr_get(&arr, 3), "d");
+
+	arr_free(&arr);
+
+	END;
+}
+
 TEST(t_arr_foreach)
 {
 	START;
@@ -416,6 +449,7 @@ STEST(t_arr)
 	RUN(t_arr_add_unique);
 	RUN(t_arr_merge_all);
 	RUN(t_arr_merge_unique);
+	RUN(t_arr_sort);
 	RUN(t_arr_foreach);
 	RUN(t_arr_print, file);
 

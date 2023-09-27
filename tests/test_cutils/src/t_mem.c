@@ -131,6 +131,23 @@ TEST(t_mem_cmp)
 	END;
 }
 
+TEST(t_mem_swap)
+{
+	START;
+
+	char a[] = "abc";
+	char b[] = "def";
+
+	EXPECT_EQ(mem_swap(NULL, NULL, 0), 1);
+	EXPECT_EQ(mem_swap(a, NULL, 0), 1);
+	EXPECT_EQ(mem_swap(a, b, sizeof(a)), 0);
+
+	EXPECT_STR(a, "def");
+	EXPECT_STR(b, "abc");
+
+	END;
+}
+
 TEST(t_mem_oom)
 {
 	START;
@@ -155,6 +172,7 @@ STEST(t_mem)
 	RUN(t_mem_set);
 	RUN(t_mem_cpy);
 	RUN(t_mem_cmp);
+	RUN(t_mem_swap);
 	RUN(t_mem_oom);
 
 	file_close(file);

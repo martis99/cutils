@@ -27,7 +27,7 @@ TEST(t_path_child_s)
 	path_init(&path, CSTR("a"));
 
 	EXPECT_EQ(path_child_s(NULL, NULL, 0, 0), NULL);
-	EXPECT_EQ(path_child_s(&path, NULL, 0, 0), &path);
+	EXPECT_EQ(path_child_s(&path, NULL, 0, 0), NULL);
 	EXPECT_EQ(path_child_s(&path, CSTR("b"), '/'), &path);
 
 	EXPECT_EQ(path.len, 3);
@@ -44,7 +44,7 @@ TEST(t_path_child)
 	path_init(&path, CSTR("a"));
 
 	EXPECT_EQ(path_child(NULL, NULL, 0), NULL);
-	EXPECT_EQ(path_child(&path, NULL, 0), &path);
+	EXPECT_EQ(path_child(&path, NULL, 0), NULL);
 	EXPECT_EQ(path_child(&path, CSTR("b")), &path);
 
 	EXPECT_EQ(path.len, 3);

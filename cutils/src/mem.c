@@ -108,6 +108,24 @@ int mem_cmp(const void *l, const void *r, size_t size)
 	return memcmp(l, r, size);
 }
 
+int mem_swap(void *ptr1, void *ptr2, size_t size)
+{
+	if (ptr1 == NULL || ptr2 == NULL) {
+		return 1;
+	}
+
+	unsigned char *byte_ptr1 = (unsigned char *)ptr1;
+	unsigned char *byte_ptr2 = (unsigned char *)ptr2;
+
+	for (size_t i = 0; i < size; i++) {
+		unsigned char temp = byte_ptr1[i];
+		byte_ptr1[i]	   = byte_ptr2[i];
+		byte_ptr2[i]	   = temp;
+	}
+
+	return 0;
+}
+
 void mem_free(void *memory, size_t size)
 {
 	if (memory == NULL) {
