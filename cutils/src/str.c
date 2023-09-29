@@ -283,13 +283,21 @@ int str_cstr(str_t str, str_t *l, str_t *r, const char *s, size_t s_len)
 str_t str_cpy(str_t src)
 {
 	str_t copy = strz(src.len + 1);
-
-	cstr_cpy((char *)copy.data, copy.size, src.data, src.len);
-	((char *)copy.data)[src.len] = '\0';
-
-	copy.len = src.len;
-
+	str_cpyd(src, &copy);
 	return copy;
+}
+
+int str_cpyd(str_t src, str_t *dst)
+{
+	if (dst == NULL || dst->size < src.len + 1) {
+		return 1;
+	}
+
+	cstr_cpy((char *)dst->data, dst->size, src.data, src.len);
+	dst->len = src.len;
+	((char *)dst->data)[dst->len] = '\0';
+
+	return 0;
 }
 
 static int append(str_t *str, const char *cstr, size_t len)

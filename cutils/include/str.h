@@ -45,6 +45,7 @@ int str_chr(str_t str, str_t *l, str_t *r, char c);
 int str_cstr(str_t str, str_t *l, str_t *r, const char *s, size_t s_len);
 
 str_t str_cpy(str_t src);
+int str_cpyd(str_t src, str_t *dst);
 
 int str_split(str_t str, char c, str_t *l, str_t *r);
 int str_rsplit(str_t str, char c, str_t *l, str_t *r);

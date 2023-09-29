@@ -87,6 +87,7 @@ make_rule_t make_rule_get_target(const make_t *make, make_rule_target_data_t tar
 
 int make_expand(make_t *make);
 str_t make_var_get_expanded(const make_t *make, str_t var);
+str_t make_var_get_resolved(const make_t *make, str_t var);
 
 int make_print(const make_t *make, FILE *file);
 

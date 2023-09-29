@@ -10,7 +10,8 @@ typedef struct make_var_data_s {
 	make_var_type_t type;
 	lnode_t values;
 	str_t ref;
-	str_t value;
+	str_t expand;
+	str_t resolve;
 	int ext : 1;
 	int expanded : 1;
 } make_var_data_t;
@@ -137,7 +138,8 @@ static inline void make_var_free(make_var_data_t *var)
 {
 	str_free(&var->name);
 	str_free(&var->ref);
-	str_free(&var->value);
+	str_free(&var->expand);
+	str_free(&var->resolve);
 }
 
 static inline void make_rule_free(make_rule_data_t *rule)
@@ -237,7 +239,8 @@ static make_var_t make_create_var_r(make_t *make, str_t name, make_var_type_t ty
 			.type	 = type,
 			.values	 = MAKE_END,
 			.ref	 = strf("$(%.*s)", name.len, name.data),
-			.value	 = strz(MAX_VAR_VALUE_LEN),
+			.expand	 = strz(MAX_VAR_VALUE_LEN),
+			.resolve = strz(MAX_VAR_VALUE_LEN),
 			.ext	 = ext,
 			.expanded = 0,
 		},
@@ -485,7 +488,7 @@ static int replace_refs(make_t *make, str_t *res)
 			continue;
 		}
 
-		found |= str_replace(res, act->var.ref, act->var.value);
+		found |= str_replace(res, act->var.ref, act->var.resolve);
 	}
 	return found;
 }
@@ -506,24 +509,31 @@ static str_t make_str(const make_t *make, make_str_data_t str)
 
 static int make_var_expand(make_t *make, make_var_data_t *var)
 {
-	str_zero(&var->value);
+	str_zero(&var->expand);
+	str_zero(&var->resolve);
 	const make_str_data_t *value;
 	list_foreach(&make->strs, var->values, value)
 	{
-		str_cat(&var->value, make_str(make, *value));
+		str_cat(&var->expand, make_str(make, *value));
 
 		if (list_get_next(&make->strs, _i) != LIST_END) {
-			str_cat(&var->value, STR(" "));
+			str_cat(&var->expand, STR(" "));
 		}
 	}
 
-	replace_refs(make, &var->value);
+	str_cpyd(var->expand, &var->resolve);
+	replace_refs(make, &var->resolve);
 
 	switch (var->type) {
 	case MAKE_VAR_APP: {
 		make_var_data_t *inst = make_var_get(make, make_var_get_name(make, var->name));
-		str_cat(&inst->value, STR(" "));
-		str_cat(&inst->value, var->value);
+		if (var != inst) {
+			str_cat(&inst->expand, STR(" "));
+			str_cat(&inst->expand, var->expand);
+			str_cat(&inst->resolve, STR(" "));
+			str_cat(&inst->resolve, var->resolve);
+		}
+
 		break;
 	}
 	default: break;
@@ -661,7 +671,24 @@ str_t make_var_get_expanded(const make_t *make, str_t var)
 	list_foreach_all(&make->acts, act)
 	{
 		if (act->type == MAKE_ACT_VAR && act->var.expanded && str_eq(act->var.name, var)) {
-			return act->var.value;
+			return act->var.expand;
+		}
+	}
+
+	return str_null();
+}
+
+str_t make_var_get_resolved(const make_t *make, str_t var)
+{
+	if (make == NULL) {
+		return str_null();
+	}
+
+	make_act_data_t *act;
+	list_foreach_all(&make->acts, act)
+	{
+		if (act->type == MAKE_ACT_VAR && act->var.expanded && str_eq(act->var.name, var)) {
+			return act->var.resolve;
 		}
 	}
 
@@ -842,9 +869,10 @@ static inline int make_var_dbg(const make_t *make, const make_var_data_t *var, F
 	}
 	ret |= !c_fprintf(file,
 			  "    REF     : %.*s\n"
-			  "    VALUE   : %.*s\n"
+			  "    EXPANDED: %.*s\n"
+			  "    RESOLVED: %.*s\n"
 			  "\n",
-			  var->ref.len, var->ref.data, var->value.len, var->value.data);
+			  var->ref.len, var->ref.data, var->expand.len, var->expand.data, var->resolve.len, var->resolve.data);
 
 	return ret;
 }

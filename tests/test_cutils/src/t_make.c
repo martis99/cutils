@@ -398,6 +398,21 @@ TEST(t_make_var_get_expanded)
 	END;
 }
 
+TEST(t_make_var_get_resolved)
+{
+	START;
+
+	make_t make = { 0 };
+	make_init(&make, 1, 1, 1);
+
+	EXPECT_EQ(make_var_get_resolved(NULL, STR("")).data, NULL);
+	EXPECT_EQ(make_var_get_resolved(&make, STR("")).data, NULL);
+
+	make_free(&make);
+
+	END;
+}
+
 TEST(t_make_print, FILE *file)
 {
 	START;
@@ -631,6 +646,57 @@ TEST(t_make_expand_print_var_ext_inst, FILE *file)
 		file_read_ft(file, buf, sizeof(buf));
 
 		const char exp[] = "";
+		EXPECT_STR(buf, exp);
+	}
+
+	make_free(&make);
+
+	END;
+}
+
+TEST(t_make_expand_print_var_ref, FILE *file)
+{
+	START;
+
+	make_t make = { 0 };
+	make_init(&make, 1, 1, 1);
+
+	make_var_t ext1 = make_create_var_ext(&make, STR("EXT1"), MAKE_VAR_INST);
+	make_var_t ext2 = make_create_var_ext(&make, STR("EXT2"), MAKE_VAR_INST);
+	make_var_t ext3 = make_create_var_ext(&make, STR("EXT3"), MAKE_VAR_INST);
+	make_var_t ext4 = make_create_var_ext(&make, STR("EXT4"), MAKE_VAR_INST);
+
+	make_var_t var	   = make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_APP));
+	make_var_t var_app = make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_APP));
+
+	make_var_add_val(&make, var, MVAR(ext1));
+	make_var_add_val(&make, var, MVAR(ext2));
+	make_var_add_val(&make, var_app, MVAR(ext3));
+	make_var_add_val(&make, var_app, MVAR(ext4));
+
+	{
+		make_ext_set_val(&make, STR("EXT1"), MSTR(STR("VAL1")));
+		make_ext_set_val(&make, STR("EXT2"), MSTR(STR("VAL2")));
+		make_ext_set_val(&make, STR("EXT3"), MSTR(STR("VAL3")));
+		make_ext_set_val(&make, STR("EXT4"), MSTR(STR("VAL4")));
+
+		EXPECT_EQ(make_expand(&make), 0);
+
+		str_t var_exp = make_var_get_expanded(&make, STR("VAR"));
+		EXPECT_STRN(var_exp.data, "$(EXT1) $(EXT2) $(EXT3) $(EXT4)", var_exp.len);
+
+		str_t var_res = make_var_get_resolved(&make, STR("VAR"));
+		EXPECT_STRN(var_res.data, "VAL1 VAL2 VAL3 VAL4", var_res.len);
+	}
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_EQ(make_print(&make, file), 0);
+
+		char buf[64] = { 0 };
+		file_read_ft(file, buf, sizeof(buf));
+
+		const char exp[] = "VAR += $(EXT1) $(EXT2)\n"
+				   "VAR += $(EXT3) $(EXT4)\n";
 		EXPECT_STR(buf, exp);
 	}
 
@@ -1036,6 +1102,7 @@ TEST(t_make_expand_print, FILE *file)
 	RUN(t_make_ext_set_val);
 	RUN(t_make_expand);
 	RUN(t_make_var_get_expanded);
+	RUN(t_make_var_get_resolved);
 	RUN(t_make_print, file);
 	RUN(t_make_dbg, file);
 	RUN(t_make_expand_print_empty, file);
@@ -1044,6 +1111,7 @@ TEST(t_make_expand_print, FILE *file)
 	RUN(t_make_expand_print_var_inst2, file);
 	RUN(t_make_expand_print_var_app, file);
 	RUN(t_make_expand_print_var_ext_inst, file);
+	RUN(t_make_expand_print_var_ref, file);
 	RUN(t_make_expand_print_if_empty, file);
 	RUN(t_make_expand_print_if_lr, file);
 	RUN(t_make_expand_print_var_if_true, file);

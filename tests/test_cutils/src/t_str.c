@@ -422,6 +422,25 @@ TEST(t_str_cpy)
 	END;
 }
 
+TEST(t_str_cpyd)
+{
+	START;
+
+	str_t src = strc("abc", 3);
+	str_t dst = strz(4);
+
+	EXPECT_EQ(str_cpyd(src, NULL), 1);
+	EXPECT_EQ(str_cpyd(dst, &src), 1);
+	EXPECT_EQ(str_cpyd(src, &dst), 0);
+
+	EXPECT_STR(dst.data, "abc");
+	EXPECT_EQ(dst.len, 3);
+
+	str_free(&dst);
+
+	END;
+}
+
 TEST(t_str_split)
 {
 	START;
@@ -634,6 +653,7 @@ STEST(t_str)
 	RUN(t_str_chr);
 	RUN(t_str_cstr);
 	RUN(t_str_cpy);
+	RUN(t_str_cpyd);
 	RUN(t_str_split);
 	RUN(t_str_split_ref);
 	RUN(t_str_split_buf);
