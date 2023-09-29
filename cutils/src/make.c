@@ -14,6 +14,7 @@ typedef struct make_var_data_s {
 	str_t resolve;
 	int ext : 1;
 	int expanded : 1;
+	int init : 1;
 } make_var_data_t;
 
 typedef struct make_rule_data_s {
@@ -484,7 +485,22 @@ static int replace_refs(make_t *make, str_t *res)
 	const make_act_data_t *act;
 	list_foreach_all(&make->acts, act)
 	{
-		if (act->type != MAKE_ACT_VAR || act->var.type != MAKE_VAR_INST) {
+		if (act->type != MAKE_ACT_VAR || !act->var.init || act->var.ext) {
+			continue;
+		}
+
+		found |= str_replace(res, act->var.ref, act->var.expand);
+	}
+	return found;
+}
+
+static int replace_exts(make_t *make, str_t *res)
+{
+	int found = 0;
+	const make_act_data_t *act;
+	list_foreach_all(&make->acts, act)
+	{
+		if (act->type != MAKE_ACT_VAR || !act->var.init || !act->var.ext) {
 			continue;
 		}
 
@@ -521,22 +537,19 @@ static int make_var_expand(make_t *make, make_var_data_t *var)
 		}
 	}
 
+	make_var_data_t *init = make_var_get(make, make_var_get_name(make, var->name));
+
+	init->init = 1;
+
+	replace_refs(make, &var->expand);
 	str_cpyd(var->expand, &var->resolve);
-	replace_refs(make, &var->resolve);
+	replace_exts(make, &var->resolve);
 
-	switch (var->type) {
-	case MAKE_VAR_APP: {
-		make_var_data_t *inst = make_var_get(make, make_var_get_name(make, var->name));
-		if (var != inst) {
-			str_cat(&inst->expand, STR(" "));
-			str_cat(&inst->expand, var->expand);
-			str_cat(&inst->resolve, STR(" "));
-			str_cat(&inst->resolve, var->resolve);
-		}
-
-		break;
-	}
-	default: break;
+	if (var != init) {
+		str_cat(&init->expand, STR(" "));
+		str_cat(&init->expand, var->expand);
+		str_cat(&init->resolve, STR(" "));
+		str_cat(&init->resolve, var->resolve);
 	}
 
 	var->expanded = 1;
@@ -557,7 +570,9 @@ static inline int make_if_expand(make_t *make, make_if_data_t *mif)
 	str_cat(&mif->r_value, make_str(make, mif->r));
 
 	replace_refs(make, &mif->l_value);
+	replace_exts(make, &mif->l_value);
 	replace_refs(make, &mif->r_value);
+	replace_exts(make, &mif->r_value);
 
 	if (str_eq(mif->l_value, mif->r_value)) {
 		ret |= make_acts_expand(make, mif->true_acts);
@@ -574,7 +589,10 @@ static inline int make_expand_reset(make_t *make)
 	list_foreach_all(&make->acts, act)
 	{
 		switch (act->type) {
-		case MAKE_ACT_VAR: act->var.expanded = 0; break;
+		case MAKE_ACT_VAR:
+			act->var.expanded = 0;
+			act->var.init	  = 0;
+			break;
 		default: break;
 		}
 	}

@@ -6,7 +6,7 @@
 struct bucket {
 	struct bucket *next;
 
-	void *key;
+	const void *key;
 	size_t ksize;
 	u32 hash;
 	void *value;
@@ -28,9 +28,9 @@ typedef void (*dict_callback_hc)(void *key, size_t ksize, void *value, void *pri
 dict_t *dict_init(dict_t *map, int capacity);
 void dict_free(dict_t *map);
 
-void dict_set(dict_t *map, void *key, size_t ksize, void *value);
+void dict_set(dict_t *map, const void *key, size_t ksize, void *value);
 
-int dict_get(const dict_t *map, void *key, size_t ksize, void **out_val);
+int dict_get(const dict_t *map, const void *key, size_t ksize, void **out_val);
 
 #define dict_foreach(_dict, _bucket) for (struct bucket *_bucket = (_dict)->first; _bucket != NULL; _bucket = _bucket->next)
 

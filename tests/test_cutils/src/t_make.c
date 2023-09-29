@@ -669,10 +669,14 @@ TEST(t_make_expand_print_var_ref, FILE *file)
 	make_var_t var	   = make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_APP));
 	make_var_t var_app = make_add_act(&make, make_create_var(&make, STR("VAR"), MAKE_VAR_APP));
 
+	make_var_t out = make_add_act(&make, make_create_var(&make, STR("OUT"), MAKE_VAR_INST));
+
 	make_var_add_val(&make, var, MVAR(ext1));
 	make_var_add_val(&make, var, MVAR(ext2));
 	make_var_add_val(&make, var_app, MVAR(ext3));
 	make_var_add_val(&make, var_app, MVAR(ext4));
+
+	make_var_add_val(&make, out, MVAR(var));
 
 	{
 		make_ext_set_val(&make, STR("EXT1"), MSTR(STR("VAL1")));
@@ -682,11 +686,11 @@ TEST(t_make_expand_print_var_ref, FILE *file)
 
 		EXPECT_EQ(make_expand(&make), 0);
 
-		str_t var_exp = make_var_get_expanded(&make, STR("VAR"));
-		EXPECT_STRN(var_exp.data, "$(EXT1) $(EXT2) $(EXT3) $(EXT4)", var_exp.len);
+		str_t out_exp = make_var_get_expanded(&make, STR("OUT"));
+		EXPECT_STRN(out_exp.data, "$(EXT1) $(EXT2) $(EXT3) $(EXT4)", out_exp.len);
 
-		str_t var_res = make_var_get_resolved(&make, STR("VAR"));
-		EXPECT_STRN(var_res.data, "VAL1 VAL2 VAL3 VAL4", var_res.len);
+		str_t out_res = make_var_get_resolved(&make, STR("OUT"));
+		EXPECT_STRN(out_res.data, "VAL1 VAL2 VAL3 VAL4", out_res.len);
 	}
 	{
 		file_reopen(TEST_FILE, "wb+", file);
@@ -696,7 +700,8 @@ TEST(t_make_expand_print_var_ref, FILE *file)
 		file_read_ft(file, buf, sizeof(buf));
 
 		const char exp[] = "VAR += $(EXT1) $(EXT2)\n"
-				   "VAR += $(EXT3) $(EXT4)\n";
+				   "VAR += $(EXT3) $(EXT4)\n"
+				   "OUT := $(VAR)\n";
 		EXPECT_STR(buf, exp);
 	}
 

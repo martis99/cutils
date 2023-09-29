@@ -99,7 +99,7 @@ static inline u32 hash_data(const byte *data, size_t size)
 	return (u32)(hash ^ hash >> 32);
 }
 
-static struct bucket *find_entry(const dict_t *map, void *key, size_t ksize, u32 hash)
+static struct bucket *find_entry(const dict_t *map, const void *key, size_t ksize, u32 hash)
 {
 	u32 index = hash % map->capacity;
 
@@ -114,7 +114,7 @@ static struct bucket *find_entry(const dict_t *map, void *key, size_t ksize, u32
 	}
 }
 
-void dict_set(dict_t *map, void *key, size_t ksize, void *val)
+void dict_set(dict_t *map, const void *key, size_t ksize, void *val)
 {
 	if (map == NULL || key == NULL) {
 		return;
@@ -140,7 +140,7 @@ void dict_set(dict_t *map, void *key, size_t ksize, void *val)
 	entry->value = val;
 }
 
-int dict_get(const dict_t *map, void *key, size_t ksize, void **out_val)
+int dict_get(const dict_t *map, const void *key, size_t ksize, void **out_val)
 {
 	if (map == NULL || key == NULL) {
 		return 1;
