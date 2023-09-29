@@ -5,16 +5,16 @@
 
 #include <stdio.h>
 
-typedef struct mem_stats_s {
+typedef struct mem_s {
 	size_t mem;
 	size_t mem_max;
 	uint allocs;
 	uint reallocs;
-} mem_stats_t;
+} mem_t;
 
-void mem_init(mem_stats_t *stats);
-const mem_stats_t *mem_get_stats();
-void mem_print(FILE *file);
+mem_t *mem_init(mem_t *mem);
+const mem_t *mem_get();
+int mem_print(FILE *file);
 
 void *mem_alloc(size_t size);
 void *mem_calloc(size_t count, size_t size);

@@ -1,8 +1,8 @@
 #include "arr.h"
+#include "cutils.h"
 #include "list.h"
 #include "log.h"
 #include "make.h"
-#include "mem.h"
 #include "print.h"
 #include "tree.h"
 #include "xml.h"
@@ -77,10 +77,6 @@ static void example_list()
 static void example_log()
 {
 	c_printf(SEP, __func__);
-
-	log_t log = { 0 };
-
-	log_init(&log);
 
 	log_trace("trace");
 	log_debug("debug");
@@ -226,8 +222,8 @@ static void example_xml()
 
 int main(int argc, char **argv)
 {
-	mem_stats_t mem_stats = { 0 };
-	mem_init(&mem_stats);
+	cutils_t cutils = { 0 };
+	c_init(&cutils);
 
 	example_arr();
 	example_list();
@@ -238,7 +234,7 @@ int main(int argc, char **argv)
 
 	c_printf(SEP, "----------");
 
-	mem_print(stdout);
+	c_free(&cutils, stdout);
 
 	return 0;
 }

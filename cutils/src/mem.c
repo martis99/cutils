@@ -6,24 +6,32 @@
 #include <memory.h>
 #include <stdlib.h>
 
-static mem_stats_t *s_stats;
+static mem_t *s_mem;
 static int s_oom;
 
-void mem_init(mem_stats_t *stats)
+mem_t *mem_init(mem_t *mem)
 {
-	s_stats = stats;
-	s_oom	= 0;
+	s_mem = mem;
+	s_oom = 0;
+
+	return mem;
 }
 
-const mem_stats_t *mem_get_stats()
+const mem_t *mem_get()
 {
-	return s_stats;
+	return s_mem;
 }
 
-void mem_print(FILE *file)
+int mem_print(FILE *file)
 {
-	size_t mem_max = s_stats->mem_max;
-	char s	       = '\0';
+	if (file == NULL || s_mem == NULL) {
+		return 0;
+	}
+
+	size_t mem_max = s_mem->mem_max;
+
+	char s	= '\0';
+	int ret = 0;
 
 	if (mem_max > (size_t)1024 * 1024) {
 		mem_max /= (size_t)1024 * 1024;
@@ -34,12 +42,16 @@ void mem_print(FILE *file)
 	}
 
 	if (s == '\0') {
-		c_fprintf(file, "mem:      %zu max: %zu B\n", s_stats->mem, s_stats->mem_max);
+		ret += c_fprintf(file, "mem:      %zu max: %zu B\n", s_mem->mem, s_mem->mem_max);
 	} else {
-		c_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_stats->mem, mem_max, s, s_stats->mem_max);
+		ret += c_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_mem->mem, mem_max, s, s_mem->mem_max);
 	}
-	c_fprintf(file, "allocs:   %d\n", s_stats->allocs);
-	c_fprintf(file, "reallocs: %d\n", s_stats->reallocs);
+	ret += c_fprintf(file, "allocs:   %d\n", s_mem->allocs);
+	ret += c_fprintf(file, "reallocs: %d\n", s_mem->reallocs);
+
+	c_fflush(file);
+
+	return ret;
 }
 
 #define MAX(a, b) (a) > (b) ? (a) : (b)
@@ -50,9 +62,11 @@ void *mem_alloc(size_t size)
 		return NULL;
 	}
 
-	s_stats->mem += size;
-	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
-	s_stats->allocs++;
+	if (s_mem) {
+		s_mem->mem += size;
+		s_mem->mem_max = MAX(s_mem->mem, s_mem->mem_max);
+		s_mem->allocs++;
+	}
 
 	return malloc(size);
 }
@@ -63,9 +77,11 @@ void *mem_calloc(size_t count, size_t size)
 		return NULL;
 	}
 
-	s_stats->mem += count * size;
-	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
-	s_stats->allocs++;
+	if (s_mem) {
+		s_mem->mem += count * size;
+		s_mem->mem_max = MAX(s_mem->mem, s_mem->mem_max);
+		s_mem->allocs++;
+	}
 
 	return calloc(count, size);
 }
@@ -76,10 +92,12 @@ void *mem_realloc(void *memory, size_t new_size, size_t old_size)
 		return NULL;
 	}
 
-	s_stats->mem -= old_size;
-	s_stats->mem += new_size;
-	s_stats->mem_max = MAX(s_stats->mem, s_stats->mem_max);
-	s_stats->reallocs++;
+	if (s_mem) {
+		s_mem->mem -= old_size;
+		s_mem->mem += new_size;
+		s_mem->mem_max = MAX(s_mem->mem, s_mem->mem_max);
+		s_mem->reallocs++;
+	}
 
 	return realloc(memory, new_size);
 }
@@ -132,7 +150,10 @@ void mem_free(void *memory, size_t size)
 		return;
 	}
 
-	s_stats->mem -= size;
+	if (s_mem) {
+		s_mem->mem -= size;
+	}
+
 	free(memory);
 }
 

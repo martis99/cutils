@@ -23,6 +23,9 @@ TEST(t_fprintf, FILE *file)
 
 	EXPECT_EQ(c_fprintf(NULL, NULL), 0);
 
+	file_reopen(TEST_FILE, "r", file);
+	EXPECT_EQ(c_fprintf(file, ""), 0);
+
 	{
 		file_reopen(TEST_FILE, "wb+", file);
 
@@ -75,6 +78,16 @@ TEST(t_swprintf)
 	EXPECT_EQ(c_swprintf(buf, sizeof(buf), L"%ls", L"a"), 1);
 
 	EXPECT_WSTR(buf, L"a");
+
+	END;
+}
+
+TEST(t_fflush, FILE *file)
+{
+	START;
+
+	EXPECT_EQ(c_fflush(NULL), 1);
+	EXPECT_EQ(c_fflush(file), 0);
 
 	END;
 }
@@ -164,13 +177,11 @@ STEST(t_print)
 	RUN(t_sprintf);
 	RUN(t_wprintf);
 	RUN(t_swprintf);
+	RUN(t_fflush, file);
 	RUN(t_set_unset_u16);
 	RUN(t_ur, file);
 	RUN(t_v, file);
 	RUN(t_vr, file);
-
-	RUN(t_sprintf);
-	RUN(t_swprintf);
 
 	file_close(file);
 	file_delete(TEST_FILE);

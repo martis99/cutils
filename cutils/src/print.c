@@ -12,7 +12,7 @@
 	#include <locale.h>
 #endif
 
-size_t c_printv(const char *fmt, va_list args)
+int c_printv(const char *fmt, va_list args)
 {
 	if (fmt == NULL) {
 		return 0;
@@ -20,21 +20,21 @@ size_t c_printv(const char *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
-	size_t ret = vprintf(fmt, copy);
+	int ret = vprintf(fmt, copy);
 	va_end(copy);
 	return ret;
 }
 
-size_t c_printf(const char *fmt, ...)
+int c_printf(const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = c_printv(fmt, args);
+	int ret = c_printv(fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t c_fprintv(FILE *file, const char *fmt, va_list args)
+int c_fprintv(FILE *file, const char *fmt, va_list args)
 {
 	if (file == NULL || fmt == NULL) {
 		return 0;
@@ -42,26 +42,29 @@ size_t c_fprintv(FILE *file, const char *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
-	size_t ret;
+	int ret;
 #if defined(C_WIN)
 	ret = vfprintf_s(file, fmt, copy);
 #else
 	ret = vfprintf(file, fmt, copy);
 #endif
+	if (ret < 0) {
+		ret = 0;
+	}
 	va_end(copy);
 	return ret;
 }
 
-size_t c_fprintf(FILE *file, const char *fmt, ...)
+int c_fprintf(FILE *file, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = c_fprintv(file, fmt, args);
+	int ret = c_fprintv(file, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
+int c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 {
 	if ((buf == NULL && size > 0) || fmt == NULL) {
 		return 0;
@@ -69,7 +72,7 @@ size_t c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
-	size_t ret;
+	int ret;
 #if defined(C_WIN)
 	ret = vsnprintf(buf, size / sizeof(char), fmt, copy);
 #else
@@ -84,16 +87,16 @@ size_t c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 	return ret;
 }
 
-size_t c_sprintf(char *buf, size_t size, const char *fmt, ...)
+int c_sprintf(char *buf, size_t size, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = c_sprintv(buf, size, fmt, args);
+	int ret = c_sprintv(buf, size, fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t c_wprintv(const wchar *fmt, va_list args)
+int c_wprintv(const wchar *fmt, va_list args)
 {
 	if (fmt == NULL) {
 		return 0;
@@ -101,24 +104,24 @@ size_t c_wprintv(const wchar *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
-	size_t ret = vwprintf(fmt, copy);
-	if (ret == -1) {
+	int ret = vwprintf(fmt, copy);
+	if (ret < 0) {
 		ret = 0;
 	}
 	va_end(copy);
 	return ret;
 }
 
-size_t c_wprintf(const wchar *fmt, ...)
+int c_wprintf(const wchar *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = c_wprintv(fmt, args);
+	int ret = c_wprintv(fmt, args);
 	va_end(args);
 	return ret;
 }
 
-size_t c_swprintv(wchar *buf, size_t size, const wchar *fmt, va_list args)
+int c_swprintv(wchar *buf, size_t size, const wchar *fmt, va_list args)
 {
 	if ((buf == NULL && size > 0) || fmt == NULL) {
 		return 0;
@@ -126,7 +129,7 @@ size_t c_swprintv(wchar *buf, size_t size, const wchar *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
-	size_t ret;
+	int ret;
 #if defined(C_WIN)
 	ret = vswprintf_s(buf, size / sizeof(wchar_t), fmt, copy);
 #else
@@ -136,13 +139,22 @@ size_t c_swprintv(wchar *buf, size_t size, const wchar *fmt, va_list args)
 	return ret;
 }
 
-size_t c_swprintf(wchar *buf, size_t size, const wchar *fmt, ...)
+int c_swprintf(wchar *buf, size_t size, const wchar *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-	size_t ret = c_swprintv(buf, size, fmt, args);
+	int ret = c_swprintv(buf, size, fmt, args);
 	va_end(args);
 	return ret;
+}
+
+int c_fflush(FILE *file)
+{
+	if (file == NULL) {
+		return 1;
+	}
+
+	return fflush(file);
 }
 
 int c_set_u16(FILE *file)

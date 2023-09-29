@@ -7,6 +7,16 @@
 
 #define TEST_FILE "t_log.txt"
 
+TEST(t_log_init, log_t *log)
+{
+	START;
+
+	EXPECT_EQ(log_init(NULL), NULL);
+	EXPECT_EQ(log_init(log), log);
+
+	END;
+}
+
 TEST(t_log_stdout)
 {
 	START;
@@ -30,11 +40,28 @@ TEST(t_log_level_str)
 	END;
 }
 
-TEST(t_log_set_level)
+TEST(t_log_set_level, log_t *log)
 {
 	START;
 
-	log_set_level(LOG_TRACE);
+	log_init(NULL);
+	EXPECT_EQ(log_set_level(LOG_TRACE), 1);
+
+	log_init(log);
+	EXPECT_EQ(log_set_level(LOG_TRACE), 0);
+
+	END;
+}
+
+TEST(t_log_set_quiet, log_t *log)
+{
+	START;
+
+	log_init(NULL);
+	EXPECT_EQ(log_set_quiet(log->quiet), 1);
+
+	log_init(log);
+	EXPECT_EQ(log_set_quiet(log->quiet), 0);
 
 	END;
 }
@@ -44,24 +71,32 @@ static void file_callback(log_event_t *ev)
 	(void)ev;
 }
 
-TEST(t_log_add_callback)
+TEST(t_log_add_callback, log_t *log)
 {
 	START;
 
+	log_init(NULL);
+	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 1);
+
+	log_init(log);
 	for (int i = 0; i < 31; i++) {
 		EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 0);
 	}
 
-	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), -1);
+	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 1);
 
 	END;
 }
 
-TEST(t_log_log)
+TEST(t_log_log, log_t *log)
 {
 	START;
 
-	log_log(LOG_TRACE, NULL, 0, NULL);
+	log_init(NULL);
+	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL), 1);
+
+	log_init(log);
+	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL), 1);
 
 	END;
 }
@@ -208,7 +243,7 @@ STEST(t_log)
 {
 	SSTART;
 
-	RUN(t_log_log);
+	const log_t *log = log_get();
 
 	log_t lg = { 0 };
 	log_init(&lg);
@@ -218,10 +253,13 @@ STEST(t_log)
 	FILE *file = file_open(TEST_FILE, "wb+");
 	log_add_fp(file, 0);
 
+	RUN(t_log_init, &lg);
 	RUN(t_log_stdout);
 	RUN(t_log_level_str);
-	RUN(t_log_set_level);
-	RUN(t_log_add_callback);
+	RUN(t_log_set_level, &lg);
+	RUN(t_log_set_quiet, &lg);
+	RUN(t_log_add_callback, &lg);
+	RUN(t_log_log, &lg);
 	RUN(t_log_trace, file);
 	RUN(t_log_debug, file);
 	RUN(t_log_info, file);
@@ -230,8 +268,9 @@ STEST(t_log)
 	RUN(t_log_fatal, file);
 
 	file_close(file);
-
 	file_delete(TEST_FILE);
+
+	log_init((log_t *)log);
 
 	SEND;
 }

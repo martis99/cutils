@@ -7,11 +7,21 @@
 
 #define TEST_FILE "t_mem.txt"
 
+TEST(t_mem_init, mem_t *mem)
+{
+	START;
+
+	EXPECT_EQ(mem_init(NULL), NULL);
+	EXPECT_EQ(mem_init(mem), mem);
+
+	END;
+}
+
 TEST(t_mem_get_stats)
 {
 	START;
 
-	EXPECT_NE(mem_get_stats(), NULL);
+	EXPECT_NE(mem_get(), NULL);
 
 	END;
 }
@@ -20,32 +30,34 @@ TEST(t_mem_print, FILE *file)
 {
 	START;
 
-	mem_stats_t *mem_stats = (mem_stats_t *)mem_get_stats();
+	mem_t *mem = (mem_t *)mem_get();
 
-	size_t mem_max = mem_stats->mem_max;
+	size_t mem_max = mem->mem_max;
 
-	mem_stats->mem_max = 10;
+	mem->mem_max = 10;
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		mem_print(file);
-	}
-
-	mem_stats->mem_max = 1024 + 10;
+	EXPECT_EQ(mem_print(NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		mem_print(file);
+		EXPECT_GT(mem_print(file), 0);
 	}
 
-	mem_stats->mem_max = 1024 * 1024 + 10;
+	mem->mem_max = 1024 + 10;
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		mem_print(file);
+		EXPECT_GT(mem_print(file), 0);
 	}
 
-	mem_stats->mem_max = mem_max;
+	mem->mem_max = 1024 * 1024 + 10;
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_GT(mem_print(file), 0);
+	}
+
+	mem->mem_max = mem_max;
 
 	END;
 }
@@ -164,6 +176,12 @@ STEST(t_mem)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
+	const mem_t *mem = mem_get();
+
+	mem_t mm = { 0 };
+	mem_init(&mm);
+
+	RUN(t_mem_init, &mm);
 	RUN(t_mem_get_stats);
 	RUN(t_mem_print, file);
 	RUN(t_mem_alloc);
@@ -177,6 +195,8 @@ STEST(t_mem)
 
 	file_close(file);
 	file_delete(TEST_FILE);
+
+	mem_init((mem_t *)mem);
 
 	SEND;
 }

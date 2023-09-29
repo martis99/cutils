@@ -24,9 +24,15 @@ static void file_callback(log_event_t *ev)
 	fflush(ev->udata);
 }
 
-void log_init(log_t *log)
+log_t *log_init(log_t *log)
 {
 	s_log = log;
+	return log;
+}
+
+const log_t *log_get()
+{
+	return s_log;
 }
 
 const char *log_level_str(int level)
@@ -34,25 +40,39 @@ const char *log_level_str(int level)
 	return level_strs[level];
 }
 
-void log_set_level(int level)
+int log_set_level(int level)
 {
+	if (s_log == NULL) {
+		return 1;
+	}
+
 	s_log->level = level;
+	return 0;
 }
 
-void log_set_quiet(int enable)
+int log_set_quiet(int enable)
 {
+	if (s_log == NULL) {
+		return 1;
+	}
+
 	s_log->quiet = enable;
+	return 0;
 }
 
 int log_add_callback(log_LogFn fn, void *udata, int level)
 {
+	if (s_log == NULL) {
+		return 1;
+	}
+
 	for (int i = 0; i < LOG_MAX_CALLBACKS; i++) {
 		if (!s_log->callbacks[i].fn) {
 			s_log->callbacks[i] = (callback_t){ fn, udata, level };
 			return 0;
 		}
 	}
-	return -1;
+	return 1;
 }
 
 int log_add_fp(FILE *fp, int level)
@@ -60,18 +80,19 @@ int log_add_fp(FILE *fp, int level)
 	return log_add_callback(file_callback, fp, level);
 }
 
-static void init_event(log_event_t *ev, void *udata)
+static int init_event(log_event_t *ev, void *udata)
 {
 	if (!ev->time[0]) {
 		c_time_str(ev->time);
 	}
 	ev->udata = udata;
+	return 0;
 }
 
-void log_log(int level, const char *file, int line, const char *fmt, ...)
+int log_log(int level, const char *file, int line, const char *fmt, ...)
 {
-	if (s_log == NULL) {
-		return;
+	if (s_log == NULL || file == NULL || fmt == NULL) {
+		return 1;
 	}
 
 	log_event_t ev = {
@@ -97,4 +118,5 @@ void log_log(int level, const char *file, int line, const char *fmt, ...)
 			va_end(ev.ap);
 		}
 	}
+	return 0;
 }
