@@ -14,6 +14,9 @@ TEST(t_printf)
 	EXPECT_EQ(c_printf(NULL), 0);
 	EXPECT_EQ(c_printf(""), 0);
 
+	c_wprintf(L"");
+	EXPECT_EQ(c_printf(" "), 1);
+
 	END;
 }
 
@@ -63,6 +66,9 @@ TEST(t_wprintf)
 
 	EXPECT_EQ(c_wprintf(NULL), 0);
 	EXPECT_EQ(c_wprintf(L""), 0);
+
+	c_printf("");
+	EXPECT_EQ(c_wprintf(L" "), 1);
 
 	END;
 }

@@ -1,7 +1,10 @@
 #include "print.h"
 
+#include "file.h"
+#include "log.h"
 #include "platform.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <wchar.h>
@@ -20,7 +23,12 @@ int c_printv(const char *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
+	errno	= 0;
 	int ret = vprintf(fmt, copy);
+	if (ret < 0 && errno == 0) {
+		file_reopen(NULL, "w", stdout);
+		ret = vprintf(fmt, copy);
+	}
 	va_end(copy);
 	return ret;
 }
@@ -43,12 +51,15 @@ int c_fprintv(FILE *file, const char *fmt, va_list args)
 	va_list copy;
 	va_copy(copy, args);
 	int ret;
+	errno = 0;
 #if defined(C_WIN)
 	ret = vfprintf_s(file, fmt, copy);
 #else
 	ret = vfprintf(file, fmt, copy);
 #endif
 	if (ret < 0) {
+		int errnum = errno;
+		log_error("cutils", "failed to write to file: %s (%d)", log_strerror(errnum), errnum);
 		ret = 0;
 	}
 	va_end(copy);
@@ -104,10 +115,13 @@ int c_wprintv(const wchar *fmt, va_list args)
 
 	va_list copy;
 	va_copy(copy, args);
+	errno	= 0;
 	int ret = vwprintf(fmt, copy);
-	if (ret < 0) {
-		ret = 0;
+	if (ret < 0 && errno == 0) {
+		file_reopen(NULL, "w", stdout);
+		ret = vwprintf(fmt, copy);
 	}
+
 	va_end(copy);
 	return ret;
 }

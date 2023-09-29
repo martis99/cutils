@@ -1,6 +1,7 @@
 #include "log.h"
 
 #include "c_time.h"
+#include "platform.h"
 
 static log_t *s_log;
 
@@ -10,7 +11,11 @@ static const char *level_colors[] = { "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[
 
 static void stdout_callback(log_event_t *ev)
 {
-	fprintf(ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->file, ev->line);
+	if (ev->tag == NULL) {
+		fprintf(ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->file, ev->line);
+	} else {
+		fprintf(ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m [%s] ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->file, ev->line, ev->tag);
+	}
 	vfprintf(ev->udata, ev->fmt, ev->ap);
 	fprintf(ev->udata, "\n");
 	fflush(ev->udata);
@@ -18,7 +23,11 @@ static void stdout_callback(log_event_t *ev)
 
 static void file_callback(log_event_t *ev)
 {
-	fprintf(ev->udata, "%s %-5s %s:%d: ", ev->time, level_strs[ev->level], ev->file, ev->line);
+	if (ev->tag == NULL) {
+		fprintf(ev->udata, "%s %-5s %s:%d: ", ev->time, level_strs[ev->level], ev->file, ev->line);
+	} else {
+		fprintf(ev->udata, "%s %-5s %s:%d: [%s] ", ev->time, level_strs[ev->level], ev->file, ev->line, ev->tag);
+	}
 	vfprintf(ev->udata, ev->fmt, ev->ap);
 	fprintf(ev->udata, "\n");
 	fflush(ev->udata);
@@ -89,15 +98,16 @@ static int init_event(log_event_t *ev, void *udata)
 	return 0;
 }
 
-int log_log(int level, const char *file, int line, const char *fmt, ...)
+int log_log(int level, const char *file, int line, const char *tag, const char *fmt, ...)
 {
 	if (s_log == NULL || file == NULL || fmt == NULL) {
 		return 1;
 	}
 
 	log_event_t ev = {
-		.fmt   = fmt,
 		.file  = file,
+		.tag   = tag,
+		.fmt   = fmt,
 		.line  = line,
 		.level = level,
 	};
@@ -119,4 +129,15 @@ int log_log(int level, const char *file, int line, const char *fmt, ...)
 		}
 	}
 	return 0;
+}
+
+const char *log_strerror(int errnum)
+{
+#if defined C_WIN
+	static char buf[256] = { 0 };
+	strerror_s(buf, sizeof(buf), errnum);
+	return buf;
+#else
+	return strerror(errnum);
+#endif
 }

@@ -23,7 +23,8 @@ TEST(t_log_stdout)
 
 	log_set_quiet(0);
 
-	log_debug("t_log_stdout");
+	log_debug(NULL, "t_log_stdout");
+	log_debug("test_cutils", "t_log_stdout");
 
 	log_set_quiet(1);
 
@@ -93,10 +94,10 @@ TEST(t_log_log, log_t *log)
 	START;
 
 	log_init(NULL);
-	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL), 1);
+	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL, NULL), 1);
 
 	log_init(log);
-	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL), 1);
+	EXPECT_EQ(log_log(LOG_TRACE, NULL, 0, NULL, NULL), 1);
 
 	END;
 }
@@ -107,7 +108,7 @@ TEST(t_log_trace, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_trace("trace%d", 1);
+	log_trace(NULL, "trace%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
@@ -130,7 +131,7 @@ TEST(t_log_debug, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_debug("debug%d", 1);
+	log_debug(NULL, "debug%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
@@ -153,7 +154,7 @@ TEST(t_log_info, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_info("info%d", 1);
+	log_info(NULL, "info%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
@@ -176,7 +177,7 @@ TEST(t_log_warn, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_warn("warn%d", 1);
+	log_warn(NULL, "warn%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
@@ -199,7 +200,7 @@ TEST(t_log_error, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_error("error%d", 1);
+	log_error(NULL, "error%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };
@@ -222,7 +223,7 @@ TEST(t_log_fatal, FILE *file)
 
 	file_reopen(TEST_FILE, "wb+", file);
 
-	log_fatal("fatal%d", 1);
+	log_fatal(NULL, "fatal%d", 1);
 	uint exp_line = __LINE__ - 1;
 
 	char buf[1024] = { 0 };

@@ -9,8 +9,9 @@
 
 typedef struct log_event_s {
 	va_list ap;
-	const char *fmt;
 	const char *file;
+	const char *tag;
+	const char *fmt;
 	char time[C_TIME_BUF_SIZE];
 	void *udata;
 	int line;
@@ -36,12 +37,12 @@ typedef struct log_s {
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
-#define log_trace(...) log_log(LOG_TRACE, __func__, __LINE__, __VA_ARGS__)
-#define log_debug(...) log_log(LOG_DEBUG, __func__, __LINE__, __VA_ARGS__)
-#define log_info(...)  log_log(LOG_INFO, __func__, __LINE__, __VA_ARGS__)
-#define log_warn(...)  log_log(LOG_WARN, __func__, __LINE__, __VA_ARGS__)
-#define log_error(...) log_log(LOG_ERROR, __func__, __LINE__, __VA_ARGS__)
-#define log_fatal(...) log_log(LOG_FATAL, __func__, __LINE__, __VA_ARGS__)
+#define log_trace(tag, ...) log_log(LOG_TRACE, __func__, __LINE__, tag, __VA_ARGS__)
+#define log_debug(tag, ...) log_log(LOG_DEBUG, __func__, __LINE__, tag, __VA_ARGS__)
+#define log_info(tag, ...)  log_log(LOG_INFO, __func__, __LINE__, tag, __VA_ARGS__)
+#define log_warn(tag, ...)  log_log(LOG_WARN, __func__, __LINE__, tag, __VA_ARGS__)
+#define log_error(tag, ...) log_log(LOG_ERROR, __func__, __LINE__, tag, __VA_ARGS__)
+#define log_fatal(tag, ...) log_log(LOG_FATAL, __func__, __LINE__, tag, __VA_ARGS__)
 
 log_t *log_init(log_t *log);
 const log_t *log_get();
@@ -52,6 +53,8 @@ int log_set_quiet(int enable);
 int log_add_callback(log_LogFn fn, void *udata, int level);
 int log_add_fp(FILE *fp, int level);
 
-int log_log(int level, const char *file, int line, const char *fmt, ...);
+int log_log(int level, const char *file, int line, const char *tag, const char *fmt, ...);
+
+const char *log_strerror(int errnum);
 
 #endif

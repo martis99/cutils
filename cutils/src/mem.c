@@ -1,5 +1,6 @@
 #include "mem.h"
 
+#include "log.h"
 #include "platform.h"
 #include "print.h"
 
@@ -58,8 +59,11 @@ int mem_print(FILE *file)
 
 void *mem_alloc(size_t size)
 {
-	if (size > 0 && s_oom) {
-		return NULL;
+	void *ptr = size > 0 && s_oom ? NULL : malloc(size);
+
+	if (ptr == NULL) {
+		log_error("cutils", "out of memory");
+		return ptr;
 	}
 
 	if (s_mem) {
@@ -68,7 +72,7 @@ void *mem_alloc(size_t size)
 		s_mem->allocs++;
 	}
 
-	return malloc(size);
+	return ptr;
 }
 
 void *mem_calloc(size_t count, size_t size)

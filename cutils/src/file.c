@@ -54,13 +54,16 @@ FILE *file_open_f(const char *format, const char *mode, ...)
 
 FILE *file_reopen(const char *path, const char *mode, FILE *file)
 {
-	if (path == NULL || mode == NULL || file == NULL) {
+	if ((path == NULL && file != stdout && file != stderr) || mode == NULL || file == NULL) {
 		return NULL;
 	}
 
 	FILE *new_file = NULL;
 
 #if defined(C_WIN)
+	if (path == NULL) {
+		return NULL;
+	}
 	freopen_s(&file, path, mode, file);
 #else
 	file = freopen(path, mode, file);
@@ -86,7 +89,7 @@ size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 #if defined(C_WIN)
 	cnt = fread_s(data, data_size, size, 1, file);
 #else
-	cnt = fread(data, size, 1, file);
+	cnt  = fread(data, size, 1, file);
 #endif
 	if (cnt != 1) {
 		return 0;
