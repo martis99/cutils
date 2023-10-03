@@ -5,11 +5,13 @@ on:
     branches: [ "main" ]
     paths-ignore:
       - '.github/**'
+      - '**.md'
 
   pull_request:
     branches: [ "main" ]
     paths-ignore:
       - '.github/**'
+      - '**.md'
 
   workflow_dispatch:
 
@@ -29,15 +31,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Generate solution
+      - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: ./build-linux
 
-      - name: Build
+      - name: Make
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: make CONFIG=${{matrix.configuration}} PLATFORM=${{matrix.platform}}
 
-      - name: Test
+      - name: Run
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: ./bin/${{matrix.configuration}}-${{matrix.platform}}/tests/test_cutils/test_cutils
 
@@ -53,7 +55,7 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Generate solution
+      - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: .\build-win-x64.exe
 
@@ -64,10 +66,10 @@ jobs:
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: nuget restore .
 
-      - name: Build
+      - name: MSBuild
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: msbuild /m /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}} .
 
-      - name: Test
+      - name: Run
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: .\bin\${{matrix.configuration}}-${{matrix.platform}}\tests\test_cutils\test_cutils.exe
