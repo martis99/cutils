@@ -16,6 +16,7 @@ TEST(t_file_open_close)
 
 	EXPECT_EQ(file_open(NULL, NULL), NULL);
 	EXPECT_EQ(file_open(TEST_FILE, NULL), NULL);
+	EXPECT_EQ(file_open("not.txt", "r"), NULL);
 	FILE *file = file_open(TEST_FILE, "w+");
 
 	EXPECT_NE(file, 0);
@@ -56,6 +57,7 @@ TEST(t_file_reopen)
 	EXPECT_EQ(file_reopen(TEST_FILE, NULL, NULL), NULL);
 	EXPECT_EQ(file_reopen(TEST_FILE, "w+", NULL), NULL);
 	EXPECT_EQ(file_reopen(TEST_FILE, "w+", file), file);
+	EXPECT_EQ(file_reopen("not.txt", "r", file), NULL);
 
 	file_close(file);
 	file_delete(TEST_FILE);
@@ -177,6 +179,7 @@ TEST(t_file_delete)
 
 	EXPECT_NE(file_delete(NULL), 0);
 	EXPECT_EQ(file_delete(TEST_FILE), 0);
+	EXPECT_EQ(file_delete("not.txt"), 1);
 
 	END;
 }

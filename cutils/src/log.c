@@ -11,11 +11,17 @@ static const char *level_colors[] = { "\x1b[94m", "\x1b[36m", "\x1b[32m", "\x1b[
 
 static void stdout_callback(log_event_t *ev)
 {
-	if (ev->tag == NULL) {
-		fprintf(ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->file, ev->line);
-	} else {
-		fprintf(ev->udata, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m [%s] ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->file, ev->line, ev->tag);
+	const char *tag_s = "";
+	const char *tag_e = "";
+	const char *tag	  = "";
+	if (ev->tag != NULL) {
+		tag_s = " [";
+		tag_e = "]";
+		tag   = ev->tag;
 	}
+
+	fprintf(ev->udata, "%s %s%-5s\x1b[0m [%s:%s] \x1b[90m%s:%d:\x1b[0m%s%s%s ", ev->time, level_colors[ev->level], level_strs[ev->level], ev->pkg, ev->file, ev->func,
+		ev->line, tag_s, tag, tag_e);
 	vfprintf(ev->udata, ev->fmt, ev->ap);
 	fprintf(ev->udata, "\n");
 	fflush(ev->udata);
@@ -23,11 +29,16 @@ static void stdout_callback(log_event_t *ev)
 
 static void file_callback(log_event_t *ev)
 {
-	if (ev->tag == NULL) {
-		fprintf(ev->udata, "%s %-5s %s:%d: ", ev->time, level_strs[ev->level], ev->file, ev->line);
-	} else {
-		fprintf(ev->udata, "%s %-5s %s:%d: [%s] ", ev->time, level_strs[ev->level], ev->file, ev->line, ev->tag);
+	const char *tag_s = "";
+	const char *tag_e = "";
+	const char *tag	  = "";
+	if (ev->tag != NULL) {
+		tag_s = " [";
+		tag_e = "]";
+		tag   = ev->tag;
 	}
+
+	fprintf(ev->udata, "%s %-5s [%s:%s] %s:%d:%s%s%s ", ev->time, level_strs[ev->level], ev->pkg, ev->file, ev->func, ev->line, tag_s, tag, tag_e);
 	vfprintf(ev->udata, ev->fmt, ev->ap);
 	fprintf(ev->udata, "\n");
 	fflush(ev->udata);
@@ -98,14 +109,16 @@ static int init_event(log_event_t *ev, void *udata)
 	return 0;
 }
 
-int log_log(int level, const char *file, int line, const char *tag, const char *fmt, ...)
+int log_log(int level, const char *pkg, const char *file, const char *func, int line, const char *tag, const char *fmt, ...)
 {
 	if (s_log == NULL || file == NULL || fmt == NULL) {
 		return 1;
 	}
 
 	log_event_t ev = {
+		.pkg   = pkg,
 		.file  = file,
+		.func  = func,
 		.tag   = tag,
 		.fmt   = fmt,
 		.line  = line,

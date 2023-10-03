@@ -78,12 +78,12 @@ static void example_log()
 {
 	c_printf(SEP, __func__);
 
-	log_trace(NULL, "trace");
-	log_debug(NULL, "debug");
-	log_info(NULL, "info");
-	log_warn(NULL, "warn");
-	log_error(NULL, "error");
-	log_fatal(NULL, "fatal");
+	log_trace("example", "cutils", NULL, "trace");
+	log_debug("example", "cutils", NULL, "debug");
+	log_info("example", "cutils", NULL, "info");
+	log_warn("example", "cutils", NULL, "warn");
+	log_error("example", "cutils", NULL, "error");
+	log_fatal("example", "cutils", NULL, "fatal");
 }
 
 static void example_make()

@@ -19,9 +19,11 @@
 
 #include "test.h"
 
+#include "test_test.h"
+
 #include "cutils.h"
 
-TEST(tests)
+TEST(test_cutils)
 {
 	SSTART;
 	RUN(t_args);
@@ -51,7 +53,11 @@ int main(int argc, char **argv)
 	c_init(&cutils);
 
 	t_init(80);
-	tests();
+
+	log_set_level(LOG_FATAL);
+
+	test_test();
+	test_cutils();
 	const int ret = t_finish();
 
 	c_free(&cutils, stdout);

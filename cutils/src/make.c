@@ -1,5 +1,6 @@
 #include "make.h"
 
+#include "log.h"
 #include "platform.h"
 #include "print.h"
 

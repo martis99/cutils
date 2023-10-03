@@ -7,18 +7,20 @@
 
 #define TEST_FILE "t_cutils.txt"
 
-TEST(t_c_init, cutils_t *cutils)
+TEST(t_c_init)
 {
 	START;
 
-	cutils_t cu = { 0 };
+	const mem_t *mem = mem_get();
+	const log_t *log = log_get();
 
 	EXPECT_EQ(c_init(NULL), NULL);
 
+	cutils_t cu = { 0 };
 	EXPECT_EQ(c_init(&cu), &cu);
 
-	mem_init(&cutils->mem);
-	log_init(&cutils->log);
+	mem_init((mem_t *)mem);
+	log_init((log_t *)log);
 
 	END;
 }
@@ -50,10 +52,10 @@ STEST(t_cutils)
 	const log_t *log = log_get();
 
 	cutils_t cu = { 0 };
-
 	c_init(&cu);
+	cu.log = *log;
 
-	RUN(t_c_init, &cu);
+	RUN(t_c_init);
 	RUN(t_c_free, file);
 
 	file_close(file);

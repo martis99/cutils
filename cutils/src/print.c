@@ -59,7 +59,7 @@ int c_fprintv(FILE *file, const char *fmt, va_list args)
 #endif
 	if (ret < 0) {
 		int errnum = errno;
-		log_error("cutils", "failed to write to file: %s (%d)", log_strerror(errnum), errnum);
+		log_error("cutils", "print", NULL, "failed to write to file: %s (%d)", log_strerror(errnum), errnum);
 		ret = 0;
 	}
 	va_end(copy);

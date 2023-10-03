@@ -1,5 +1,6 @@
 #include "arr.h"
 
+#include "log.h"
 #include "mem.h"
 
 #include <stdlib.h>
@@ -74,7 +75,12 @@ uint arr_add(arr_t *arr)
 
 void *arr_get(const arr_t *arr, uint index)
 {
-	if (arr == NULL || index >= arr->cnt) {
+	if (arr == NULL) {
+		return NULL;
+	}
+
+	if (index >= arr->cnt) {
+		log_error("cutils", "arr", NULL, "invalid id: %d", index);
 		return NULL;
 	}
 

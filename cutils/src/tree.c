@@ -195,6 +195,6 @@ void tree_it_next(tree_it *it)
 	} else {
 		do {
 			it->stack[it->top - 1] = tree_get_next(it->tree, it->stack[it->top - 1]);
-		} while (it->stack[it->top - 1] == TREE_END && it->top-- > 0);
+		} while (it->stack[it->top - 1] == TREE_END && --it->top > 0);
 	}
 }

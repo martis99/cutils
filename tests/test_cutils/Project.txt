@@ -1,5 +1,5 @@
 NAME: test_cutils
 TYPE: EXE
 SOURCE: src
-DEPENDS: cutils, test
-INCLUDES: cutils, test
+DEPENDS: cutils, libtest_test
+INCLUDES: cutils, libtest_test

@@ -1,6 +1,7 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include <limits.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <wchar.h>
@@ -28,5 +29,27 @@ typedef wchar_t wchar;
 typedef unsigned int uint;
 
 typedef unsigned char bool;
+
+#define UINT8_MIN  0
+#define UINT16_MIN 0
+#define UINT32_MIN 0
+#define UINT64_MIN 0
+
+#define S8_MIN	((s8)INT8_MIN)
+#define S8_MAX	((s8)INT8_MAX)
+#define U8_MIN	((u8)UINT8_MIN)
+#define U8_MAX	((u8)UINT8_MAX)
+#define S16_MIN ((s16)INT16_MIN)
+#define S16_MAX ((s16)INT16_MAX)
+#define U16_MIN ((u16)UINT16_MIN)
+#define U16_MAX ((u16)UINT16_MAX)
+#define S32_MIN ((s32)INT32_MIN)
+#define S32_MAX ((s32)INT32_MAX)
+#define U32_MIN ((u32)UINT32_MIN)
+#define U32_MAX ((u32)UINT32_MAX)
+#define S64_MIN ((s64)INT64_MIN)
+#define S64_MAX ((s64)INT64_MAX)
+#define U64_MIN ((u64)UINT64_MIN)
+#define U64_MAX ((u64)UINT64_MAX)
 
 #endif

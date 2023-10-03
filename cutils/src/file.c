@@ -2,11 +2,13 @@
 
 #include "arr.h"
 #include "cstr.h"
+#include "log.h"
 #include "mem.h"
 #include "path.h"
 #include "platform.h"
 #include "print.h"
 
+#include <errno.h>
 #include <string.h>
 
 #if defined(C_WIN)
@@ -24,11 +26,16 @@ FILE *file_open(const char *path, const char *mode)
 
 	FILE *file = NULL;
 
+	errno = 0;
 #if defined(C_WIN)
 	fopen_s(&file, path, mode);
 #else
 	file = fopen(path, mode);
 #endif
+	if (file == NULL) {
+		int errnum = errno;
+		log_error("cutils", "file", NULL, "failed to open file \"%s\": %s (%d)", path, log_strerror(errnum), errnum);
+	}
 	return file;
 }
 
@@ -58,8 +65,7 @@ FILE *file_reopen(const char *path, const char *mode, FILE *file)
 		return NULL;
 	}
 
-	FILE *new_file = NULL;
-
+	errno = 0;
 #if defined(C_WIN)
 	if (path == NULL) {
 		return NULL;
@@ -68,6 +74,10 @@ FILE *file_reopen(const char *path, const char *mode, FILE *file)
 #else
 	file = freopen(path, mode, file);
 #endif
+	if (file == NULL) {
+		int errnum = errno;
+		log_error("cutils", "file", NULL, "failed to reopen file \"%s\": %s (%d)", path, log_strerror(errnum), errnum);
+	}
 	return file;
 }
 
@@ -89,7 +99,7 @@ size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 #if defined(C_WIN)
 	cnt = fread_s(data, data_size, size, 1, file);
 #else
-	cnt  = fread(data, size, 1, file);
+	cnt = fread(data, size, 1, file);
 #endif
 	if (cnt != 1) {
 		return 0;
@@ -159,11 +169,19 @@ int file_delete(const char *path)
 		return 1;
 	}
 
+	int ret;
 #if defined(C_WIN)
-	return DeleteFileA(path) == 0 ? 1 : 0;
+	ret = DeleteFileA(path) == 0 ? 1 : 0;
 #else
-	return remove(path) == 0 ? 0 : 1;
+	errno = 0;
+	ret   = remove(path);
+	if (ret != 0) {
+		int errnum = errno;
+		log_error("cutils", "file", NULL, "failed to delete file \"%s\": %s (%d)", path, log_strerror(errnum), errnum);
+		ret = 1;
+	}
 #endif
+	return ret;
 }
 
 int file_exists(const char *path)
