@@ -1,11 +1,10 @@
 # cutils
-cross-platform utitilities and basic data structures implementation for C
 
-***
+cross-platform utitilities and basic data structures implementation in C
 
 [![codecov](https://codecov.io/github/martis99/cutils/branch/main/graph/badge.svg?token=LZ14PL0R4E)](https://codecov.io/github/martis99/cutils)
 
-## Featues
+## Features
 
 ### Utilities
 - [x] file
@@ -25,7 +24,7 @@ cross-platform utitilities and basic data structures implementation for C
 
 ### File Formats
 - [ ] json
-- [ ] Makefile
+- [x] Makefile
 - [x] xml
 
 ## Build
