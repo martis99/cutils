@@ -39,6 +39,9 @@ jobs:
         with:
           files: ./bin/Debug-x64/tests/test_cutils/lcov.info
 
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
         with:
