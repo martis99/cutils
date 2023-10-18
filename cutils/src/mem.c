@@ -118,6 +118,10 @@ void *mem_realloc(void *memory, size_t new_size, size_t old_size)
 		return memory;
 	}
 
+	if (old_size == 0) {
+		return mem_alloc(new_size);
+	}
+
 	void *ptr = new_size > old_size && s_oom ? NULL : realloc(memory, new_size);
 
 	if (ptr == NULL) {

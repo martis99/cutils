@@ -94,26 +94,15 @@ TEST(t_mem_realloc)
 
 	EXPECT_EQ(mem_realloc(NULL, 0, 0), NULL);
 
-	{
-		void *ptr = mem_alloc(0);
-		EXPECT_EQ(mem_realloc(ptr, 0, 0), ptr);
-		EXPECT_EQ(mem_realloc(ptr, 1, 0), ptr);
-		EXPECT_NE(mem_realloc(ptr, 0, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 1, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 2, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 1, 2), NULL);
-		mem_free(ptr, 0);
-	}
-	{
-		void *ptr = mem_alloc(1);
-		EXPECT_EQ(mem_realloc(ptr, 0, 0), ptr);
-		EXPECT_EQ(mem_realloc(ptr, 1, 0), ptr);
-		EXPECT_NE(mem_realloc(ptr, 0, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 1, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 2, 1), NULL);
-		EXPECT_NE(mem_realloc(ptr, 1, 2), NULL);
-		mem_free(ptr, 1);
-	}
+	void *ptr = mem_alloc(0);
+	EXPECT_EQ(ptr = mem_realloc(ptr, 0, 0), ptr);
+	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
+	EXPECT_NE(ptr = mem_realloc(ptr, 0, 1), NULL);
+	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
+	EXPECT_NE(ptr = mem_realloc(ptr, 1, 1), NULL);
+	EXPECT_NE(ptr = mem_realloc(ptr, 2, 1), NULL);
+	EXPECT_NE(ptr = mem_realloc(ptr, 1, 2), NULL);
+	mem_free(ptr, 1);
 
 	END;
 }
