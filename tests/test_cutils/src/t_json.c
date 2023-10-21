@@ -27,7 +27,6 @@ TEST(t_json_init_free)
 	json_free(NULL);
 
 	EXPECT_EQ(json.values.data, NULL);
-	EXPECT_EQ(json.root, JSON_END);
 
 	END;
 }
@@ -59,8 +58,8 @@ TEST(t_json_print, FILE *file)
 	json_t json = { 0 };
 	json_init(&json, 1);
 
-	EXPECT_EQ(json_print(NULL, JSON_END, NULL), 1);
-	EXPECT_EQ(json_print(&json, JSON_END, NULL), 1);
+	EXPECT_EQ(json_print(NULL, JSON_END, "\t", NULL), 1);
+	EXPECT_EQ(json_print(&json, JSON_END, "\t", NULL), 1);
 
 	json_free(&json);
 
@@ -91,7 +90,7 @@ TEST(t_json_print_all, FILE *file)
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(json_print(&json, root, file), 0);
+		EXPECT_EQ(json_print(&json, root, "\t", file), 0);
 
 		char buf[256] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));

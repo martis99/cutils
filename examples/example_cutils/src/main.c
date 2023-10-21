@@ -54,7 +54,7 @@ static void example_json()
 	const json_val_t obj = json_add_val(&json, root, STRH("obj"), JSON_OBJ());
 	json_add_val(&json, obj, STRH("int"), JSON_INT(4));
 
-	json_print(&json, root, stdout);
+	json_print(&json, root, "\t", stdout);
 
 	json_free(&json);
 }

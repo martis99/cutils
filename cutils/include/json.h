@@ -50,7 +50,6 @@ typedef struct json_mem_s {
 
 typedef struct json_s {
 	list_t values;
-	json_val_t root;
 } json_t;
 
 json_t *json_init(json_t *json, uint values_cap);
@@ -58,7 +57,7 @@ void json_free(json_t *json);
 
 json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_data_t value);
 
-int json_print(const json_t *json, json_val_t val, FILE *file);
+int json_print(const json_t *json, json_val_t val, const char *ident, FILE *file);
 
 #define JSON_INT(val)                           \
 	(json_val_data_t)                       \

@@ -12,8 +12,6 @@ json_t *json_init(json_t *json, uint values_cap)
 		return NULL;
 	}
 
-	json->root = JSON_END;
-
 	return json;
 }
 
@@ -33,7 +31,6 @@ void json_free(json_t *json)
 	}
 
 	list_free(&json->values);
-	json->root = JSON_END;
 }
 
 static json_mem_t *json_get_mem(const json_t *json, json_val_t val)
@@ -43,14 +40,14 @@ static json_mem_t *json_get_mem(const json_t *json, json_val_t val)
 
 json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_data_t value)
 {
-	if (json == NULL || ((json->root == JSON_END) != (parent == JSON_END))) {
+	if (json == NULL) {
 		return JSON_END;
 	}
 
 	json_val_t val;
 
 	if (parent == JSON_END) {
-		list_add_next_node(&json->values, json->root, val);
+		list_add_next_node(&json->values, parent, val);
 	} else {
 		json_mem_t *mem = json_get_mem(json, parent);
 		if (mem == NULL) {
@@ -77,7 +74,7 @@ json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_da
 	return val;
 }
 
-static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int depth, FILE *file)
+static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int depth, const char *indent, FILE *file)
 {
 	if (mem == NULL) {
 		return 1;
@@ -86,7 +83,7 @@ static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int dep
 	int ret = 0;
 
 	for (int i = 0; i < depth; i++) {
-		ret |= !c_fprintf(file, "\t");
+		ret |= !c_fprintf(file, "%s", indent);
 	}
 
 	if (name) {
@@ -109,14 +106,14 @@ static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int dep
 		ret |= !c_fprintf(file, "{\n");
 		list_foreach(&json->values, mem->value.o.values, child)
 		{
-			ret |= json_mem_print(json, child, 1, depth + 1, file);
+			ret |= json_mem_print(json, child, 1, depth + 1, indent, file);
 			if (list_get_next(&json->values, _i) != LIST_END) {
 				ret |= !c_fprintf(file, ",");
 			}
 			ret |= !c_fprintf(file, "\n");
 		}
 		for (int i = 0; i < depth; i++) {
-			ret |= !c_fprintf(file, "\t");
+			ret |= !c_fprintf(file, "%s", indent);
 		}
 
 		ret |= !c_fprintf(file, "}");
@@ -130,14 +127,14 @@ static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int dep
 
 		list_foreach(&json->values, mem->value.a.values, child)
 		{
-			ret |= json_mem_print(json, child, 0, depth + 1, file);
+			ret |= json_mem_print(json, child, 0, depth + 1, indent, file);
 			if (list_get_next(&json->values, _i) != LIST_END) {
 				ret |= !c_fprintf(file, ",");
 			}
 			ret |= !c_fprintf(file, "\n");
 		}
 		for (int i = 0; i < depth; i++) {
-			ret |= !c_fprintf(file, "\t");
+			ret |= !c_fprintf(file, "%s", indent);
 		}
 
 		ret |= !c_fprintf(file, "]");
@@ -147,7 +144,7 @@ static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int dep
 	return ret;
 }
 
-int json_print(const json_t *json, json_val_t val, FILE *file)
+int json_print(const json_t *json, json_val_t val, const char *indent, FILE *file)
 {
-	return json_mem_print(json, list_get_data(&json->values, val), 0, 0, file);
+	return json_mem_print(json, list_get_data(&json->values, val), 0, 0, indent, file);
 }
