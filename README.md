@@ -20,13 +20,15 @@ cross-platform utitilities and basic data structures implementation in C
 
 ### Data structures
 - [x] array
+- [ ] ast
 - [x] hashmap
 - [x] list
 - [x] tree
 
 ### File Formats
-- [ ] json
-- [x] Makefile
+- [ ] bnf
+- [x] json
+- [x] makefile
 - [x] xml
 
 ## Build

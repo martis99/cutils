@@ -1,5 +1,6 @@
 #include "arr.h"
 #include "cutils.h"
+#include "json.h"
 #include "list.h"
 #include "log.h"
 #include "make.h"
@@ -31,6 +32,31 @@ static void example_arr()
 	arr_print(&arr, stdout, print_arr, 0);
 
 	arr_free(&arr);
+}
+
+static void example_json()
+{
+	c_printf(SEP, __func__);
+
+	json_t json = { 0 };
+	json_init(&json, 1);
+
+	const json_val_t root = json_add_val(&json, JSON_END, str_null(), JSON_OBJ());
+	json_add_val(&json, root, STRH("int"), JSON_INT(1));
+	json_add_val(&json, root, STRH("float"), JSON_FLOAT(2.1234567));
+	json_add_val(&json, root, STRH("double"), JSON_DOUBLE(3.123456789012345));
+	json_add_val(&json, root, STRH("bool"), JSON_BOOL(1));
+	json_add_val(&json, root, STRH("str"), JSON_STR(STRH("str")));
+	const json_val_t arr = json_add_val(&json, root, STRH("arr"), JSON_ARR());
+	json_add_val(&json, arr, str_null(), JSON_INT(0));
+	json_add_val(&json, arr, str_null(), JSON_INT(1));
+	json_add_val(&json, arr, str_null(), JSON_INT(2));
+	const json_val_t obj = json_add_val(&json, root, STRH("obj"), JSON_OBJ());
+	json_add_val(&json, obj, STRH("int"), JSON_INT(4));
+
+	json_print(&json, root, stdout);
+
+	json_free(&json);
 }
 
 static int print_list(FILE *file, void *data, int ret)
@@ -198,7 +224,7 @@ static void example_xml()
 	xml_t xml = { 0 };
 	xml_init(&xml, 8, 8);
 
-	xml_tag_t parent = xml_add_tag(&xml, TREE_END, STR("Parent"));
+	xml_tag_t parent = xml_add_tag(&xml, XML_END, STR("Parent"));
 
 	xml_tag_t child1 = xml_add_tag(&xml, parent, STR("EmptyChild"));
 	xml_tag_t child2 = xml_add_tag_val(&xml, parent, STR("Child"), STR("Value"));
@@ -226,6 +252,7 @@ int main(int argc, char **argv)
 	c_init(&cutils);
 
 	example_arr();
+	example_json();
 	example_list();
 	example_log();
 	example_make();

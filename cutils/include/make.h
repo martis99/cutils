@@ -93,46 +93,46 @@ int make_print(const make_t *make, FILE *file);
 
 int make_dbg(const make_t *make, FILE *file);
 
-#define MSTR(_str)                                \
-	(make_str_data_t)                         \
-	{                                         \
-		.type = MAKE_STR_STR, .str = _str \
-	}
-
-#define MVAR(_var)                                \
-	(make_str_data_t)                         \
-	{                                         \
-		.type = MAKE_STR_VAR, .var = _var \
-	}
-
-#define MRULE(_target)                             \
-	(make_rule_target_data_t)                  \
+#define MSTR(_str)                                 \
+	(make_str_data_t)                          \
 	{                                          \
-		.target = _target, .action = { 0 } \
+		.type = MAKE_STR_STR, .str = _str, \
 	}
 
-#define MRULEACT(_target, _action)                   \
-	(make_rule_target_data_t)                    \
-	{                                            \
-		.target = _target, .action = _action \
+#define MVAR(_var)                                 \
+	(make_str_data_t)                          \
+	{                                          \
+		.type = MAKE_STR_VAR, .var = _var, \
 	}
 
-#define MCMD(_cmd)                                    \
-	(make_cmd_data_t)                             \
+#define MRULE(_target)                              \
+	(make_rule_target_data_t)                   \
+	{                                           \
+		.target = _target, .action = { 0 }, \
+	}
+
+#define MRULEACT(_target, _action)                    \
+	(make_rule_target_data_t)                     \
 	{                                             \
-		.type = MAKE_CMD_NORMAL, .arg1 = _cmd \
+		.target = _target, .action = _action, \
 	}
 
-#define MCMDCHILD(_dir, _target)                                      \
-	(make_cmd_data_t)                                             \
-	{                                                             \
-		.type = MAKE_CMD_CHILD, .arg1 = _dir, .arg2 = _target \
+#define MCMD(_cmd)                                     \
+	(make_cmd_data_t)                              \
+	{                                              \
+		.type = MAKE_CMD_NORMAL, .arg1 = _cmd, \
 	}
 
-#define MCMDERR(_msg)                              \
-	(make_cmd_data_t)                          \
-	{                                          \
-		.type = MAKE_CMD_ERR, .arg1 = _msg \
+#define MCMDCHILD(_dir, _target)                                       \
+	(make_cmd_data_t)                                              \
+	{                                                              \
+		.type = MAKE_CMD_CHILD, .arg1 = _dir, .arg2 = _target, \
+	}
+
+#define MCMDERR(_msg)                               \
+	(make_cmd_data_t)                           \
+	{                                           \
+		.type = MAKE_CMD_ERR, .arg1 = _msg, \
 	}
 
 #endif

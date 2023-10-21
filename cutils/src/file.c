@@ -93,6 +93,7 @@ size_t file_read(FILE *file, size_t size, char *data, size_t data_size)
 	size = MIN(file_size(file), size);
 
 	if (size >= data_size) {
+		log_error("cutils", "file", NULL, "buffer too small %d/%d", data_size, size);
 		return 0;
 	}
 

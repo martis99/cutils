@@ -8,6 +8,8 @@
 
 #include <stdarg.h>
 
+#define XML_END TREE_END
+
 typedef tnode_t xml_tag_t;
 typedef lnode_t xml_attr_t;
 

@@ -41,8 +41,8 @@ TEST(t_xml_add_tag)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	EXPECT_EQ(xml_add_tag(NULL, TREE_END, str_null()), TREE_END);
-	EXPECT_EQ(xml_add_tag(&xml, TREE_END, STRH("")), 0);
+	EXPECT_EQ(xml_add_tag(NULL, XML_END, str_null()), XML_END);
+	EXPECT_EQ(xml_add_tag(&xml, XML_END, STRH("")), 0);
 
 	xml_free(&xml);
 
@@ -56,11 +56,11 @@ TEST(t_xml_add_tag_val)
 	xml_t xml = { 0 };
 	xml_init(&xml, 0, 0);
 
-	EXPECT_EQ(xml_add_tag_val(NULL, TREE_END, str_null(), str_null()), TREE_END);
+	EXPECT_EQ(xml_add_tag_val(NULL, XML_END, str_null(), str_null()), XML_END);
 	mem_oom(1);
-	EXPECT_EQ(xml_add_tag_val(&xml, TREE_END, STRH(""), STRH("")), TREE_END);
+	EXPECT_EQ(xml_add_tag_val(&xml, XML_END, STRH(""), STRH("")), XML_END);
 	mem_oom(0);
-	EXPECT_EQ(xml_add_tag_val(&xml, TREE_END, STRH(""), STRH("")), 0);
+	EXPECT_EQ(xml_add_tag_val(&xml, XML_END, STRH(""), STRH("")), 0);
 
 	xml_free(&xml);
 
@@ -74,9 +74,9 @@ TEST(t_xml_remove_tag)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	EXPECT_EQ(xml_remove_tag(NULL, TREE_END), 1);
-	EXPECT_EQ(xml_remove_tag(&xml, TREE_END), 1);
-	EXPECT_EQ(xml_remove_tag(&xml, xml_add_tag(&xml, TREE_END, STRH(""))), 0);
+	EXPECT_EQ(xml_remove_tag(NULL, XML_END), 1);
+	EXPECT_EQ(xml_remove_tag(&xml, XML_END), 1);
+	EXPECT_EQ(xml_remove_tag(&xml, xml_add_tag(&xml, XML_END, STRH(""))), 0);
 
 	xml_free(&xml);
 
@@ -90,10 +90,10 @@ TEST(t_xml_has_child)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	EXPECT_EQ(xml_has_child(NULL, TREE_END), 0);
-	EXPECT_EQ(xml_has_child(&xml, TREE_END), 0);
+	EXPECT_EQ(xml_has_child(NULL, XML_END), 0);
+	EXPECT_EQ(xml_has_child(&xml, XML_END), 0);
 
-	xml_tag_t parent = xml_add_tag(&xml, TREE_END, STRH(""));
+	xml_tag_t parent = xml_add_tag(&xml, XML_END, STRH(""));
 	xml_add_tag(&xml, parent, STRH(""));
 	EXPECT_EQ(xml_has_child(&xml, parent), 1);
 
@@ -109,12 +109,12 @@ TEST(t_xml_add_attr)
 	xml_t xml = { 0 };
 	xml_init(&xml, 0, 0);
 
-	EXPECT_EQ(xml_add_attr(NULL, TREE_END, str_null(), str_null()), LIST_END);
-	EXPECT_EQ(xml_add_attr(&xml, TREE_END, str_null(), str_null()), LIST_END);
+	EXPECT_EQ(xml_add_attr(NULL, XML_END, str_null(), str_null()), LIST_END);
+	EXPECT_EQ(xml_add_attr(&xml, XML_END, str_null(), str_null()), LIST_END);
 	mem_oom(1);
-	EXPECT_EQ(xml_add_attr(&xml, xml_add_tag(&xml, TREE_END, STRH("")), STRH(""), STRH("")), LIST_END);
+	EXPECT_EQ(xml_add_attr(&xml, xml_add_tag(&xml, XML_END, STRH("")), STRH(""), STRH("")), LIST_END);
 	mem_oom(0);
-	EXPECT_EQ(xml_add_attr(&xml, xml_add_tag(&xml, TREE_END, STRH("")), STRH(""), STRH("")), 0);
+	EXPECT_EQ(xml_add_attr(&xml, xml_add_tag(&xml, XML_END, STRH("")), STRH(""), STRH("")), 0);
 
 	xml_free(&xml);
 
@@ -139,10 +139,10 @@ TEST(t_xml_print, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	EXPECT_EQ(xml_print(NULL, TREE_END, NULL), 1);
-	EXPECT_EQ(xml_print(&xml, TREE_END, NULL), 1);
+	EXPECT_EQ(xml_print(NULL, XML_END, NULL), 1);
+	EXPECT_EQ(xml_print(&xml, XML_END, NULL), 1);
 
-	xml_tag_t tag = xml_add_tag(&xml, TREE_END, STRH(""));
+	xml_tag_t tag = xml_add_tag(&xml, XML_END, STRH(""));
 	EXPECT_EQ(xml_print(&xml, tag, NULL), 1);
 
 	{
@@ -169,11 +169,11 @@ TEST(t_xml_print_tag, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	xml_add_tag(&xml, TREE_END, STRH("Project"));
+	xml_add_tag(&xml, XML_END, STRH("Project"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -195,11 +195,11 @@ TEST(t_xml_print_tag_val, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	xml_add_tag_val(&xml, TREE_END, STRH("Project"), STRH("Name"));
+	xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Name"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -221,11 +221,11 @@ TEST(t_xml_print_tag_val_nl, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	xml_add_tag_val(&xml, TREE_END, STRH("Project"), STRH("Name\n"));
+	xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Name\n"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -248,12 +248,12 @@ TEST(t_xml_print_tag_attr, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STRH("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	xml_add_attr(&xml, project, STRH("Name"), STRH("Project1"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -275,12 +275,12 @@ TEST(t_xml_print_tag_val_attr, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag_val(&xml, TREE_END, STRH("Project"), STRH("Value"));
+	const xml_tag_t project = xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Value"));
 	xml_add_attr(&xml, project, STRH("Name"), STRH("Project1"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -302,12 +302,12 @@ TEST(t_xml_print_tag_child, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STRH("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	xml_add_tag(&xml, project, STRH("Child"));
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -331,14 +331,14 @@ TEST(t_xml_print_remove_tag, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STRH("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	const xml_tag_t child	= xml_add_tag(&xml, project, STRH("Child"));
 
 	xml_remove_tag(&xml, child);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -360,7 +360,7 @@ TEST(t_xml_print_remove_tag_attr, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STRH("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	const xml_tag_t child	= xml_add_tag(&xml, project, STRH("Child"));
 	xml_add_attr(&xml, child, STRH("Name"), STRH("Project3"));
 
@@ -368,7 +368,7 @@ TEST(t_xml_print_remove_tag_attr, FILE *file)
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -390,7 +390,7 @@ TEST(t_xml_print_remove_tag_middle, FILE *file)
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	const xml_tag_t project = xml_add_tag(&xml, TREE_END, STRH("Project"));
+	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	const xml_tag_t child1	= xml_add_tag(&xml, project, STRH("Child1"));
 	const xml_tag_t child2	= xml_add_tag(&xml, project, STRH("Child2"));
 	const xml_tag_t child3	= xml_add_tag(&xml, project, STRH("Child3"));
@@ -399,7 +399,7 @@ TEST(t_xml_print_remove_tag_middle, FILE *file)
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		xml_print(&xml, 0, file);
+		EXPECT_EQ(xml_print(&xml, 0, file), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -439,8 +439,8 @@ STEST(t_xml)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	RUN(t_xml_init_free, file);
-	RUN(t_xml_add, file);
+	RUN(t_xml_init_free);
+	RUN(t_xml_add);
 	RUN(t_xml_prints, file);
 
 	file_close(file);

@@ -353,7 +353,12 @@ make_act_t make_add_act(make_t *make, make_act_t act)
 		if (phony == MAKE_END) {
 			phony = make_add_act(make, make_create_phony(make));
 		}
-		make_rule_add_depend(make, phony, data->rule.target);
+		make_rule_target_data_t depend = data->rule.target;
+		if (depend.target.type == MAKE_STR_STR) {
+			depend.target.str.ref = 1;
+			depend.action.ref     = 1;
+		}
+		make_rule_add_depend(make, phony, depend);
 	}
 
 	return list_set_next_node(&make->acts, make->g_acts, act);

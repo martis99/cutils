@@ -4,6 +4,7 @@
 #include "t_cutils.h"
 #include "t_dict.h"
 #include "t_file.h"
+#include "t_json.h"
 #include "t_list.h"
 #include "t_log.h"
 #include "t_make.h"
@@ -32,6 +33,7 @@ TEST(test_cutils)
 	RUN(t_cutils);
 	RUN(t_dict);
 	RUN(t_file);
+	RUN(t_json);
 	RUN(t_list);
 	RUN(t_log);
 	RUN(t_make);
