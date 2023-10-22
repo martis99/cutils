@@ -1,0 +1,6 @@
+NAME: libtest_cutils
+TYPE: LIB
+SOURCE: src
+INCLUDE: include
+DEPENDS: cutils, libtest_test
+INCLUDES: cutils, libtest_test
