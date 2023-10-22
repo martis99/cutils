@@ -43,7 +43,7 @@ static void example_json()
 
 	const json_val_t root = json_add_val(&json, JSON_END, str_null(), JSON_OBJ());
 	json_add_val(&json, root, STRH("int"), JSON_INT(1));
-	json_add_val(&json, root, STRH("float"), JSON_FLOAT(2.1234567));
+	json_add_val(&json, root, STRH("float"), JSON_FLOAT(2.1234567f));
 	json_add_val(&json, root, STRH("double"), JSON_DOUBLE(3.123456789012345));
 	json_add_val(&json, root, STRH("bool"), JSON_BOOL(1));
 	json_add_val(&json, root, STRH("str"), JSON_STR(STRH("str")));
