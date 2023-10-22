@@ -1,8 +1,6 @@
-#include "t_args.h"
+#include "t_cutils_c.h"
 
 #include "args.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_args.txt"
 

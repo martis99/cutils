@@ -1,28 +1,9 @@
 #include "test_cutils.h"
 
-#include "t_args.h"
-#include "t_arr.h"
-#include "t_cstr.h"
-#include "t_cutils.h"
-#include "t_dict.h"
-#include "t_file.h"
-#include "t_json.h"
-#include "t_list.h"
-#include "t_log.h"
-#include "t_make.h"
-#include "t_md5.h"
-#include "t_mem.h"
-#include "t_path.h"
-#include "t_print.h"
-#include "t_str.h"
-#include "t_time.h"
-#include "t_tree.h"
-#include "t_type.h"
-#include "t_xml.h"
+#include "t_cutils_c.h"
 
 #include "cutils.h"
 
-#include "test.h"
 #include "test_test.h"
 
 TEST(tests)

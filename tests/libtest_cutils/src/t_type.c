@@ -1,8 +1,6 @@
-#include "t_type.h"
+#include "t_cutils_c.h"
 
 #include "type.h"
-
-#include "test.h"
 
 TEST(size)
 {

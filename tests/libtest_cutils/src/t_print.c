@@ -1,9 +1,7 @@
-#include "t_print.h"
+#include "t_cutils_c.h"
 
 #include "file.h"
 #include "print.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_print.txt"
 

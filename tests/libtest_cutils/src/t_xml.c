@@ -1,11 +1,9 @@
-#include "t_xml.h"
+#include "t_cutils_c.h"
 
 #include "cstr.h"
 #include "file.h"
 #include "mem.h"
 #include "xml.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_xml.txt"
 

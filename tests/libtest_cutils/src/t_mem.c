@@ -1,9 +1,7 @@
-#include "t_mem.h"
+#include "t_cutils_c.h"
 
 #include "file.h"
 #include "mem.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_mem.txt"
 

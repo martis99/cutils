@@ -1,9 +1,7 @@
-#include "t_md5.h"
+#include "t_cutils_c.h"
 
 #include "cstr.h"
 #include "md5.h"
-
-#include "test.h"
 
 TEST(format)
 {

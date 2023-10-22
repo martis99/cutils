@@ -1,10 +1,8 @@
-#include "t_tree.h"
+#include "t_cutils_c.h"
 
 #include "file.h"
 #include "print.h"
 #include "tree.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_tree.txt"
 

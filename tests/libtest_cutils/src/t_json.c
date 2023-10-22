@@ -1,11 +1,9 @@
-#include "t_json.h"
+#include "t_cutils_c.h"
 
 #include "cstr.h"
 #include "file.h"
 #include "json.h"
 #include "mem.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_json.txt"
 

@@ -1,9 +1,7 @@
-#include "t_md5.h"
+#include "t_cutils_c.h"
 
 #include "cutils.h"
 #include "file.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_cutils.txt"
 

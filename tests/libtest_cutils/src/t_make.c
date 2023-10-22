@@ -1,10 +1,8 @@
-#include "t_make.h"
+#include "t_cutils_c.h"
 
 #include "file.h"
 #include "make.h"
 #include "mem.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_make.txt"
 

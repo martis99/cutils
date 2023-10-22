@@ -1,11 +1,9 @@
-#include "t_list.h"
+#include "t_cutils_c.h"
 
 #include "file.h"
 #include "list.h"
 #include "mem.h"
 #include "print.h"
-
-#include "test.h"
 
 #define TEST_FILE "t_list.txt"
 
