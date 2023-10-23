@@ -9,7 +9,7 @@ cutils_t *c_init(cutils_t *cutils)
 	mem_init(&cutils->mem);
 	log_init(&cutils->log);
 
-	log_set_level(LOG_DEBUG);
+	log_set_level(LOG_WARN);
 
 	return cutils;
 }

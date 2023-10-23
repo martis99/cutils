@@ -80,7 +80,7 @@ void *arr_get(const arr_t *arr, uint index)
 	}
 
 	if (index >= arr->cnt) {
-		log_error("cutils", "arr", NULL, "invalid id: %d", index);
+		log_warn("cutils", "arr", NULL, "invalid id: %d", index);
 		return NULL;
 	}
 

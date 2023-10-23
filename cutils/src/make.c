@@ -521,6 +521,7 @@ static str_t make_str(const make_t *make, make_str_data_t str)
 	case MAKE_STR_VAR: {
 		make_var_data_t *data = make_var_get(make, str.var);
 		if (data == NULL) {
+			log_warn("cutils", "make", NULL, "variable not found");
 			return str_null();
 		}
 		return data->ref;
