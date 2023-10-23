@@ -3,6 +3,8 @@
 #include "c_time.h"
 #include "platform.h"
 
+#include <string.h>
+
 static log_t *s_log;
 
 static const char *level_strs[] = { "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" };

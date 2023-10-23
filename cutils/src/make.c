@@ -2,7 +2,6 @@
 
 #include "log.h"
 #include "platform.h"
-#include "print.h"
 
 #define MAX_VAR_VALUE_LEN 256
 
@@ -377,7 +376,7 @@ make_var_t make_var_add_val(make_t *make, make_var_t var, make_str_data_t val)
 	}
 
 	make_str_t str;
-	list_add_next_node(&make->strs, make_var_get(make, var)->values, str);
+	list_add_next_node(&make->strs, data->values, str);
 	make_str_data_t *target = list_get_data(&make->strs, str);
 
 	if (target == NULL) {
@@ -402,7 +401,7 @@ make_str_t make_rule_add_depend(make_t *make, make_rule_t rule, make_rule_target
 	}
 
 	make_str_t str;
-	list_add_next_node(&make->targets, make_rule_get(make, rule)->depends, str);
+	list_add_next_node(&make->targets, data->depends, str);
 	make_rule_target_data_t *target = list_get_data(&make->targets, str);
 
 	if (target == NULL) {

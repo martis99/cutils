@@ -1,9 +1,8 @@
 #ifndef ARR_H
 #define ARR_H
 
+#include "print.h"
 #include "type.h"
-
-#include <stdio.h>
 
 #define ARR_END -1
 

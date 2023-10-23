@@ -132,8 +132,8 @@ STEST(t_json)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	RUN(t_json_init_free, file);
-	RUN(t_json_add_val, file);
+	RUN(t_json_init_free);
+	RUN(t_json_add_val);
 	RUN(t_json_prints, file);
 
 	file_close(file);

@@ -2,9 +2,8 @@
 #define LIST_H
 
 #include "arr.h"
+#include "print.h"
 #include "type.h"
-
-#include <stdio.h>
 
 #define LIST_END ARR_END
 

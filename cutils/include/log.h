@@ -2,10 +2,7 @@
 #define LOG_H
 
 #include "c_time.h"
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
+#include "print.h"
 
 typedef struct log_event_s {
 	va_list ap;

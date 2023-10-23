@@ -2,9 +2,8 @@
 #define TREE_H
 
 #include "list.h"
+#include "print.h"
 #include "type.h"
-
-#include <stdio.h>
 
 #define TREE_END LIST_END
 

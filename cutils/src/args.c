@@ -1,6 +1,9 @@
+//TODO: Return error message instead of help when wrong args are passed:
+//  test_cutils: invalid option: 'h'
+//  test_cutils: 'h' requires parameter
+
 #include "args.h"
 
-#include <stdio.h>
 #include <string.h>
 
 static inline int switch_int(char c)
@@ -38,41 +41,41 @@ static param_handler_fn s_handlers[] = {
 
 static inline void header(const char *name, const char *description, FILE *file)
 {
-	fprintf(file, "%s\n", description);
-	fprintf(file, "\n");
-	fprintf(file, "Usage\n");
-	fprintf(file, "  %s [options]\n", name);
-	fprintf(file, "\n");
+	c_fprintf(file, "%s\n", description);
+	c_fprintf(file, "\n");
+	c_fprintf(file, "Usage\n");
+	c_fprintf(file, "  %s [options]\n", name);
+	c_fprintf(file, "\n");
 }
 
 void args_usage(const char *name, const char *description, FILE *file)
 {
 	header(name, description, file);
-	fprintf(file, "Run 'build --help' for more information\n");
-	fflush(file);
+	c_fprintf(file, "Run '%s --help' for more information\n", name);
+	c_fflush(file);
 }
 
 static inline void help(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size, FILE *file)
 {
 	header(name, description, file);
-	fprintf(file, "Options\n");
+	c_fprintf(file, "Options\n");
 
 	size_t args_len = args_size / sizeof(arg_t);
 	for (size_t i = 0; i < args_len; i++) {
-		fprintf(file, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
+		c_fprintf(file, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
 	}
-	fprintf(file, "\n");
+	c_fprintf(file, "\n");
 
 	size_t modes_len = modes_size / sizeof(mode_desc_t);
 	for (size_t mode = 0; mode < modes_len; mode++) {
-		fprintf(file, "%s\n", modes[mode].name);
+		c_fprintf(file, "%s\n", modes[mode].name);
 		for (size_t i = 0; i < modes[mode].len; i++) {
-			fprintf(file, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
+			c_fprintf(file, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
 		}
-		fprintf(file, "\n");
+		c_fprintf(file, "\n");
 	}
 
-	fflush(file);
+	c_fflush(file);
 }
 
 static inline int get_arg(const arg_t *args, size_t args_size, int argc, const char **argv, int *index, const char **param)

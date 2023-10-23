@@ -1,9 +1,8 @@
 #ifndef MEM_H
 #define MEM_H
 
+#include "print.h"
 #include "type.h"
-
-#include <stdio.h>
 
 typedef struct mem_s {
 	size_t mem;

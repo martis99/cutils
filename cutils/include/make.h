@@ -3,9 +3,8 @@
 
 #include "arr.h"
 #include "list.h"
+#include "print.h"
 #include "str.h"
-
-#include <stdio.h>
 
 #define MAKE_END LIST_END
 

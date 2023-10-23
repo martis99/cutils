@@ -1,9 +1,9 @@
 #ifndef ARGS_H
 #define ARGS_H
 
-#include <stddef.h>
+#include "print.h"
 
-#include "file.h"
+#include <stddef.h>
 
 typedef enum param_e {
 	PARAM_NONE,

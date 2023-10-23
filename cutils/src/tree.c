@@ -1,7 +1,6 @@
 #include "tree.h"
 
 #include "mem.h"
-#include "print.h"
 
 typedef struct header_s {
 	tnode_t child;

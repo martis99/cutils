@@ -1,7 +1,7 @@
 #include "list.h"
 
+#include "log.h"
 #include "mem.h"
-#include "print.h"
 
 typedef struct header_s {
 	lnode_t next;
@@ -28,6 +28,7 @@ lnode_t list_add(list_t *list)
 {
 	lnode_t node = arr_add(list);
 	if (node == LIST_END) {
+		log_error("cutils", "list", NULL, "failed to add element");
 		return LIST_END;
 	}
 

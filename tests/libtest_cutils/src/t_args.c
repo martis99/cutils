@@ -1,6 +1,7 @@
 #include "t_cutils_c.h"
 
 #include "args.h"
+#include "file.h"
 
 #define TEST_FILE "t_args.txt"
 
@@ -23,7 +24,7 @@ TEST(t_args_usage, FILE *file)
 				   "Usage\n"
 				   "  test_cutils [options]\n"
 				   "\n"
-				   "Run 'build --help' for more information\n";
+				   "Run 'test_cutils --help' for more information\n";
 		EXPECT_STR(buf, exp);
 	}
 
@@ -44,12 +45,12 @@ TEST(t_args_handle, FILE *file)
 		[1] = ARG('B', "dir", PARAM_STR, "<dir>", "Set directory", handle_dir),
 		[2] = ARG('S', "dir", PARAM_STR, "<dir>", "Set directory", NULL),
 		[3] = ARG('D', "debug", PARAM_SWITCH, "<0/1>", "Turn on/off debug messages (default: 0)", NULL),
-		[4] = ARG('M', "mode", PARAM_MODE, "<name>", "Set mode (default: A)", NULL),
+		[4] = ARG('M', "mode", PARAM_MODE, "<mode>", "Set mode (default: A)", NULL),
 	};
 
 	mode_t mode_modes[] = {
-		[0] = { .c = 'A', .desc = "A" },
-		[1] = { .c = 'B', .desc = "B" },
+		[0] = { .c = 'A', .desc = "A mode" },
+		[1] = { .c = 'B', .desc = "B mode" },
 	};
 
 	mode_desc_t modes[] = {
@@ -89,10 +90,15 @@ TEST(t_args_handle, FILE *file)
 		file_reopen(TEST_FILE, "wb+", file);
 		EXPECT_EQ(args_handle(NAME, DESC, args, sizeof(args), modes, sizeof(modes), sizeof(argv_err) / sizeof(char *), argv_err, params, file), 1);
 
-		char buf[64] = { 0 };
+		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
 
-		const char exp[] = "";
+		const char exp[] = "cutils tests\n"
+				   "\n"
+				   "Usage\n"
+				   "  test_cutils [options]\n"
+				   "\n"
+				   "Run 'test_cutils --help' for more information\n";
 		EXPECT_STR(buf, exp);
 	}
 
@@ -105,10 +111,25 @@ TEST(t_args_handle, FILE *file)
 		file_reopen(TEST_FILE, "wb+", file);
 		EXPECT_EQ(args_handle(NAME, DESC, args, sizeof(args), modes, sizeof(modes), sizeof(argv_help) / sizeof(char *), argv_help, params, file), 2);
 
-		char buf[64] = { 0 };
+		char buf[512] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
 
-		const char exp[] = "";
+		const char exp[] = "cutils tests\n"
+				   "\n"
+				   "Usage\n"
+				   "  test_cutils [options]\n"
+				   "\n"
+				   "Options\n"
+				   "  -T --test                    Run tests\n"
+				   "  -B --dir          <dir>      Set directory\n"
+				   "  -S --dir          <dir>      Set directory\n"
+				   "  -D --debug        <0/1>      Turn on/off debug messages (default: 0)\n"
+				   "  -M --mode         <mode>     Set mode (default: A)\n"
+				   "\n"
+				   "Modes\n"
+				   "  A = A mode\n"
+				   "  B = B mode\n"
+				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 
@@ -121,10 +142,25 @@ TEST(t_args_handle, FILE *file)
 		file_reopen(TEST_FILE, "wb+", file);
 		EXPECT_EQ(args_handle(NAME, DESC, args, sizeof(args), modes, sizeof(modes), sizeof(argv_d) / sizeof(char *), argv_d, params, file), 2);
 
-		char buf[64] = { 0 };
+		char buf[512] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
 
-		const char exp[] = "";
+		const char exp[] = "cutils tests\n"
+				   "\n"
+				   "Usage\n"
+				   "  test_cutils [options]\n"
+				   "\n"
+				   "Options\n"
+				   "  -T --test                    Run tests\n"
+				   "  -B --dir          <dir>      Set directory\n"
+				   "  -S --dir          <dir>      Set directory\n"
+				   "  -D --debug        <0/1>      Turn on/off debug messages (default: 0)\n"
+				   "  -M --mode         <mode>     Set mode (default: A)\n"
+				   "\n"
+				   "Modes\n"
+				   "  A = A mode\n"
+				   "  B = B mode\n"
+				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 
@@ -137,10 +173,25 @@ TEST(t_args_handle, FILE *file)
 		file_reopen(TEST_FILE, "wb+", file);
 		EXPECT_EQ(args_handle(NAME, DESC, args, sizeof(args), modes, sizeof(modes), sizeof(argv_h) / sizeof(char *), argv_h, params, file), 2);
 
-		char buf[64] = { 0 };
+		char buf[512] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
 
-		const char exp[] = "";
+		const char exp[] = "cutils tests\n"
+				   "\n"
+				   "Usage\n"
+				   "  test_cutils [options]\n"
+				   "\n"
+				   "Options\n"
+				   "  -T --test                    Run tests\n"
+				   "  -B --dir          <dir>      Set directory\n"
+				   "  -S --dir          <dir>      Set directory\n"
+				   "  -D --debug        <0/1>      Turn on/off debug messages (default: 0)\n"
+				   "  -M --mode         <mode>     Set mode (default: A)\n"
+				   "\n"
+				   "Modes\n"
+				   "  A = A mode\n"
+				   "  B = B mode\n"
+				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 

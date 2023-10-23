@@ -13,6 +13,7 @@ arr_t *arr_init(arr_t *arr, uint cap, size_t size)
 
 	arr->data = mem_alloc(cap * size);
 	if (arr->data == NULL) {
+		log_error("cutils", "arr", NULL, "failed to allocate memory");
 		return NULL;
 	}
 
@@ -64,6 +65,7 @@ uint arr_add(arr_t *arr)
 	}
 
 	if (arr_resize(arr)) {
+		log_error("cutils", "arr", NULL, "failed to add element");
 		return ARR_END;
 	}
 
