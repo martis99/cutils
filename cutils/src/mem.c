@@ -149,6 +149,10 @@ void *mem_set(void *dst, int val, size_t size)
 
 void *mem_cpy(void *dst, size_t dst_size, const void *src, size_t src_size)
 {
+	if (src_size > dst_size) {
+		log_error("cutils", "mem", NULL, "destination too small %d/%d", dst_size, src_size);
+		return NULL;
+	}
 #if defined(C_WIN)
 	memcpy_s(dst, dst_size, src, src_size);
 #else

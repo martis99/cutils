@@ -130,7 +130,7 @@ TEST(t_xml_add)
 	SEND;
 }
 
-TEST(t_xml_print, FILE *file)
+TESTP(t_xml_print, FILE *file)
 {
 	START;
 
@@ -160,7 +160,7 @@ TEST(t_xml_print, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag, FILE *file)
+TESTP(t_xml_print_tag, FILE *file)
 {
 	START;
 
@@ -186,7 +186,7 @@ TEST(t_xml_print_tag, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag_val, FILE *file)
+TESTP(t_xml_print_tag_val, FILE *file)
 {
 	START;
 
@@ -212,7 +212,7 @@ TEST(t_xml_print_tag_val, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag_val_nl, FILE *file)
+TESTP(t_xml_print_tag_val_nl, FILE *file)
 {
 	START;
 
@@ -239,7 +239,7 @@ TEST(t_xml_print_tag_val_nl, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag_attr, FILE *file)
+TESTP(t_xml_print_tag_attr, FILE *file)
 {
 	START;
 
@@ -266,7 +266,7 @@ TEST(t_xml_print_tag_attr, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag_val_attr, FILE *file)
+TESTP(t_xml_print_tag_val_attr, FILE *file)
 {
 	START;
 
@@ -293,7 +293,7 @@ TEST(t_xml_print_tag_val_attr, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_tag_child, FILE *file)
+TESTP(t_xml_print_tag_child, FILE *file)
 {
 	START;
 
@@ -322,7 +322,7 @@ TEST(t_xml_print_tag_child, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_remove_tag, FILE *file)
+TESTP(t_xml_print_remove_tag, FILE *file)
 {
 	START;
 
@@ -351,7 +351,7 @@ TEST(t_xml_print_remove_tag, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_remove_tag_attr, FILE *file)
+TESTP(t_xml_print_remove_tag_attr, FILE *file)
 {
 	START;
 
@@ -381,7 +381,7 @@ TEST(t_xml_print_remove_tag_attr, FILE *file)
 	END;
 }
 
-TEST(t_xml_print_remove_tag_middle, FILE *file)
+TESTP(t_xml_print_remove_tag_middle, FILE *file)
 {
 	START;
 
@@ -389,9 +389,9 @@ TEST(t_xml_print_remove_tag_middle, FILE *file)
 	xml_init(&xml, 1, 1);
 
 	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
-	const xml_tag_t child1	= xml_add_tag(&xml, project, STRH("Child1"));
-	const xml_tag_t child2	= xml_add_tag(&xml, project, STRH("Child2"));
-	const xml_tag_t child3	= xml_add_tag(&xml, project, STRH("Child3"));
+	xml_add_tag(&xml, project, STRH("Child1"));
+	const xml_tag_t child2 = xml_add_tag(&xml, project, STRH("Child2"));
+	xml_add_tag(&xml, project, STRH("Child3"));
 
 	xml_remove_tag(&xml, child2);
 
@@ -415,19 +415,19 @@ TEST(t_xml_print_remove_tag_middle, FILE *file)
 	END;
 }
 
-TEST(t_xml_prints, FILE *file)
+TESTP(t_xml_prints, FILE *file)
 {
 	SSTART;
-	RUN(t_xml_print, file);
-	RUN(t_xml_print_tag, file);
-	RUN(t_xml_print_tag_val, file);
-	RUN(t_xml_print_tag_val_nl, file);
-	RUN(t_xml_print_tag_attr, file);
-	RUN(t_xml_print_tag_val_attr, file);
-	RUN(t_xml_print_tag_child, file);
-	RUN(t_xml_print_remove_tag, file);
-	RUN(t_xml_print_remove_tag_attr, file);
-	RUN(t_xml_print_remove_tag_middle, file);
+	RUNP(t_xml_print, file);
+	RUNP(t_xml_print_tag, file);
+	RUNP(t_xml_print_tag_val, file);
+	RUNP(t_xml_print_tag_val_nl, file);
+	RUNP(t_xml_print_tag_attr, file);
+	RUNP(t_xml_print_tag_val_attr, file);
+	RUNP(t_xml_print_tag_child, file);
+	RUNP(t_xml_print_remove_tag, file);
+	RUNP(t_xml_print_remove_tag_attr, file);
+	RUNP(t_xml_print_remove_tag_middle, file);
 	SEND;
 }
 
@@ -439,7 +439,7 @@ STEST(t_xml)
 
 	RUN(t_xml_init_free);
 	RUN(t_xml_add);
-	RUN(t_xml_prints, file);
+	RUNP(t_xml_prints, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

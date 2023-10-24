@@ -4,7 +4,7 @@
 #include "print.h"
 #include "type.h"
 
-#define ARR_END -1
+#define ARR_END ((uint)-1)
 
 typedef struct arr_s {
 	void *data;

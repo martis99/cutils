@@ -12,7 +12,6 @@
 typedef lnode_t json_val_t;
 
 typedef enum json_val_type_e {
-	JSON_VAL_EMPTY,
 	JSON_VAL_INT,
 	JSON_VAL_FLOAT,
 	JSON_VAL_DOUBLE,
@@ -40,7 +39,7 @@ typedef struct json_val_data_s {
 		str_t s;
 		json_obj_t o;
 		json_arr_t a;
-	};
+	} val;
 } json_val_data_t;
 
 typedef struct json_mem_s {
@@ -59,46 +58,46 @@ json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_da
 
 int json_print(const json_t *json, json_val_t val, const char *ident, FILE *file);
 
-#define JSON_INT(val)                           \
-	(json_val_data_t)                       \
-	{                                       \
-		.type = JSON_VAL_INT, .i = val, \
+#define JSON_INT(_val)                               \
+	(json_val_data_t)                            \
+	{                                            \
+		.type = JSON_VAL_INT, .val.i = _val, \
 	}
 
-#define JSON_FLOAT(val)                           \
-	(json_val_data_t)                         \
-	{                                         \
-		.type = JSON_VAL_FLOAT, .f = val, \
+#define JSON_FLOAT(_val)                               \
+	(json_val_data_t)                              \
+	{                                              \
+		.type = JSON_VAL_FLOAT, .val.f = _val, \
 	}
 
-#define JSON_DOUBLE(val)                           \
-	(json_val_data_t)                          \
-	{                                          \
-		.type = JSON_VAL_DOUBLE, .d = val, \
+#define JSON_DOUBLE(_val)                               \
+	(json_val_data_t)                               \
+	{                                               \
+		.type = JSON_VAL_DOUBLE, .val.d = _val, \
 	}
 
-#define JSON_BOOL(val)                           \
-	(json_val_data_t)                        \
-	{                                        \
-		.type = JSON_VAL_BOOL, .b = val, \
+#define JSON_BOOL(_val)                               \
+	(json_val_data_t)                             \
+	{                                             \
+		.type = JSON_VAL_BOOL, .val.b = _val, \
 	}
 
-#define JSON_STR(val)                           \
-	(json_val_data_t)                       \
-	{                                       \
-		.type = JSON_VAL_STR, .s = val, \
+#define JSON_STR(_val)                               \
+	(json_val_data_t)                            \
+	{                                            \
+		.type = JSON_VAL_STR, .val.s = _val, \
 	}
 
-#define JSON_OBJ()                                                             \
-	(json_val_data_t)                                                      \
-	{                                                                      \
-		.type = JSON_VAL_OBJ, .o = (json_obj_t){ .values = JSON_END }, \
+#define JSON_OBJ()                                                                 \
+	(json_val_data_t)                                                          \
+	{                                                                          \
+		.type = JSON_VAL_OBJ, .val.o = (json_obj_t){ .values = JSON_END }, \
 	}
 
-#define JSON_ARR()                                                             \
-	(json_val_data_t)                                                      \
-	{                                                                      \
-		.type = JSON_VAL_ARR, .a = (json_arr_t){ .values = JSON_END }, \
+#define JSON_ARR()                                                                 \
+	(json_val_data_t)                                                          \
+	{                                                                          \
+		.type = JSON_VAL_ARR, .val.a = (json_arr_t){ .values = JSON_END }, \
 	}
 
 #endif

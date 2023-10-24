@@ -60,8 +60,6 @@ TEST(t_dict_foreach)
 	dict_set(&dict, "one", 3, "1");
 	dict_set(&dict, "two", 3, "2");
 
-	char *val = NULL;
-
 	int i = 0;
 	dict_foreach(&dict, pair)
 	{

@@ -6,6 +6,9 @@
 
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	cutils_t cutils = { 0 };
 	c_init(&cutils);
 

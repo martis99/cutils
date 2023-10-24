@@ -119,8 +119,9 @@ static void example_make()
 	make_t make = { 0 };
 	make_init(&make, 8, 8, 8);
 
-	make_var_t slndir   = make_add_act(&make, make_create_var_ext(&make, STR("SLNDIR"), MAKE_VAR_INST));
-	make_var_t config   = make_add_act(&make, make_create_var_ext(&make, STR("CONFIG"), MAKE_VAR_INST));
+	make_add_act(&make, make_create_var_ext(&make, STR("SLNDIR"), MAKE_VAR_INST));
+	make_add_act(&make, make_create_var_ext(&make, STR("CONFIG"), MAKE_VAR_INST));
+
 	make_var_t platform = make_add_act(&make, make_create_var_ext(&make, STR("PLATFORM"), MAKE_VAR_INST));
 	make_var_t tool	    = make_add_act(&make, make_create_var_ext(&make, STR("TOOL"), MAKE_VAR_INST));
 
@@ -145,9 +146,9 @@ static void example_make()
 
 	make_rule_t if_gcc = make_rule_add_act(&make, compile, make_create_if(&make, MVAR(tool), MSTR(STR("gcc"))));
 
-	make_var_t tool_gcc = make_if_add_true_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("gcc"))));
+	make_if_add_true_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("gcc"))));
 
-	make_var_t tool_clang = make_if_add_false_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("clang"))));
+	make_if_add_false_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("clang"))));
 
 	make_rule_add_act(&make, compile, make_create_cmd(&make, MCMD(STR("cleanup"))));
 
@@ -226,11 +227,11 @@ static void example_xml()
 
 	xml_tag_t parent = xml_add_tag(&xml, XML_END, STR("Parent"));
 
-	xml_tag_t child1 = xml_add_tag(&xml, parent, STR("EmptyChild"));
-	xml_tag_t child2 = xml_add_tag_val(&xml, parent, STR("Child"), STR("Value"));
+	xml_add_tag(&xml, parent, STR("EmptyChild"));
+	xml_add_tag_val(&xml, parent, STR("Child"), STR("Value"));
 	xml_tag_t child3 = xml_add_tag(&xml, parent, STR("Child"));
 	xml_tag_t child4 = xml_add_tag(&xml, parent, STR("Child"));
-	xml_tag_t child5 = xml_add_tag_val(&xml, parent, STR("Child"), strf("Value: %d", 5));
+	xml_add_tag_val(&xml, parent, STR("Child"), strf("Value: %d", 5));
 
 	xml_add_attr(&xml, child3, STR("Name"), STR("Child3"));
 
@@ -238,8 +239,8 @@ static void example_xml()
 	xml_add_attr(&xml, child4, STR("Age"), STR("45"));
 	xml_add_attr(&xml, child4, STR("Settings"), strf("Format:%s", "True"));
 
-	xml_tag_t child41 = xml_add_tag(&xml, child4, STR("Child41"));
-	xml_tag_t child42 = xml_add_tag(&xml, child4, STR("Child42"));
+	xml_add_tag(&xml, child4, STR("Child41"));
+	xml_add_tag(&xml, child4, STR("Child42"));
 
 	xml_print(&xml, parent, stdout);
 
@@ -248,6 +249,9 @@ static void example_xml()
 
 int main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	cutils_t cutils = { 0 };
 	c_init(&cutils);
 

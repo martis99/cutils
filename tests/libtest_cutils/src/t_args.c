@@ -8,7 +8,7 @@
 #define NAME "test_cutils"
 #define DESC "cutils tests"
 
-TEST(t_args_usage, FILE *file)
+TESTP(t_args_usage, FILE *file)
 {
 	START;
 
@@ -33,10 +33,12 @@ TEST(t_args_usage, FILE *file)
 
 static int handle_dir(const char *param, void *ret)
 {
+	(void)param;
+	(void)ret;
 	return 0;
 }
 
-TEST(t_args_handle, FILE *file)
+TESTP(t_args_handle, FILE *file)
 {
 	START;
 
@@ -204,8 +206,8 @@ STEST(t_args)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	RUN(t_args_usage, file);
-	RUN(t_args_handle, file);
+	RUNP(t_args_usage, file);
+	RUNP(t_args_handle, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

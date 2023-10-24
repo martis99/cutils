@@ -5,7 +5,7 @@
 
 #define TEST_FILE "t_mem.txt"
 
-TEST(t_mem_init, mem_t *mem)
+TESTP(t_mem_init, mem_t *mem)
 {
 	START;
 
@@ -24,7 +24,7 @@ TEST(t_mem_get_stats)
 	END;
 }
 
-TEST(t_mem_print, FILE *file)
+TESTP(t_mem_print, FILE *file)
 {
 	START;
 
@@ -92,8 +92,9 @@ TEST(t_mem_realloc)
 
 	EXPECT_EQ(mem_realloc(NULL, 0, 0), NULL);
 
-	void *ptr = mem_alloc(0);
-	EXPECT_EQ(ptr = mem_realloc(ptr, 0, 0), ptr);
+	void *ptr  = mem_alloc(0);
+	void *prev = ptr;
+	EXPECT_EQ(ptr = mem_realloc(ptr, 0, 0), prev);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 0, 1), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
@@ -127,6 +128,7 @@ TEST(t_mem_cpy)
 	void *dst = mem_alloc(0);
 
 	EXPECT_EQ(mem_cpy(NULL, 0, NULL, 0), NULL);
+	EXPECT_EQ(mem_cpy(dst, 0, src, 1), NULL);
 	EXPECT_NE(mem_cpy(dst, 0, src, 0), NULL);
 
 	mem_free(src, 0);
@@ -189,9 +191,9 @@ STEST(t_mem)
 	mem_t mm = { 0 };
 	mem_init(&mm);
 
-	RUN(t_mem_init, &mm);
+	RUNP(t_mem_init, &mm);
 	RUN(t_mem_get_stats);
-	RUN(t_mem_print, file);
+	RUNP(t_mem_print, file);
 	RUN(t_mem_alloc);
 	RUN(t_mem_calloc);
 	RUN(t_mem_realloc);

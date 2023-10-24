@@ -23,7 +23,7 @@ TEST(t_c_init)
 	END;
 }
 
-TEST(t_c_free, FILE *file)
+TESTP(t_c_free, FILE *file)
 {
 	START;
 
@@ -54,7 +54,7 @@ STEST(t_cutils)
 	cu.log = *log;
 
 	RUN(t_c_init);
-	RUN(t_c_free, file);
+	RUNP(t_c_free, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

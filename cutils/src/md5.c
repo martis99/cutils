@@ -53,7 +53,7 @@ int md5(const char *msg, size_t msg_len, byte *buf, size_t buf_size, char *out, 
 	union {
 		u32 h[4];
 		u8 b[16];
-	} o = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };
+	} o = { .h = { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 } };
 
 	size_t chunk_cnt = 1 + (msg_len + 8) / 64;
 	if (64 * chunk_cnt > buf_size) {

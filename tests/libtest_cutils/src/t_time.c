@@ -16,7 +16,6 @@ TEST(time_int)
 
 	u64 eps = end - start - 1000;
 
-	EXPECT_GE(eps, 0);
 	EXPECT_LT(eps, 162);
 
 	END;

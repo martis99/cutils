@@ -351,7 +351,7 @@ static int print_list(FILE *file, void *data, int ret)
 	return ret;
 }
 
-TEST(t_list_print, FILE *file)
+TESTP(t_list_print, FILE *file)
 {
 	START;
 
@@ -398,7 +398,7 @@ STEST(t_list)
 	RUN(t_list_next);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);
-	RUN(t_list_print, file);
+	RUNP(t_list_print, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

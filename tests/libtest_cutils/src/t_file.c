@@ -96,7 +96,7 @@ TEST(t_file_read_t)
 
 	char data[64] = { 0 };
 
-	EXPECT_EQ(file_read_t(NULL, NULL, 0), -1);
+	EXPECT_EQ(file_read_t(NULL, NULL, 0), (size_t)-1);
 	EXPECT_EQ(file_read_t(TEST_FILE, NULL, 0), 0);
 	EXPECT_EQ(file_read_t(TEST_FILE, data, 0), 0);
 	EXPECT_EQ(file_read_t(TEST_FILE, data, sizeof(data)), 4);
@@ -244,16 +244,24 @@ TEST(t_folder_exists)
 
 static int file_cb(path_t *path, const char *folder, void *priv)
 {
+	(void)path;
+	(void)folder;
+	(void)priv;
 	return 0;
 }
 
 static int file_err_cb(path_t *path, const char *folder, void *priv)
 {
+	(void)path;
+	(void)folder;
+	(void)priv;
 	return -1;
 }
 
 static int file_cnt_cb(path_t *path, const char *folder, void *priv)
 {
+	(void)path;
+
 	int *index = (int *)priv;
 
 	const char *file = NULL;
@@ -269,6 +277,8 @@ static int file_cnt_cb(path_t *path, const char *folder, void *priv)
 
 static int folder_cnt_cb(path_t *path, const char *folder, void *priv)
 {
+	(void)path;
+
 	int *index = (int *)priv;
 
 	const char *file = NULL;

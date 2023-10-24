@@ -18,7 +18,7 @@ TEST(t_printf)
 	END;
 }
 
-TEST(t_fprintf, FILE *file)
+TESTP(t_fprintf, FILE *file)
 {
 	START;
 
@@ -86,7 +86,7 @@ TEST(t_swprintf)
 	END;
 }
 
-TEST(t_fflush, FILE *file)
+TESTP(t_fflush, FILE *file)
 {
 	START;
 
@@ -110,7 +110,7 @@ TEST(t_set_unset_u16)
 	END;
 }
 
-TEST(t_ur, FILE *file)
+TESTP(t_ur, FILE *file)
 {
 	START;
 
@@ -130,7 +130,7 @@ TEST(t_ur, FILE *file)
 	END;
 }
 
-TEST(t_v, FILE *file)
+TESTP(t_v, FILE *file)
 {
 	START;
 
@@ -150,7 +150,7 @@ TEST(t_v, FILE *file)
 	END;
 }
 
-TEST(t_vr, FILE *file)
+TESTP(t_vr, FILE *file)
 {
 	START;
 
@@ -177,15 +177,15 @@ STEST(t_print)
 	FILE *file = file_open(TEST_FILE, "wb+");
 
 	RUN(t_printf);
-	RUN(t_fprintf, file);
+	RUNP(t_fprintf, file);
 	RUN(t_sprintf);
 	RUN(t_wprintf);
 	RUN(t_swprintf);
-	RUN(t_fflush, file);
+	RUNP(t_fflush, file);
 	RUN(t_set_unset_u16);
-	RUN(t_ur, file);
-	RUN(t_v, file);
-	RUN(t_vr, file);
+	RUNP(t_ur, file);
+	RUNP(t_v, file);
+	RUNP(t_vr, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

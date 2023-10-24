@@ -99,7 +99,7 @@ TEST(t_make_create_rule)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_rule(NULL, MRULE(MVAR(MAKE_END)), 0), MAKE_END);
-	make_str_data_t str = (make_str_data_t){ .type = -1, .var = MAKE_END };
+	make_str_data_t str = (make_str_data_t){ .type = -1 };
 	EXPECT_EQ(make_create_rule(&make, MRULE(str), 0), 0);
 	EXPECT_EQ(make_create_rule(&make, MRULE(MVAR(MAKE_END)), 0), 1);
 	mem_oom(1);
@@ -411,7 +411,7 @@ TEST(t_make_var_get_resolved)
 	END;
 }
 
-TEST(t_make_print, FILE *file)
+TESTP(t_make_print, FILE *file)
 {
 	START;
 
@@ -434,7 +434,7 @@ TEST(t_make_print, FILE *file)
 	END;
 }
 
-TEST(t_make_dbg, FILE *file)
+TESTP(t_make_dbg, FILE *file)
 {
 	START;
 
@@ -454,7 +454,7 @@ TEST(t_make_dbg, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_empty, FILE *file)
+TESTP(t_make_expand_print_empty, FILE *file)
 {
 	START;
 
@@ -485,7 +485,7 @@ TEST(t_make_expand_print_empty, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_inst_empty, FILE *file)
+TESTP(t_make_expand_print_var_inst_empty, FILE *file)
 {
 	START;
 
@@ -520,7 +520,7 @@ TEST(t_make_expand_print_var_inst_empty, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_inst, FILE *file)
+TESTP(t_make_expand_print_var_inst, FILE *file)
 {
 	START;
 
@@ -551,7 +551,7 @@ TEST(t_make_expand_print_var_inst, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_inst2, FILE *file)
+TESTP(t_make_expand_print_var_inst2, FILE *file)
 {
 	START;
 
@@ -584,7 +584,7 @@ TEST(t_make_expand_print_var_inst2, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_app, FILE *file)
+TESTP(t_make_expand_print_var_app, FILE *file)
 {
 	START;
 
@@ -621,7 +621,7 @@ TEST(t_make_expand_print_var_app, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_ext_inst, FILE *file)
+TESTP(t_make_expand_print_var_ext_inst, FILE *file)
 {
 	START;
 
@@ -652,7 +652,7 @@ TEST(t_make_expand_print_var_ext_inst, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_ref, FILE *file)
+TESTP(t_make_expand_print_var_ref, FILE *file)
 {
 	START;
 
@@ -708,7 +708,7 @@ TEST(t_make_expand_print_var_ref, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_if_empty, FILE *file)
+TESTP(t_make_expand_print_if_empty, FILE *file)
 {
 	START;
 
@@ -740,7 +740,7 @@ TEST(t_make_expand_print_if_empty, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_if_lr, FILE *file)
+TESTP(t_make_expand_print_if_lr, FILE *file)
 {
 	START;
 
@@ -772,7 +772,7 @@ TEST(t_make_expand_print_if_lr, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_if_true, FILE *file)
+TESTP(t_make_expand_print_var_if_true, FILE *file)
 {
 	START;
 
@@ -821,7 +821,7 @@ TEST(t_make_expand_print_var_if_true, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print_var_if_false, FILE *file)
+TESTP(t_make_expand_print_var_if_false, FILE *file)
 {
 	START;
 
@@ -873,7 +873,7 @@ TEST(t_make_expand_print_var_if_false, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_empty, FILE *file)
+TESTP(t_make_print_rule_empty, FILE *file)
 {
 	START;
 
@@ -903,7 +903,7 @@ TEST(t_make_print_rule_empty, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_empty_var, FILE *file)
+TESTP(t_make_print_rule_empty_var, FILE *file)
 {
 	START;
 
@@ -933,7 +933,7 @@ TEST(t_make_print_rule_empty_var, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_empty_action, FILE *file)
+TESTP(t_make_print_rule_empty_action, FILE *file)
 {
 	START;
 
@@ -963,7 +963,7 @@ TEST(t_make_print_rule_empty_action, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_depend, FILE *file)
+TESTP(t_make_print_rule_depend, FILE *file)
 {
 	START;
 
@@ -994,7 +994,7 @@ TEST(t_make_print_rule_depend, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_depends, FILE *file)
+TESTP(t_make_print_rule_depends, FILE *file)
 {
 	START;
 
@@ -1026,7 +1026,7 @@ TEST(t_make_print_rule_depends, FILE *file)
 	END;
 }
 
-TEST(t_make_print_rule_acts, FILE *file)
+TESTP(t_make_print_rule_acts, FILE *file)
 {
 	START;
 
@@ -1065,7 +1065,7 @@ TEST(t_make_print_rule_acts, FILE *file)
 	END;
 }
 
-TEST(t_make_print_cmd, FILE *file)
+TESTP(t_make_print_cmd, FILE *file)
 {
 	START;
 
@@ -1099,33 +1099,33 @@ TEST(t_make_print_cmd, FILE *file)
 	END;
 }
 
-TEST(t_make_expand_print, FILE *file)
+TESTP(t_make_expand_print, FILE *file)
 {
 	SSTART;
 	RUN(t_make_ext_set_val);
 	RUN(t_make_expand);
 	RUN(t_make_var_get_expanded);
 	RUN(t_make_var_get_resolved);
-	RUN(t_make_print, file);
-	RUN(t_make_dbg, file);
-	RUN(t_make_expand_print_empty, file);
-	RUN(t_make_expand_print_var_inst_empty, file);
-	RUN(t_make_expand_print_var_inst, file);
-	RUN(t_make_expand_print_var_inst2, file);
-	RUN(t_make_expand_print_var_app, file);
-	RUN(t_make_expand_print_var_ext_inst, file);
-	RUN(t_make_expand_print_var_ref, file);
-	RUN(t_make_expand_print_if_empty, file);
-	RUN(t_make_expand_print_if_lr, file);
-	RUN(t_make_expand_print_var_if_true, file);
-	RUN(t_make_expand_print_var_if_false, file);
-	RUN(t_make_print_rule_empty, file);
-	RUN(t_make_print_rule_empty_var, file);
-	RUN(t_make_print_rule_empty_action, file);
-	RUN(t_make_print_rule_depend, file);
-	RUN(t_make_print_rule_depends, file);
-	RUN(t_make_print_rule_acts, file);
-	RUN(t_make_print_cmd, file);
+	RUNP(t_make_print, file);
+	RUNP(t_make_dbg, file);
+	RUNP(t_make_expand_print_empty, file);
+	RUNP(t_make_expand_print_var_inst_empty, file);
+	RUNP(t_make_expand_print_var_inst, file);
+	RUNP(t_make_expand_print_var_inst2, file);
+	RUNP(t_make_expand_print_var_app, file);
+	RUNP(t_make_expand_print_var_ext_inst, file);
+	RUNP(t_make_expand_print_var_ref, file);
+	RUNP(t_make_expand_print_if_empty, file);
+	RUNP(t_make_expand_print_if_lr, file);
+	RUNP(t_make_expand_print_var_if_true, file);
+	RUNP(t_make_expand_print_var_if_false, file);
+	RUNP(t_make_print_rule_empty, file);
+	RUNP(t_make_print_rule_empty_var, file);
+	RUNP(t_make_print_rule_empty_action, file);
+	RUNP(t_make_print_rule_depend, file);
+	RUNP(t_make_print_rule_depends, file);
+	RUNP(t_make_print_rule_acts, file);
+	RUNP(t_make_print_cmd, file);
 	SEND;
 }
 
@@ -1139,7 +1139,7 @@ STEST(t_make)
 	RUN(t_make_create);
 	RUN(t_make_add);
 	RUN(t_make_rule_get_target);
-	RUN(t_make_expand_print, file);
+	RUNP(t_make_expand_print, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

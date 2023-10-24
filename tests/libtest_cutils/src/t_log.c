@@ -5,7 +5,7 @@
 
 #define TEST_FILE "t_log.txt"
 
-TEST(t_log_init, log_t *log)
+TESTP(t_log_init, log_t *log)
 {
 	START;
 
@@ -15,7 +15,7 @@ TEST(t_log_init, log_t *log)
 	END;
 }
 
-TEST(t_log_stdout, int quiet, int level)
+TESTP(t_log_stdout, int quiet, int level)
 {
 	START;
 
@@ -41,7 +41,7 @@ TEST(t_log_level_str)
 	END;
 }
 
-TEST(t_log_set_level, log_t *log)
+TESTP(t_log_set_level, log_t *log)
 {
 	START;
 
@@ -54,7 +54,7 @@ TEST(t_log_set_level, log_t *log)
 	END;
 }
 
-TEST(t_log_set_quiet, log_t *log)
+TESTP(t_log_set_quiet, log_t *log)
 {
 	START;
 
@@ -72,7 +72,7 @@ static void file_callback(log_event_t *ev)
 	(void)ev;
 }
 
-TEST(t_log_add_callback, log_t *log)
+TESTP(t_log_add_callback, log_t *log)
 {
 	START;
 
@@ -89,7 +89,7 @@ TEST(t_log_add_callback, log_t *log)
 	END;
 }
 
-TEST(t_log_log, log_t *log)
+TESTP(t_log_log, log_t *log)
 {
 	START;
 
@@ -102,7 +102,7 @@ TEST(t_log_log, log_t *log)
 	END;
 }
 
-TEST(t_log_trace, FILE *file)
+TESTP(t_log_trace, FILE *file)
 {
 	START;
 
@@ -125,7 +125,7 @@ TEST(t_log_trace, FILE *file)
 	END;
 }
 
-TEST(t_log_debug, FILE *file)
+TESTP(t_log_debug, FILE *file)
 {
 	START;
 
@@ -148,7 +148,7 @@ TEST(t_log_debug, FILE *file)
 	END;
 }
 
-TEST(t_log_info, FILE *file)
+TESTP(t_log_info, FILE *file)
 {
 	START;
 
@@ -171,7 +171,7 @@ TEST(t_log_info, FILE *file)
 	END;
 }
 
-TEST(t_log_warn, FILE *file)
+TESTP(t_log_warn, FILE *file)
 {
 	START;
 
@@ -194,7 +194,7 @@ TEST(t_log_warn, FILE *file)
 	END;
 }
 
-TEST(t_log_error, FILE *file)
+TESTP(t_log_error, FILE *file)
 {
 	START;
 
@@ -217,7 +217,7 @@ TEST(t_log_error, FILE *file)
 	END;
 }
 
-TEST(t_log_fatal, FILE *file)
+TESTP(t_log_fatal, FILE *file)
 {
 	START;
 
@@ -254,19 +254,19 @@ STEST(t_log)
 	FILE *file = file_open(TEST_FILE, "wb+");
 	log_add_fp(file, 0);
 
-	RUN(t_log_init, &lg);
-	RUN(t_log_stdout, lg.quiet, lg.level);
+	RUNP(t_log_init, &lg);
+	RUNP(t_log_stdout, lg.quiet, lg.level);
 	RUN(t_log_level_str);
-	RUN(t_log_set_level, &lg);
-	RUN(t_log_set_quiet, &lg);
-	RUN(t_log_add_callback, &lg);
-	RUN(t_log_log, &lg);
-	RUN(t_log_trace, file);
-	RUN(t_log_debug, file);
-	RUN(t_log_info, file);
-	RUN(t_log_warn, file);
-	RUN(t_log_error, file);
-	RUN(t_log_fatal, file);
+	RUNP(t_log_set_level, &lg);
+	RUNP(t_log_set_quiet, &lg);
+	RUNP(t_log_add_callback, &lg);
+	RUNP(t_log_log, &lg);
+	RUNP(t_log_trace, file);
+	RUNP(t_log_debug, file);
+	RUNP(t_log_info, file);
+	RUNP(t_log_warn, file);
+	RUNP(t_log_error, file);
+	RUNP(t_log_fatal, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

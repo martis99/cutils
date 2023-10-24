@@ -35,7 +35,7 @@ typedef struct make_str_data_s {
 	union {
 		str_t str;
 		make_var_t var;
-	};
+	} val;
 } make_str_data_t;
 
 typedef struct make_rule_target_data_s {
@@ -92,16 +92,16 @@ int make_print(const make_t *make, FILE *file);
 
 int make_dbg(const make_t *make, FILE *file);
 
-#define MSTR(_str)                                 \
-	(make_str_data_t)                          \
-	{                                          \
-		.type = MAKE_STR_STR, .str = _str, \
+#define MSTR(_str)                                     \
+	(make_str_data_t)                              \
+	{                                              \
+		.type = MAKE_STR_STR, .val.str = _str, \
 	}
 
-#define MVAR(_var)                                 \
-	(make_str_data_t)                          \
-	{                                          \
-		.type = MAKE_STR_VAR, .var = _var, \
+#define MVAR(_var)                                     \
+	(make_str_data_t)                              \
+	{                                              \
+		.type = MAKE_STR_VAR, .val.var = _var, \
 	}
 
 #define MRULE(_target)                              \

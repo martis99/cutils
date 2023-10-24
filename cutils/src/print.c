@@ -91,7 +91,7 @@ int c_sprintv(char *buf, size_t size, const char *fmt, va_list args)
 #endif
 	va_end(copy);
 
-	if (size > 0 && ret > size) {
+	if (size > 0 && (size_t)ret > size) {
 		return 0;
 	}
 
@@ -195,6 +195,7 @@ int c_unset_u16(FILE *file, int mode)
 	fflush(file);
 	return _setmode(_fileno(file), mode);
 #else
+	(void)mode;
 	return 0;
 #endif
 }

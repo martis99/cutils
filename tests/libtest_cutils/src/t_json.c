@@ -49,7 +49,7 @@ TEST(t_json_add_val)
 	END;
 }
 
-TEST(t_json_print, FILE *file)
+TEST(t_json_print)
 {
 	START;
 
@@ -64,7 +64,7 @@ TEST(t_json_print, FILE *file)
 	END;
 }
 
-TEST(t_json_print_all, FILE *file)
+TESTP(t_json_print_all, FILE *file)
 {
 	START;
 
@@ -113,16 +113,46 @@ TEST(t_json_print_all, FILE *file)
 		EXPECT_STR(buf, exp);
 	}
 
+	json_add_val(&json, root, STRH("invalid"), (json_val_data_t){ .type = -1 });
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_EQ(json_print(&json, root, "\t", file), 1);
+
+		char buf[256] = { 0 };
+		file_read_ft(file, buf, sizeof(buf));
+
+		const char exp[] = "{\n"
+				   "\t\"int\": 1,\n"
+				   "\t\"float\": 2.1234567,\n"
+				   "\t\"double\": 3.123456789012345,\n"
+				   "\t\"bool\": true,\n"
+				   "\t\"str\": \"str\",\n"
+				   "\t\"arr\": [\n"
+				   "\t\t0,\n"
+				   "\t\t1,\n"
+				   "\t\t2,\n"
+				   "\t\t{},\n"
+				   "\t\t[]\n"
+				   "\t],\n"
+				   "\t\"obj\": {\n"
+				   "\t\t\"int\": 4\n"
+				   "\t},\n"
+				   "\t\"invalid\": \n"
+				   "}";
+		EXPECT_STR(buf, exp);
+	}
+
 	json_free(&json);
 
 	END;
 }
 
-TEST(t_json_prints, FILE *file)
+TESTP(t_json_prints, FILE *file)
 {
 	SSTART;
-	RUN(t_json_print, file);
-	RUN(t_json_print_all, file);
+	RUN(t_json_print);
+	RUNP(t_json_print_all, file);
 	SEND;
 }
 
@@ -134,7 +164,7 @@ STEST(t_json)
 
 	RUN(t_json_init_free);
 	RUN(t_json_add_val);
-	RUN(t_json_prints, file);
+	RUNP(t_json_prints, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

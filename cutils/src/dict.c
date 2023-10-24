@@ -84,12 +84,12 @@ static inline u32 hash_data(const byte *data, size_t size)
 
 	u64 last = size & 0xff;
 	switch (size % 8) {
-	case 7: last |= (u64)data[6] << 56;
-	case 6: last |= (u64)data[5] << 48;
-	case 5: last |= (u64)data[4] << 40;
-	case 4: last |= (u64)data[3] << 32;
-	case 3: last |= (u64)data[2] << 24;
-	case 2: last |= (u64)data[1] << 16;
+	case 7: last |= (u64)data[6] << 56; /* falls through */
+	case 6: last |= (u64)data[5] << 48; /* falls through */
+	case 5: last |= (u64)data[4] << 40; /* falls through */
+	case 4: last |= (u64)data[3] << 32; /* falls through */
+	case 3: last |= (u64)data[2] << 24; /* falls through */
+	case 2: last |= (u64)data[1] << 16; /* falls through */
 	case 1:
 		last |= (u64)data[0] << 8;
 		hash ^= last;
