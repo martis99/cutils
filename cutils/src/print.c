@@ -265,3 +265,36 @@ int c_vr(FILE *file)
 #endif
 	return ret;
 }
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+int c_sprintv_cb(void *buf, size_t size, int off, const char *fmt, va_list args)
+{
+	off = MIN((int)size, off);
+	return c_sprintv((char *)buf + off, size - off, fmt, args);
+}
+
+int c_fprintv_cb(void *priv, size_t size, int off, const char *fmt, va_list args)
+{
+	(void)size;
+	(void)off;
+	return c_fprintv(priv, fmt, args);
+}
+
+int c_sprintf_cb(void *buf, size_t size, int off, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	const int len = c_sprintv_cb(buf, size, off, fmt, args);
+	va_end(args);
+	return len;
+}
+
+int c_fprintf_cb(void *priv, size_t size, int off, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	const int len = c_fprintv_cb(priv, size, off, fmt, args);
+	va_end(args);
+	return len;
+}

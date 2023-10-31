@@ -30,4 +30,12 @@ int c_ur(FILE *file);
 int c_v(FILE *file);
 int c_vr(FILE *file);
 
+typedef int (*c_printv_cb)(void *priv, size_t size, int off, const char *fmt, va_list args);
+int c_sprintv_cb(void *buf, size_t size, int off, const char *fmt, va_list args);
+int c_fprintv_cb(void *file, size_t size, int off, const char *fmt, va_list args);
+
+typedef int (*c_printf_cb)(void *priv, size_t size, int off, const char *fmt, ...);
+int c_sprintf_cb(void *buf, size_t size, int off, const char *fmt, ...);
+int c_fprintf_cb(void *file, size_t size, int off, const char *fmt, ...);
+
 #endif
