@@ -3,32 +3,153 @@
 #include "file.h"
 #include "log.h"
 
-#define TEST_FILE "t_log.txt"
-
-TESTP(t_log_init, log_t *log)
+TEST(t_log_init)
 {
 	START;
 
+	const log_t *log = log_get();
+
 	EXPECT_EQ(log_init(NULL), NULL);
-	EXPECT_EQ(log_init(log), log);
+	EXPECT_EQ(log_init((log_t *)log), log);
 
 	END;
 }
 
-TESTP(t_log_stdout, int quiet, int level)
+TEST(t_log_stdout)
 {
 	START;
 
-	log_set_quiet(0);
-	log_set_level(LOG_DEBUG);
+	int quiet  = log_set_quiet(0);
+	int level  = log_set_level(LOG_DEBUG);
+	int header = log_set_header(1);
 
-	log_debug("test", "log", NULL, "t_log_stdout");
-	log_debug("test", "log", "stdout", "t_log_stdout");
+	log_debug("test", "log", NULL, "stdout test");
+	log_debug("test", "log", "stdout", "stdout test");
+
+	log_set_header(0);
+
+	log_debug("test", "log", NULL, "stdout test");
+	log_debug("test", "log", "stdout", "stdout test");
 
 	log_set_quiet(quiet);
 	log_set_level(level);
+	log_set_header(header);
 
 	END;
+}
+
+TEST(t_log_print_header)
+{
+	START;
+
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
+
+	log_debug("test", "log", NULL, "file test %d", 1);
+	uint exp_line = __LINE__ - 1;
+
+	uint y, m, d, H, M, S, U, line, x;
+
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u DEBUG [test:log] t_log_print_header:%u: file test %u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+
+	EXPECT_EQ(line, exp_line);
+	EXPECT_EQ(x, 1);
+
+	log_init((log_t *)log);
+
+	END;
+}
+
+TEST(t_log_print_header_tag)
+{
+	START;
+
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
+
+	log_debug("test", "log", "file", "file test %d", 2);
+	uint exp_line = __LINE__ - 1;
+
+	uint y, m, d, H, M, S, U, line, x;
+
+	EXPECT_FMT(buf, 9, "%4u-%2u-%2u %2u:%2u:%2u.%3u DEBUG [test:log] t_log_print_header_tag:%u: [file] file test %u\n", &y, &m, &d, &H, &M, &S, &U, &line, &x);
+
+	EXPECT_EQ(line, exp_line);
+	EXPECT_EQ(x, 2);
+
+	log_init((log_t *)log);
+
+	END;
+}
+
+TEST(t_log_print_no_header)
+{
+	START;
+
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
+
+	log_debug("test", "log", NULL, "file test %d", 3);
+
+	uint x;
+
+	EXPECT_FMT(buf, 1, "file test %u\n", &x);
+
+	EXPECT_EQ(x, 3);
+
+	log_init((log_t *)log);
+
+	END;
+}
+
+TEST(t_log_print_no_header_tag)
+{
+	START;
+
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
+
+	log_debug("test", "log", "file", "file test %d", 4);
+
+	uint x;
+
+	EXPECT_FMT(buf, 1, "[file] file test %u\n", &x);
+
+	EXPECT_EQ(x, 4);
+
+	log_init((log_t *)log);
+
+	END;
+}
+
+TEST(t_log_print)
+{
+	SSTART;
+	RUN(t_log_print_header);
+	RUN(t_log_print_header_tag);
+	RUN(t_log_print_no_header);
+	RUN(t_log_print_no_header_tag);
+	SEND;
 }
 
 TEST(t_log_level_str)
@@ -41,79 +162,128 @@ TEST(t_log_level_str)
 	END;
 }
 
-TESTP(t_log_set_level, log_t *log)
+TEST(t_log_set_level)
 {
 	START;
 
-	log_init(NULL);
-	EXPECT_EQ(log_set_level(log->level), 1);
+	const log_t *log = log_get();
 
-	log_init(log);
-	EXPECT_EQ(log_set_level(log->level), 0);
+	log_init(NULL);
+	EXPECT_EQ(log_set_level(LOG_WARN), LOG_WARN);
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	EXPECT_EQ(log_set_level(log_set_level(LOG_DEBUG)), LOG_DEBUG);
+
+	log_init((log_t *)log);
 
 	END;
 }
 
-TESTP(t_log_set_quiet, log_t *log)
+TEST(t_log_set_quiet)
 {
 	START;
 
-	log_init(NULL);
-	EXPECT_EQ(log_set_quiet(log->quiet), 1);
+	const log_t *log = log_get();
 
-	log_init(log);
-	EXPECT_EQ(log_set_quiet(log->quiet), 0);
+	log_init(NULL);
+	EXPECT_EQ(log_set_quiet(0), 0);
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	EXPECT_EQ(log_set_quiet(log_set_quiet(1)), 1);
+
+	log_init((log_t *)log);
 
 	END;
 }
 
-static void file_callback(log_event_t *ev)
+TEST(t_log_set_header)
+{
+	START;
+
+	const log_t *log = log_get();
+
+	log_init(NULL);
+	EXPECT_EQ(log_set_header(1), 1);
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	log_init((log_t *)log);
+	EXPECT_EQ(log_set_header(log_set_header(0)), 0);
+
+	log_init((log_t *)log);
+
+	END;
+}
+
+static int print_callback(log_event_t *ev)
 {
 	(void)ev;
+	return 0;
 }
 
-TESTP(t_log_add_callback, log_t *log)
+TEST(t_log_add_callback)
 {
 	START;
 
-	log_init(NULL);
-	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 1);
+	const log_t *log = log_get();
 
-	log_init(log);
-	for (int i = 0; i < 31; i++) {
-		EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 0);
+	log_init(NULL);
+	EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 1);
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	for (int i = 0; i < LOG_MAX_CALLBACKS; i++) {
+		EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 0);
 	}
 
-	EXPECT_EQ(log_add_callback(file_callback, NULL, LOG_TRACE), 1);
+	EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 1);
+
+	log_debug("test", "log", NULL, "trace");
+
+	log_init((log_t *)log);
 
 	END;
 }
 
-TESTP(t_log_log, log_t *log)
+TEST(t_log_log)
 {
 	START;
+
+	const log_t *log = log_get();
 
 	log_init(NULL);
 	EXPECT_EQ(log_log(LOG_TRACE, "test", "log", NULL, 0, NULL, NULL), 1);
 
-	log_init(log);
+	log_t tmp = *log;
+	log_init(&tmp);
+
 	EXPECT_EQ(log_log(LOG_TRACE, "test", "log", NULL, 0, NULL, NULL), 1);
+
+	log_init((log_t *)log);
 
 	END;
 }
 
-TESTP(t_log_trace, FILE *file)
+TEST(t_log_trace)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_TRACE, 1);
 
 	log_trace("test", "log", NULL, "trace%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -122,21 +292,25 @@ TESTP(t_log_trace, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
-TESTP(t_log_debug, FILE *file)
+TEST(t_log_debug)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
 
 	log_debug("test", "log", NULL, "debug%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -145,21 +319,25 @@ TESTP(t_log_debug, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
-TESTP(t_log_info, FILE *file)
+TEST(t_log_info)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_INFO, 1);
 
 	log_info("test", "log", NULL, "info%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -168,21 +346,25 @@ TESTP(t_log_info, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
-TESTP(t_log_warn, FILE *file)
+TEST(t_log_warn)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_WARN, 1);
 
 	log_warn("test", "log", NULL, "warn%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -191,21 +373,25 @@ TESTP(t_log_warn, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
-TESTP(t_log_error, FILE *file)
+TEST(t_log_error)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_ERROR, 1);
 
 	log_error("test", "log", NULL, "error%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -214,21 +400,25 @@ TESTP(t_log_error, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
-TESTP(t_log_fatal, FILE *file)
+TEST(t_log_fatal)
 {
 	START;
 
-	file_reopen(TEST_FILE, "wb+", file);
+	const log_t *log = log_get();
+
+	log_t tmp = *log;
+	log_init(&tmp);
+
+	char buf[1024] = { 0 };
+	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_FATAL, 1);
 
 	log_fatal("test", "log", NULL, "fatal%d", 1);
 	uint exp_line = __LINE__ - 1;
-
-	char buf[1024] = { 0 };
-
-	file_read_ft(file, buf, sizeof(buf));
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -237,6 +427,8 @@ TESTP(t_log_fatal, FILE *file)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
+	log_init((log_t *)log);
+
 	END;
 }
 
@@ -244,34 +436,21 @@ STEST(t_log)
 {
 	SSTART;
 
-	const log_t *log = log_get();
-
-	log_t lg = { 0 };
-	log_init(&lg);
-
-	log_set_quiet(1);
-
-	FILE *file = file_open(TEST_FILE, "wb+");
-	log_add_fp(file, 0);
-
-	RUNP(t_log_init, &lg);
-	RUNP(t_log_stdout, lg.quiet, lg.level);
+	RUN(t_log_init);
+	RUN(t_log_stdout);
+	RUN(t_log_print);
 	RUN(t_log_level_str);
-	RUNP(t_log_set_level, &lg);
-	RUNP(t_log_set_quiet, &lg);
-	RUNP(t_log_add_callback, &lg);
-	RUNP(t_log_log, &lg);
-	RUNP(t_log_trace, file);
-	RUNP(t_log_debug, file);
-	RUNP(t_log_info, file);
-	RUNP(t_log_warn, file);
-	RUNP(t_log_error, file);
-	RUNP(t_log_fatal, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
-
-	log_init((log_t *)log);
+	RUN(t_log_set_level);
+	RUN(t_log_set_quiet);
+	RUN(t_log_set_header);
+	RUN(t_log_add_callback);
+	RUN(t_log_log);
+	RUN(t_log_trace);
+	RUN(t_log_debug);
+	RUN(t_log_info);
+	RUN(t_log_warn);
+	RUN(t_log_error);
+	RUN(t_log_fatal);
 
 	SEND;
 }

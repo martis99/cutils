@@ -12,26 +12,35 @@ typedef struct log_event_s {
 	const char *tag;
 	const char *fmt;
 	char time[C_TIME_BUF_SIZE];
-	void *udata;
 	int line;
+	c_printv_cb print;
+	size_t size;
+	int off;
+	void *priv;
 	int level;
+	int header;
 } log_event_t;
 
-typedef void (*log_LogFn)(log_event_t *ev);
+typedef int (*log_cb)(log_event_t *ev);
 
-typedef struct callback_s {
-	log_LogFn fn;
-	void *udata;
+typedef struct log_callback_s {
+	log_cb log;
+	c_printv_cb print;
+	size_t size;
+	int off;
+	void *priv;
 	int level;
-} callback_t;
+	int header;
+} log_callback_t;
 
 #define LOG_MAX_CALLBACKS 32
 
 typedef struct log_s {
-	void *udata;
+	void *priv;
 	int level;
 	int quiet;
-	callback_t callbacks[LOG_MAX_CALLBACKS];
+	int header;
+	log_callback_t callbacks[LOG_MAX_CALLBACKS];
 } log_t;
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
@@ -49,8 +58,9 @@ const log_t *log_get();
 const char *log_level_str(int level);
 int log_set_level(int level);
 int log_set_quiet(int enable);
-int log_add_callback(log_LogFn fn, void *udata, int level);
-int log_add_fp(FILE *fp, int level);
+int log_set_header(int enable);
+int log_add_callback(log_cb cb, void *priv, int level, int header);
+int log_add_print(c_printv_cb cb, size_t size, int off, void *priv, int level, int header);
 
 int log_log(int level, const char *pkg, const char *file, const char *func, int line, const char *tag, const char *fmt, ...);
 
