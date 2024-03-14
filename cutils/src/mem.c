@@ -17,6 +17,12 @@ mem_t *mem_init(mem_t *mem)
 	return mem;
 }
 
+mem_t *mem_sset(mem_t *mem)
+{
+	s_mem = mem;
+	return mem;
+}
+
 const mem_t *mem_get()
 {
 	return s_mem;

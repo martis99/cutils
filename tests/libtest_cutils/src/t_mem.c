@@ -206,7 +206,7 @@ STEST(t_mem)
 	file_close(file);
 	file_delete(TEST_FILE);
 
-	mem_init((mem_t *)mem);
+	mem_sset((mem_t *)mem);
 
 	SEND;
 }

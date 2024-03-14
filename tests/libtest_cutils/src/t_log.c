@@ -8,9 +8,12 @@ TEST(t_log_init)
 	START;
 
 	const log_t *log = log_get();
+	log_t tmp = *log;
 
 	EXPECT_EQ(log_init(NULL), NULL);
-	EXPECT_EQ(log_init((log_t *)log), log);
+	EXPECT_EQ(log_init(&tmp), &tmp);
+
+	log_set((log_t *)log);
 
 	END;
 }
@@ -45,7 +48,7 @@ TEST(t_log_print_header)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
@@ -60,7 +63,7 @@ TEST(t_log_print_header)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -72,7 +75,7 @@ TEST(t_log_print_header_tag)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
@@ -87,7 +90,7 @@ TEST(t_log_print_header_tag)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 2);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -99,7 +102,7 @@ TEST(t_log_print_no_header)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
@@ -112,7 +115,7 @@ TEST(t_log_print_no_header)
 
 	EXPECT_EQ(x, 3);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -124,7 +127,7 @@ TEST(t_log_print_no_header_tag)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
@@ -137,7 +140,7 @@ TEST(t_log_print_no_header_tag)
 
 	EXPECT_EQ(x, 4);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -168,15 +171,15 @@ TEST(t_log_set_level)
 
 	const log_t *log = log_get();
 
-	log_init(NULL);
+	log_set(NULL);
 	EXPECT_EQ(log_set_level(LOG_WARN), LOG_WARN);
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	EXPECT_EQ(log_set_level(log_set_level(LOG_DEBUG)), LOG_DEBUG);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -187,15 +190,15 @@ TEST(t_log_set_quiet)
 
 	const log_t *log = log_get();
 
-	log_init(NULL);
+	log_set(NULL);
 	EXPECT_EQ(log_set_quiet(0), 0);
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	EXPECT_EQ(log_set_quiet(log_set_quiet(1)), 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -206,16 +209,16 @@ TEST(t_log_set_header)
 
 	const log_t *log = log_get();
 
-	log_init(NULL);
+	log_set(NULL);
 	EXPECT_EQ(log_set_header(1), 1);
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 	EXPECT_EQ(log_set_header(log_set_header(0)), 0);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -232,11 +235,11 @@ TEST(t_log_add_callback)
 
 	const log_t *log = log_get();
 
-	log_init(NULL);
+	log_set(NULL);
 	EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 1);
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	for (int i = 0; i < LOG_MAX_CALLBACKS; i++) {
 		EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 0);
@@ -246,7 +249,7 @@ TEST(t_log_add_callback)
 
 	log_debug("test", "log", NULL, "trace");
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -257,15 +260,15 @@ TEST(t_log_log)
 
 	const log_t *log = log_get();
 
-	log_init(NULL);
+	log_set(NULL);
 	EXPECT_EQ(log_log(LOG_TRACE, "test", "log", NULL, 0, NULL, NULL), 1);
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	EXPECT_EQ(log_log(LOG_TRACE, "test", "log", NULL, 0, NULL, NULL), 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -277,7 +280,7 @@ TEST(t_log_trace)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_TRACE, 1);
@@ -292,7 +295,7 @@ TEST(t_log_trace)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -304,7 +307,7 @@ TEST(t_log_debug)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
@@ -319,7 +322,7 @@ TEST(t_log_debug)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -331,7 +334,7 @@ TEST(t_log_info)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_INFO, 1);
@@ -346,7 +349,7 @@ TEST(t_log_info)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -358,7 +361,7 @@ TEST(t_log_warn)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_WARN, 1);
@@ -373,7 +376,7 @@ TEST(t_log_warn)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -385,7 +388,7 @@ TEST(t_log_error)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_ERROR, 1);
@@ -400,7 +403,7 @@ TEST(t_log_error)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -412,7 +415,7 @@ TEST(t_log_fatal)
 	const log_t *log = log_get();
 
 	log_t tmp = *log;
-	log_init(&tmp);
+	log_set(&tmp);
 
 	char buf[1024] = { 0 };
 	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_FATAL, 1);
@@ -427,7 +430,7 @@ TEST(t_log_fatal)
 	EXPECT_EQ(line, exp_line);
 	EXPECT_EQ(x, 1);
 
-	log_init((log_t *)log);
+	log_set((log_t *)log);
 
 	END;
 }

@@ -17,8 +17,8 @@ TEST(t_c_init)
 	cutils_t cu = { 0 };
 	EXPECT_EQ(c_init(&cu), &cu);
 
-	mem_init((mem_t *)mem);
-	log_init((log_t *)log);
+	mem_sset((mem_t *)mem);
+	log_set((log_t *)log);
 
 	END;
 }
@@ -59,8 +59,8 @@ STEST(t_cutils)
 	file_close(file);
 	file_delete(TEST_FILE);
 
-	mem_init((mem_t *)mem);
-	log_init((log_t *)log);
+	mem_sset((mem_t *)mem);
+	log_set((log_t *)log);
 
 	SEND;
 }

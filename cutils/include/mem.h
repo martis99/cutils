@@ -12,6 +12,7 @@ typedef struct mem_s {
 } mem_t;
 
 mem_t *mem_init(mem_t *mem);
+mem_t *mem_sset(mem_t *mem);
 const mem_t *mem_get();
 int mem_print(FILE *file);
 
