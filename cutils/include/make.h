@@ -59,7 +59,7 @@ typedef struct make_s {
 	list_t strs;
 	list_t acts;
 	list_t targets;
-	make_act_t g_acts;
+	make_act_t root;
 } make_t;
 
 make_t *make_init(make_t *make, uint strs_cap, uint acts_cap, uint targets_cap);

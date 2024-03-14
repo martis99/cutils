@@ -22,14 +22,14 @@ TEST(t_make_init_free)
 
 	EXPECT_NE(make.acts.data, NULL);
 	EXPECT_NE(make.strs.data, NULL);
-	EXPECT_EQ(make.g_acts, MAKE_END);
+	EXPECT_EQ(make.root, MAKE_END);
 
 	make_free(&make);
 	make_free(NULL);
 
 	EXPECT_EQ(make.acts.data, NULL);
 	EXPECT_EQ(make.strs.data, NULL);
-	EXPECT_EQ(make.g_acts, MAKE_END);
+	EXPECT_EQ(make.root, MAKE_END);
 
 	END;
 }

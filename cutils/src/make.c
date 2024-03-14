@@ -121,7 +121,7 @@ make_t *make_init(make_t *make, uint strs_cap, uint acts_cap, uint targets_cap)
 		return NULL;
 	}
 
-	make->g_acts = MAKE_END;
+	make->root = MAKE_END;
 
 	return make;
 }
@@ -198,7 +198,7 @@ void make_free(make_t *make)
 	}
 	list_free(&make->targets);
 
-	make->g_acts = MAKE_END;
+	make->root = MAKE_END;
 }
 
 make_empty_t make_create_empty(make_t *make)
@@ -361,7 +361,7 @@ make_act_t make_add_act(make_t *make, make_act_t act)
 		make_rule_add_depend(make, phony, depend);
 	}
 
-	return list_set_next_node(&make->acts, make->g_acts, act);
+	return list_set_next_node(&make->acts, make->root, act);
 }
 
 make_var_t make_var_add_val(make_t *make, make_var_t var, make_str_data_t val)
@@ -429,7 +429,7 @@ make_act_t make_rule_add_act(make_t *make, make_rule_t rule, make_act_t act)
 	return list_set_next_node(&make->acts, data->acts, act);
 }
 
-make_act_t make_if_add_true_act(make_t *make, make_if_t mif, make_act_t act)
+static make_act_t make_if_add_act(make_t *make, make_if_t mif, int true_acts, make_act_t act)
 {
 	if (make == NULL) {
 		return MAKE_END;
@@ -441,22 +441,18 @@ make_act_t make_if_add_true_act(make_t *make, make_if_t mif, make_act_t act)
 		return MAKE_END;
 	}
 
-	return list_set_next_node(&make->acts, data->true_acts, act);
+	make_act_t *acts = true_acts ? &data->true_acts : &data->false_acts;
+	return list_set_next_node(&make->acts, *acts, act);
+}
+
+make_act_t make_if_add_true_act(make_t *make, make_if_t mif, make_act_t act)
+{
+	return make_if_add_act(make, mif, 1, act);
 }
 
 make_act_t make_if_add_false_act(make_t *make, make_if_t mif, make_act_t act)
 {
-	if (make == NULL) {
-		return MAKE_END;
-	}
-
-	make_if_data_t *data = make_if_get(make, mif);
-
-	if (data == NULL || make_act_get(make, act) == NULL) {
-		return MAKE_END;
-	}
-
-	return list_set_next_node(&make->acts, data->false_acts, act);
+	return make_if_add_act(make, mif, 0, act);
 }
 
 make_str_t make_ext_set_val(make_t *make, str_t name, make_str_data_t val)
@@ -681,7 +677,7 @@ int make_expand(make_t *make)
 
 	ret |= make_expand_reset(make);
 	ret |= make_var_ext_expand(make);
-	ret |= make_acts_expand(make, make->g_acts);
+	ret |= make_acts_expand(make, make->root);
 
 	return ret;
 }
@@ -871,7 +867,7 @@ int make_print(const make_t *make, FILE *file)
 		return 1;
 	}
 
-	return make_acts_print(make, make->g_acts, 0, file);
+	return make_acts_print(make, make->root, 0, file);
 }
 
 static inline int make_empty_dbg(const make_t *make, FILE *file)
