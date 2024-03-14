@@ -26,8 +26,12 @@ void list_free(list_t *list)
 
 lnode_t list_add(list_t *list)
 {
+	if (list == NULL) {
+		return LIST_END;
+	}
+
 	lnode_t node = arr_add(list);
-	if (node == LIST_END) {
+	if (node >= list->cnt) {
 		log_error("cutils", "list", NULL, "failed to add element");
 		return LIST_END;
 	}
@@ -72,7 +76,7 @@ lnode_t list_set_next(list_t *list, lnode_t node, lnode_t next)
 	}
 
 	lnode_t *target = &header->next;
-	while (*target != LIST_END) {
+	while (*target < list->cnt) {
 		target = &((header_t *)arr_get(list, *target))->next;
 	}
 

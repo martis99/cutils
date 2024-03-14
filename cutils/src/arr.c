@@ -170,7 +170,7 @@ arr_t *arr_add_unique(arr_t *arr, const arr_t *src)
 	for (uint i = 0; i < src->cnt; i++) {
 		const void *value = arr_get(src, i);
 
-		if (arr_index(arr, value) != ARR_END) {
+		if (arr_index(arr, value) < arr->cnt) {
 			continue;
 		}
 

@@ -812,10 +812,6 @@ TEST(t_tree_foreach_root)
 	int depth;
 
 	int i = 0;
-	tree_foreach(NULL, TREE_END, node, depth)
-	{
-	}
-
 	tree_foreach(&tree, TREE_END, node, depth)
 	{
 	}
@@ -1048,8 +1044,9 @@ TEST(t_tree_foreach)
 	SEND;
 }
 
-static int print_tree(FILE *file, void *data, int ret)
+static int print_tree(FILE *file, void *data, int ret, const void *priv)
 {
+	(void)priv;
 	c_fprintf(file, "%d\n", *(int *)data);
 	return ret;
 }
@@ -1073,14 +1070,14 @@ TESTP(t_tree_print, FILE *file)
 
 	*(int *)tree_get_data(&tree, (n111 = tree_add_child(&tree, n11))) = 111;
 
-	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, NULL, 0), 0);
-	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, NULL, 0), 0);
-	EXPECT_EQ(tree_print(&tree, root, NULL, NULL, 0), 0);
+	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, NULL, 0, NULL), 0);
+	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, NULL, 0, NULL), 0);
+	EXPECT_EQ(tree_print(&tree, root, NULL, NULL, 0, NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(tree_print(&tree, root, file, NULL, 0), 0);
-		EXPECT_EQ(tree_print(&tree, root, file, print_tree, 0), 0);
+		EXPECT_EQ(tree_print(&tree, root, file, NULL, 0, NULL), 0);
+		EXPECT_EQ(tree_print(&tree, root, file, print_tree, 0, NULL), 0);
 
 		char buf[128] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
