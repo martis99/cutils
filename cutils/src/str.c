@@ -294,7 +294,7 @@ int str_cpyd(str_t src, str_t *dst)
 	}
 
 	cstr_cpy((char *)dst->data, dst->size, src.data, src.len);
-	dst->len = src.len;
+	dst->len		      = src.len;
 	((char *)dst->data)[dst->len] = '\0';
 
 	return 0;
@@ -390,4 +390,26 @@ int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt)
 		ret |= found = str_replaces(str, from, to, cnt);
 	} while (found);
 	return ret;
+}
+
+int str_print(str_t str, c_printf_cb cb, size_t size, int off, void *priv)
+{
+	if (cb == NULL) {
+		return 0;
+	}
+
+	int len = 0;
+
+	for (size_t i = 0; i < str.len; i++) {
+		const char c = str.data[i];
+		switch (c) {
+		case '\t': len += cb(priv, size, off + len, "\\t"); break;
+		case '\n': len += cb(priv, size, off + len, "\\n"); break;
+		case '\r': len += cb(priv, size, off + len, "\\r"); break;
+		case '\0': len += cb(priv, size, off + len, "\\0"); break;
+		default: len += cb(priv, size, off + len, "%c", c); break;
+		}
+	}
+
+	return len;
 }

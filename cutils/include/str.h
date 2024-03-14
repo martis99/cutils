@@ -1,6 +1,7 @@
 #ifndef STR_H
 #define STR_H
 
+#include "print.h"
 #include "type.h"
 
 #include <stdarg.h>
@@ -53,6 +54,8 @@ int str_rsplit(str_t str, char c, str_t *l, str_t *r);
 int str_replace(str_t *str, str_t from, str_t to);
 int str_replaces(str_t *str, const str_t *from, const str_t *to, size_t cnt);
 int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt);
+
+int str_print(str_t str, c_printf_cb cb, size_t size, int len, void *priv);
 
 // clang-format off
 #define STR(_str) strc(_str, sizeof(_str) - 1)
