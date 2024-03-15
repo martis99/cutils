@@ -113,11 +113,31 @@ TEST(t_lex_print_line)
 	END;
 }
 
-TEST(t_lex_dbg)
+TESTP(t_lex_dbg, FILE *file)
 {
 	START;
 
-	EXPECT_EQ(lex_dbg(NULL, NULL), 1);
+	EXPECT_EQ(lex_dbg(NULL, NULL), 0);
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 0);
+
+	lex_tokenize(&lex, STR("A\nLN"));
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+		EXPECT_NE(lex_dbg(&lex, file), 0);
+
+		char buf[512] = { 0 };
+		file_read_ft(file, buf, sizeof(buf));
+
+		const char exp[] = "ALPHA | UPPER ( 0,  0) \"A\"\n"
+				   "WS    | NL    ( 0,  1) \"\\n\"\n"
+				   "ALPHA | UPPER ( 1,  0) \"L\"\n"
+				   "ALPHA | UPPER ( 1,  1) \"N\"\n"
+				   "EOF           ( 1,  2) \"\\0\"\n";
+		EXPECT_STR(buf, exp);
+	}
 
 	END;
 }
@@ -133,7 +153,7 @@ STEST(t_lexer)
 	RUN(t_lex_get_token);
 	RUN(t_lex_tokenize);
 	RUN(t_lex_print_line);
-	RUN(t_lex_dbg);
+	RUNP(t_lex_dbg, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

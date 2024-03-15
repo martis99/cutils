@@ -168,7 +168,7 @@ int lex_print_line(const lex_t *lex, lex_token_t token, c_printf_cb cb, size_t s
 int lex_dbg(const lex_t *lex, FILE *file)
 {
 	if (lex == NULL) {
-		return 1;
+		return 0;
 	}
 
 	int len = 0;

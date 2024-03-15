@@ -86,6 +86,44 @@ TEST(t_stx_rule_add_term)
 	END;
 }
 
+TEST(t_stx_rule_add_or)
+{
+	START;
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 0, 0);
+
+	stx_rule_t rule = stx_add_rule(&stx, STRH(""));
+
+	EXPECT_EQ(stx_rule_add_or(NULL, STX_RULE_END, 0), STX_TERM_END);
+	stx_term_t term = stx_create_term(&stx, STX_TERM_LITERAL(STR("T")));
+	EXPECT_EQ(stx_rule_add_or(NULL, STX_RULE_END, 1, term), STX_TERM_END);
+	EXPECT_EQ(stx_rule_add_or(NULL, STX_RULE_END, 2, term, term), STX_TERM_END);
+
+	stx_free(&stx);
+
+	END;
+}
+
+TEST(t_stx_rule_add_arr)
+{
+	START;
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 0, 0);
+	
+	stx_rule_t rule = stx_add_rule(&stx, STRH(""));
+
+	stx_term_t term = stx_create_term(&stx, STX_TERM_LITERAL(STR("T")));
+	
+	EXPECT_EQ(stx_rule_add_arr(NULL, STX_RULE_END, STX_TERM_TOKEN(TOKEN_UPPER), STX_TERM_NONE()), STX_TERM_END);
+	EXPECT_EQ(stx_rule_add_arr(&stx, STX_RULE_END, STX_TERM_TOKEN(TOKEN_UPPER), STX_TERM_RULE(rule)), STX_TERM_END);
+
+	stx_free(&stx);
+
+	END;
+}
+
 TEST(t_stx_term_add_term)
 {
 	START;
@@ -175,6 +213,8 @@ STEST(t_syntax)
 	RUN(t_stx_add_rule);
 	RUN(t_stx_create_term);
 	RUN(t_stx_rule_add_term);
+	RUN(t_stx_rule_add_or);
+	RUN(t_stx_rule_add_arr);
 	RUN(t_stx_term_add_term);
 	RUNP(t_stx_compile_print, file);
 
