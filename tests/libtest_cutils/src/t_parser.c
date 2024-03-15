@@ -1,4 +1,4 @@
-﻿#include "t_cutils_c.h"
+#include "t_cutils_c.h"
 
 #include "bnf.h"
 #include "cstr.h"
