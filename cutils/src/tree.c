@@ -164,15 +164,15 @@ int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, i
 			if (tree_get_next(tree, _it.stack[i + 1]) >= tree->cnt) {
 				c_fprintf(file, "  ");
 			} else {
-				c_v(file);
+				c_v(c_fprintv_cb, 0, 0, file);
 			}
 		}
 
 		if (depth > 0) {
 			if (tree_get_next(tree, _it.stack[depth]) >= tree->cnt) {
-				c_ur(file);
+				c_ur(c_fprintv_cb, 0, 0, file);
 			} else {
-				c_vr(file);
+				c_vr(c_fprintv_cb, 0, 0, file);
 			}
 		}
 

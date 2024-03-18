@@ -167,7 +167,7 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 				}
 
 				char buf[256] = { 0 };
-				const int len = str_print(token->value, c_sprintf_cb, sizeof(buf), 0, buf);
+				const int len = str_print(token->value, c_sprintv_cb, sizeof(buf), 0, buf);
 
 				log_trace("cutils", "parser", NULL, "\'%*s\': failed: got: \'%.*s\'", literal.len, literal.data, len, buf);
 				return 0;
@@ -289,7 +289,7 @@ int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
 
 			const token_t *token = lex_get_token(lex, err - off);
 			if (token != NULL) {
-				const int len = lex_print_line(lex, err - off, c_sprintf_cb, sizeof(buf), 0, buf);
+				const int len = lex_print_line(lex, err - off, c_sprintv_cb, sizeof(buf), 0, buf);
 				log_error("cutils", "parser", NULL, "%d: %.*s", token->line, len, buf);
 				log_error("cutils", "parser", NULL, "%d: %*s^", token->line, token->col + off, "");
 			}
@@ -314,7 +314,7 @@ static int print_nodes(FILE *file, void *data, int ret, const void *priv)
 		const token_t *token = lex_get_token(prs->lex, node->token);
 
 		char buf[256] = { 0 };
-		const int len = str_print(token->value, c_sprintf_cb, sizeof(buf), 0, buf);
+		const int len = str_print(token->value, c_sprintv_cb, sizeof(buf), 0, buf);
 		c_fprintf(file, "\'%.*s\'\n", len, buf);
 		break;
 	}

@@ -15,6 +15,7 @@ mem_t *mem_init(mem_t *mem);
 mem_t *mem_sset(mem_t *mem);
 const mem_t *mem_get();
 int mem_print(FILE *file);
+int mem_check();
 
 void *mem_alloc(size_t size);
 void *mem_calloc(size_t count, size_t size);

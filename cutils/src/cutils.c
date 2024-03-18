@@ -6,10 +6,8 @@ cutils_t *c_init(cutils_t *cutils)
 		return NULL;
 	}
 
+	cplatform_init(&cutils->cplatform);
 	mem_init(&cutils->mem);
-	log_init(&cutils->log);
-
-	log_set_level(LOG_WARN);
 
 	return cutils;
 }
@@ -23,6 +21,12 @@ int c_free(cutils_t *cutils, FILE *file)
 	if (file != NULL && mem_print(file) == 0) {
 		return 1;
 	}
+
+	if (mem_check()) {
+		return 1;
+	}
+
+	cplatform_free(&cutils->cplatform);
 
 	return 0;
 }

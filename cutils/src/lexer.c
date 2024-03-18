@@ -141,7 +141,7 @@ lex_t *lex_tokenize(lex_t *lex, str_t str)
 	return lex;
 }
 
-int lex_print_line(const lex_t *lex, lex_token_t token, c_printf_cb cb, size_t size, int off, void *priv)
+int lex_print_line(const lex_t *lex, lex_token_t token, c_printv_fn cb, size_t size, int off, void *priv)
 {
 	const token_t *data = lex_get_token(lex, token);
 

@@ -48,10 +48,10 @@ TEST(t_c_sprintf)
 
 	char buf[16] = { 0 };
 
-	EXPECT_EQ(c_sprintf(NULL, 1, ""), 0);
-	EXPECT_EQ(c_sprintf(buf, 1, NULL), 0);
-	EXPECT_EQ(c_sprintf(buf, 1, "abcd"), 0);
-	EXPECT_EQ(c_sprintf(buf, sizeof(buf), "%s", "a"), 1);
+	EXPECT_EQ(c_sprintf(NULL, 1, 0, ""), 0);
+	EXPECT_EQ(c_sprintf(buf, 1, 0, NULL), 0);
+	EXPECT_EQ(c_sprintf(buf, 1, 0, "abcd"), 0);
+	EXPECT_EQ(c_sprintf(buf, sizeof(buf), 0, "%s", "a"), 1);
 
 	EXPECT_STR(buf, "a");
 
@@ -77,9 +77,9 @@ TEST(t_c_swprintf)
 
 	wchar buf[16] = { 0 };
 
-	EXPECT_EQ(c_swprintf(NULL, 1, L""), 0);
-	EXPECT_EQ(c_swprintf(buf, 1, NULL), 0);
-	EXPECT_EQ(c_swprintf(buf, sizeof(buf), L"%ls", L"a"), 1);
+	EXPECT_EQ(c_swprintf(NULL, 1, 0, L""), 0);
+	EXPECT_EQ(c_swprintf(buf, 1, 0, NULL), 0);
+	EXPECT_EQ(c_swprintf(buf, sizeof(buf), 0, L"%ls", L"a"), 1);
 
 	EXPECT_WSTR(buf, L"a");
 
@@ -96,16 +96,15 @@ TESTP(t_c_fflush, FILE *file)
 	END;
 }
 
-TEST(t_c_set_unset_u16)
+TEST(t_c_setmode)
 {
 	START;
 
-	EXPECT_EQ(c_set_u16(NULL), 0);
+	EXPECT_EQ(c_setmode(NULL, 0), 0);
 
-	int mode = c_set_u16(stdout);
+	int mode = c_setmodew(stdout);
 
-	EXPECT_EQ(c_unset_u16(NULL, 0), 0);
-	c_unset_u16(stdout, mode);
+	c_setmode(stdout, mode);
 
 	END;
 }
@@ -114,12 +113,12 @@ TESTP(t_c_ur, FILE *file)
 {
 	START;
 
-	EXPECT_EQ(c_ur(NULL), 0);
+	EXPECT_EQ(c_ur(NULL, 0, 0, NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
 
-		EXPECT_EQ(c_ur(file), sizeof("└─") - 1);
+		EXPECT_EQ(c_ur(c_fprintv_cb, 0, 0, file), sizeof("└─") - 1);
 
 		char buf[16] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -134,12 +133,12 @@ TESTP(t_c_v, FILE *file)
 {
 	START;
 
-	EXPECT_EQ(c_v(NULL), 0);
+	EXPECT_EQ(c_v(NULL, 0, 0, NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
 
-		EXPECT_EQ(c_v(file), sizeof("│ ") - 1);
+		EXPECT_EQ(c_v(c_fprintv_cb, 0, 0, file), sizeof("│ ") - 1);
 
 		char buf[16] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -154,12 +153,12 @@ TESTP(t_c_vr, FILE *file)
 {
 	START;
 
-	EXPECT_EQ(c_vr(NULL), 0);
+	EXPECT_EQ(c_vr(NULL, 0, 0, NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
 
-		EXPECT_EQ(c_vr(file), sizeof("├─") - 1);
+		EXPECT_EQ(c_vr(c_fprintv_cb, 0, 0, file), sizeof("├─") - 1);
 
 		char buf[16] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
@@ -170,43 +169,89 @@ TESTP(t_c_vr, FILE *file)
 	END;
 }
 
-TEST(t_c_sprintf_cb)
+TEST(t_c_sprintv_cb)
 {
 	START;
 
 	char buf[16] = { 0 };
 
-	EXPECT_EQ(c_sprintf_cb(NULL, 0, 0, NULL), 0);
-	EXPECT_EQ(c_sprintf_cb(buf, 0, 0, NULL), 0);
-	EXPECT_EQ(c_sprintf_cb(buf, 1, 0, NULL), 0);
-	EXPECT_EQ(c_sprintf_cb(buf, 1, 0, "Test"), 0);
+	va_list empty = { 0 };
+	EXPECT_EQ(c_sprintv_cb(NULL, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_sprintv_cb(buf, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_sprintv_cb(buf, 1, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_sprintv_cb(buf, 1, 0, "Test", empty), 0);
 	EXPECT_STR(buf, "");
-	EXPECT_EQ(c_sprintf_cb(buf, 4, 2, "Test"), 0);
+	EXPECT_EQ(c_sprintv_cb(buf, 4, 2, "Test", empty), 0);
 	EXPECT_STR(buf, "");
-	EXPECT_EQ(c_sprintf_cb(buf, 5, 0, "Test"), 4);
+	EXPECT_EQ(c_sprintv_cb(buf, 5, 0, "Test", empty), 4);
 	EXPECT_STR(buf, "Test");
-	EXPECT_EQ(c_sprintf_cb(buf, 10, 4, "Test"), 4);
+	EXPECT_EQ(c_sprintv_cb(buf, 10, 4, "Test", empty), 4);
 	EXPECT_STR(buf, "TestTest");
 
 	END;
 }
 
-TESTP(t_c_fprintf_cb, FILE *file)
+TESTP(t_c_fprintv_cb, FILE *file)
 {
 	START;
 
-	EXPECT_EQ(c_fprintf_cb(NULL, 0, 0, NULL), 0);
-	EXPECT_EQ(c_fprintf_cb(file, 0, 0, NULL), 0);
+	EXPECT_EQ(c_fprintv_cb(NULL, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_fprintv_cb(file, 0, 0, NULL, NULL), 0);
 
 	{
 		file_reopen(TEST_FILE, "wb+", file);
 
-		EXPECT_EQ(c_fprintf_cb(file, 0, 0, "Test"), 4);
+		va_list empty = { 0 };
+		EXPECT_EQ(c_fprintv_cb(file, 0, 0, "Test", empty), 4);
 
 		char buf[16] = { 0 };
 		file_read_ft(file, buf, sizeof(buf));
 
 		EXPECT_STR(buf, "Test");
+	}
+
+	END;
+}
+
+TEST(t_c_swprintv_cb)
+{
+	START;
+
+	wchar buf[16] = { 0 };
+
+	va_list empty = { 0 };
+	EXPECT_EQ(c_swprintv_cb(NULL, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_swprintv_cb(buf, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_swprintv_cb(buf, 1, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_swprintv_cb(buf, 1, 0, L"Test", empty), 0);
+	EXPECT_WSTR(buf, L"");
+	EXPECT_EQ(c_swprintv_cb(buf, 4, 2, L"Test", empty), 0);
+	EXPECT_WSTR(buf, L"");
+	EXPECT_EQ(c_swprintv_cb(buf, 32, 0, L"Test", empty), 4);
+	EXPECT_WSTR(buf, L"Test");
+	EXPECT_EQ(c_swprintv_cb(buf, 64, 4, L"Test", empty), 4);
+	EXPECT_WSTR(buf, L"TestTest");
+
+	END;
+}
+
+TESTP(t_c_fwprintv_cb, FILE *file)
+{
+	START;
+
+	EXPECT_EQ(c_fwprintv_cb(NULL, 0, 0, NULL, NULL), 0);
+	EXPECT_EQ(c_fwprintv_cb(file, 0, 0, NULL, NULL), 0);
+
+	{
+		file_reopen(TEST_FILE, "wb+", file);
+
+		va_list empty = { 0 };
+		EXPECT_EQ(c_fwprintv_cb(file, 0, 0, L"Test", empty), 4);
+
+		wchar buf[64] = { 0 };
+		file_read_ft(file, (char *)buf, sizeof(buf));
+
+		//EXPECT_WSTR(buf, L"Test"); //TODO: Read wchar from file
 	}
 
 	END;
@@ -224,12 +269,14 @@ STEST(t_print)
 	RUN(t_c_wprintf);
 	RUN(t_c_swprintf);
 	RUNP(t_c_fflush, file);
-	RUN(t_c_set_unset_u16);
+	RUN(t_c_setmode);
 	RUNP(t_c_ur, file);
 	RUNP(t_c_v, file);
 	RUNP(t_c_vr, file);
-	RUN(t_c_sprintf_cb);
-	RUNP(t_c_fprintf_cb, file);
+	RUN(t_c_sprintv_cb);
+	RUNP(t_c_fprintv_cb, file);
+	RUN(t_c_swprintv_cb);
+	RUNP(t_c_fwprintv_cb, file);
 
 	file_close(file);
 	file_delete(TEST_FILE);

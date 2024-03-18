@@ -51,7 +51,7 @@ STEST(t_cutils)
 
 	cutils_t cu = { 0 };
 	c_init(&cu);
-	cu.log = *log;
+	cu.cplatform.log = *log;
 
 	RUN(t_c_init);
 	RUNP(t_c_free, file);

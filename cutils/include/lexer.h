@@ -24,7 +24,7 @@ token_t *lex_get_token(const lex_t *lex, lex_token_t token);
 
 lex_t *lex_tokenize(lex_t *lex, str_t str);
 
-int lex_print_line(const lex_t *lex, lex_token_t token, c_printf_cb cb, size_t size, int off, void *priv);
+int lex_print_line(const lex_t *lex, lex_token_t token, c_printv_fn cb, size_t size, int off, void *priv);
 
 int lex_dbg(const lex_t *lex, FILE *file);
 

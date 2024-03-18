@@ -101,10 +101,10 @@ TEST(t_lex_print_line)
 
 	lex_tokenize(&lex, STR("Test\nNew Line"));
 
-	char buf[64] = {0};
+	char buf[64] = { 0 };
 	EXPECT_EQ(lex_print_line(NULL, 0, NULL, 0, 0, NULL), 0);
 	EXPECT_EQ(lex_print_line(&lex, 0, NULL, 0, 0, NULL), 0);
-	EXPECT_EQ(lex_print_line(&lex, 1, c_sprintf_cb, sizeof(buf), 0, buf), 6);
+	EXPECT_EQ(lex_print_line(&lex, 1, c_sprintv_cb, sizeof(buf), 0, buf), 6);
 
 	EXPECT_STR(buf, "Test\\n");
 
@@ -138,6 +138,8 @@ TESTP(t_lex_dbg, FILE *file)
 				   "EOF           ( 1,  2) \"\\0\"\n";
 		EXPECT_STR(buf, exp);
 	}
+
+	lex_free(&lex);
 
 	END;
 }

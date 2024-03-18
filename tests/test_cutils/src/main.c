@@ -14,13 +14,15 @@ int main(int argc, char **argv)
 
 	t_init(80);
 
-	log_set_level(LOG_FATAL);
+	int level = log_set_level(LOG_FATAL);
 
 	t_run(test_cutils, 1);
 
-	const int ret = t_finish();
+	int ret = t_finish();
 
-	c_free(&cutils, stdout);
+	log_set_level(level);
+
+	ret |= c_free(&cutils, stdout);
 
 	return ret;
 }

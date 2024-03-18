@@ -8,7 +8,7 @@
 
 size_t cstrv(char *cstr, size_t size, const char *fmt, va_list args)
 {
-	return c_sprintv(cstr, size, fmt, args);
+	return c_sprintv(cstr, size, 0, fmt, args);
 }
 
 size_t cstrf(char *cstr, size_t size, const char *fmt, ...)

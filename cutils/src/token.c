@@ -55,7 +55,7 @@ int token_dbg(token_t token, FILE *file)
 
 	len += c_fprintf(file, "%*s (%2d, %2d) \"", MAX(13 - len, 0), "", token.line, token.col, token.value.len, token.value.data);
 
-	len += str_print(token.value, c_fprintf_cb, 0, 0, file);
+	len += str_print(token.value, c_fprintv_cb, 0, 0, file);
 
 	len += c_fprintf(file, "\"");
 

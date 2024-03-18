@@ -212,6 +212,7 @@ TESTP(t_prs_print, FILE *file)
 	lex_t lex = { 0 };
 	lex_init(&lex, 1);
 	lex_token_t token = lex_add_token(&lex);
+
 	*lex_get_token(&lex, token) = (token_t){
 		.value	    = STR("T"),
 		.line_start = 0,
@@ -247,6 +248,8 @@ TESTP(t_prs_print, FILE *file)
 		EXPECT_STR(buf, exp);
 	}
 
+	lex_free(&lex);
+	stx_free(&stx);
 	prs_free(&prs);
 
 	END;

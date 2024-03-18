@@ -60,6 +60,16 @@ int mem_print(FILE *file)
 	return ret;
 }
 
+int mem_check()
+{
+	if (s_mem->mem == 0) {
+		return 0;
+	}
+
+	log_warn("cutils", "mem", NULL, "%d bytes was not freed", s_mem->mem);
+	return 1;
+}
+
 #define MAX(a, b) (a) > (b) ? (a) : (b)
 
 void *mem_alloc(size_t size)
