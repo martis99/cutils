@@ -37,6 +37,15 @@ TESTP(t_c_free, FILE *file)
 	file_reopen(TEST_FILE, "wb+", file);
 	EXPECT_EQ(c_free(&cutils, file), 0);
 
+	mem_t *mem = (mem_t *)mem_get();
+
+	int m = mem->mem;
+
+	mem->mem = 1;
+	file_reopen(TEST_FILE, "wb+", file);
+	EXPECT_EQ(c_free(&cutils, file), 1);
+	mem->mem = m;
+
 	END;
 }
 

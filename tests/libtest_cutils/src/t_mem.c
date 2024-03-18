@@ -60,6 +60,23 @@ TESTP(t_mem_print, FILE *file)
 	END;
 }
 
+TEST(t_mem_check)
+{
+	START;
+
+	mem_t *mem = (mem_t *)mem_get();
+
+	size_t m = mem->mem;
+
+	EXPECT_EQ(mem_check(), 0);
+	mem->mem = 1;
+	EXPECT_EQ(mem_check(), 1);
+	mem->mem = m;
+	EXPECT_EQ(mem_print(NULL), 0);
+
+	END;
+}
+
 TEST(t_mem_alloc)
 {
 	START;
@@ -194,6 +211,7 @@ STEST(t_mem)
 	RUNP(t_mem_init, &mm);
 	RUN(t_mem_get_stats);
 	RUNP(t_mem_print, file);
+	RUN(t_mem_check);
 	RUN(t_mem_alloc);
 	RUN(t_mem_calloc);
 	RUN(t_mem_realloc);
