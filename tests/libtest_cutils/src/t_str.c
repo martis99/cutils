@@ -624,6 +624,22 @@ TEST(t_str_rreplaces)
 	END;
 }
 
+TEST(t_str_print)
+{
+	START;
+
+	str_t str = strc("abc", 3);
+
+	char buf[8] = {0};
+	EXPECT_EQ(str_print(str, PRINT_DST_BUF(buf, sizeof(buf), 0)), 3);
+
+	EXPECT_STR(buf, "abc");
+
+	str_free(&str);
+
+	END;
+}
+
 STEST(t_str)
 {
 	SSTART;
@@ -660,5 +676,6 @@ STEST(t_str)
 	RUN(t_str_replace);
 	RUN(t_str_replaces);
 	RUN(t_str_rreplaces);
+	RUN(t_str_print);
 	SEND;
 }

@@ -150,36 +150,37 @@ int tree_iterate_childs(const tree_t *tree, tnode_t node, tree_iterate_childs_cb
 	return ret;
 }
 
-int tree_print(const tree_t *tree, tnode_t node, FILE *file, tree_print_cb cb, int ret, const void *priv)
+int tree_print(const tree_t *tree, tnode_t node, tree_print_cb cb, print_dst_t dst, const void *priv)
 {
 	if (tree == NULL || cb == NULL) {
-		return ret;
+		return 0;
 	}
 
+	int off =dst.off;
 	tnode_t cur;
 	int depth;
 	tree_foreach(tree, node, cur, depth)
 	{
 		for (int i = 0; i < depth - 1; i++) {
 			if (tree_get_next(tree, _it.stack[i + 1]) >= tree->cnt) {
-				c_fprintf(file, "  ");
+				dst.off += c_print_exec(dst, "  ");
 			} else {
-				c_v(c_fprintv_cb, 0, 0, file);
+				dst.off += c_v(dst);
 			}
 		}
 
 		if (depth > 0) {
 			if (tree_get_next(tree, _it.stack[depth]) >= tree->cnt) {
-				c_ur(c_fprintv_cb, 0, 0, file);
+				dst.off += c_ur(dst);
 			} else {
-				c_vr(c_fprintv_cb, 0, 0, file);
+				dst.off += c_vr(dst);
 			}
 		}
 
-		ret = cb(file, tree_get_data(tree, cur), ret, priv);
+		dst.off += cb(tree_get_data(tree, cur), dst, priv);
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
 tree_it tree_it_begin(const tree_t *tree, tnode_t node)

@@ -1,10 +1,7 @@
 #include "t_cutils_c.h"
 
-#include "file.h"
 #include "print.h"
 #include "tree.h"
-
-#define TEST_FILE "t_tree.txt"
 
 TEST(t_tree_init_free)
 {
@@ -1096,14 +1093,13 @@ TEST(t_tree_foreach)
 	SEND;
 }
 
-static int print_tree(FILE *file, void *data, int ret, const void *priv)
+static int print_tree(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
-TESTP(t_tree_print, FILE *file)
+TEST(t_tree_print)
 {
 	START;
 
@@ -1122,17 +1118,14 @@ TESTP(t_tree_print, FILE *file)
 
 	*(int *)tree_get_data(&tree, (n111 = tree_add_child(&tree, n11))) = 111;
 
-	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, NULL, 0, NULL), 0);
-	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, NULL, 0, NULL), 0);
-	EXPECT_EQ(tree_print(&tree, root, NULL, NULL, 0, NULL), 0);
+	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, PRINT_DST_NONE(), NULL), 0);
+	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, PRINT_DST_NONE(), NULL), 0);
+	EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_NONE(), NULL), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(tree_print(&tree, root, file, NULL, 0, NULL), 0);
-		EXPECT_EQ(tree_print(&tree, root, file, print_tree, 0, NULL), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[64] = { 0 };
+		EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+		EXPECT_EQ(tree_print(&tree, root, print_tree, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 47);
 
 		const char exp[] = "0\n"
 				   "├─1\n"
@@ -1151,8 +1144,6 @@ STEST(t_tree)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_tree_init_free);
 	RUN(t_tree_adds);
 	RUN(t_tree_get);
@@ -1160,10 +1151,7 @@ STEST(t_tree)
 	RUN(t_tree_removes);
 	RUN(t_tree_iterate);
 	RUN(t_tree_foreach);
-	RUNP(t_tree_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_tree_print);
 
 	SEND;
 }

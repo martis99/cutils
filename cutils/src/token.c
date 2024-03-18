@@ -38,28 +38,24 @@ token_type_t token_type_enum(str_t str)
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
-int token_dbg(token_t token, FILE *file)
+int token_dbg(token_t token, print_dst_t dst)
 {
 	int first = 1;
-	int len	  = 0;
+	int off	  = dst.off;
 
 	for (token_type_t type = TOKEN_UNKNOWN; type < __TOKEN_MAX; type++) {
 		if (token.type & (1 << type)) {
 			if (first == 0) {
-				len += c_fprintf(file, " | ");
+				dst.off += c_print_exec(dst, " | ");
 			}
-			len += c_fprintf(file, "%-5s", token_type_str(type).data);
+			dst.off += c_print_exec(dst, "%-5s", token_type_str(type).data);
 			first = 0;
 		}
 	}
 
-	len += c_fprintf(file, "%*s (%2d, %2d) \"", MAX(13 - len, 0), "", token.line, token.col, token.value.len, token.value.data);
+	dst.off += c_print_exec(dst, "%*s (%2d, %2d) \"", MAX(13 - (dst.off - off), 0), "", token.line, token.col, token.value.len, token.value.data);
+	dst.off += str_print(token.value, dst);
+	dst.off += c_print_exec(dst, "\"");
 
-	len += str_print(token.value, c_fprintv_cb, 0, 0, file);
-
-	len += c_fprintf(file, "\"");
-
-	c_fflush(file);
-
-	return len;
+	return dst.off - off;
 }

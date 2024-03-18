@@ -167,7 +167,7 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 				}
 
 				char buf[256] = { 0 };
-				const int len = str_print(token->value, c_sprintv_cb, sizeof(buf), 0, buf);
+				const int len = str_print(token->value, PRINT_DST_BUF(buf, sizeof(buf), 0));
 
 				log_trace("cutils", "parser", NULL, "\'%*s\': failed: got: \'%.*s\'", literal.len, literal.data, len, buf);
 				return 0;
@@ -289,7 +289,7 @@ int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
 
 			const token_t *token = lex_get_token(lex, err - off);
 			if (token != NULL) {
-				const int len = lex_print_line(lex, err - off, c_sprintv_cb, sizeof(buf), 0, buf);
+				const int len = lex_print_line(lex, err - off, PRINT_DST_BUF(buf, sizeof(buf), 0));
 				log_error("cutils", "parser", NULL, "%d: %.*s", token->line, len, buf);
 				log_error("cutils", "parser", NULL, "%d: %*s^", token->line, token->col + off, "");
 			}
@@ -299,45 +299,47 @@ int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
 	return 1;
 }
 
-static int print_nodes(FILE *file, void *data, int ret, const void *priv)
+static int print_nodes(void *data, print_dst_t dst, const void *priv)
 {
 	const prs_t *prs = priv;
+
+	int off = dst.off;
 
 	const prs_node_data_t *node = data;
 	switch (node->type) {
 	case PRS_NODE_RULE: {
 		const stx_rule_data_t *rule = stx_get_rule_data(prs->stx, node->val.rule);
-		c_fprintf(file, "%.*s\n", rule->name.len, rule->name.data);
+		dst.off += c_print_exec(dst, "%.*s\n", rule->name.len, rule->name.data);
 		break;
 	}
 	case PRS_NODE_TOKEN: {
 		const token_t *token = lex_get_token(prs->lex, node->token);
 
 		char buf[256] = { 0 };
-		const int len = str_print(token->value, c_sprintv_cb, sizeof(buf), 0, buf);
-		c_fprintf(file, "\'%.*s\'\n", len, buf);
+		const int len = str_print(token->value, PRINT_DST_BUF(buf, sizeof(buf), 0));
+		dst.off += c_print_exec(dst, "\'%.*s\'\n", len, buf);
 		break;
 	}
 	case PRS_NODE_LITERAL: {
 		const str_t literal = node->val.literal;
-		c_fprintf(file, "\'%.*s\'\n", literal.len, literal.data);
+		dst.off += c_print_exec(dst, "\'%.*s\'\n", literal.len, literal.data);
 		break;
 	}
 	case PRS_NODE_ALT: {
 		const int alt = node->val.alt;
-		c_fprintf(file, "%d\n", alt);
+		dst.off += c_print_exec(dst, "%d\n", alt);
 		break;
 	}
 	default: break;
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-int prs_print(const prs_t *prs, void *priv)
+int prs_print(const prs_t *prs, print_dst_t dst)
 {
 	if (prs == NULL) {
 		return 0;
 	}
-	return tree_print(&prs->nodes, prs->root, priv, print_nodes, 0, prs);
+	return tree_print(&prs->nodes, prs->root, print_nodes, dst, prs);
 }

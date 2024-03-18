@@ -42,6 +42,6 @@ typedef struct token_s {
 str_t token_type_str(token_type_t type);
 token_type_t token_type_enum(str_t str);
 
-int token_dbg(token_t token, FILE *file);
+int token_dbg(token_t token, print_dst_t dst);
 
 #endif

@@ -44,7 +44,7 @@ int prs_remove_node(prs_t *prs, prs_node_t node);
 
 int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex);
 
-int prs_print(const prs_t *prs, void *priv);
+int prs_print(const prs_t *prs, print_dst_t dst);
 
 #define PRS_NODE_RULE(_rule)                              \
 	(prs_node_data_t)                                 \

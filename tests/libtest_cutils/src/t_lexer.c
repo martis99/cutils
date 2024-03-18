@@ -1,11 +1,8 @@
 #include "t_cutils_c.h"
 
 #include "cstr.h"
-#include "file.h"
 #include "lexer.h"
 #include "mem.h"
-
-#define TEST_FILE "t_lexer.txt"
 
 TEST(t_lex_init_free)
 {
@@ -102,9 +99,9 @@ TEST(t_lex_print_line)
 	lex_tokenize(&lex, STR("Test\nNew Line"));
 
 	char buf[64] = { 0 };
-	EXPECT_EQ(lex_print_line(NULL, 0, NULL, 0, 0, NULL), 0);
-	EXPECT_EQ(lex_print_line(&lex, 0, NULL, 0, 0, NULL), 0);
-	EXPECT_EQ(lex_print_line(&lex, 1, c_sprintv_cb, sizeof(buf), 0, buf), 6);
+	EXPECT_EQ(lex_print_line(NULL, 0, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(lex_print_line(&lex, 0, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(lex_print_line(&lex, 1, PRINT_DST_BUF(buf, sizeof(buf), 0)), 6);
 
 	EXPECT_STR(buf, "Test\\n");
 
@@ -113,11 +110,11 @@ TEST(t_lex_print_line)
 	END;
 }
 
-TESTP(t_lex_dbg, FILE *file)
+TEST(t_lex_dbg)
 {
 	START;
 
-	EXPECT_EQ(lex_dbg(NULL, NULL), 0);
+	EXPECT_EQ(lex_dbg(NULL, PRINT_DST_NONE()), 0);
 
 	lex_t lex = { 0 };
 	lex_init(&lex, 0);
@@ -125,11 +122,8 @@ TESTP(t_lex_dbg, FILE *file)
 	lex_tokenize(&lex, STR("A\nLN"));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_NE(lex_dbg(&lex, file), 0);
-
-		char buf[512] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[256] = { 0 };
+		EXPECT_EQ(lex_dbg(&lex, PRINT_DST_BUF(buf, sizeof(buf), 0)), 137);
 
 		const char exp[] = "ALPHA | UPPER ( 0,  0) \"A\"\n"
 				   "WS    | NL    ( 0,  1) \"\\n\"\n"
@@ -148,17 +142,12 @@ STEST(t_lexer)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_lex_init_free);
 	RUN(t_lex_add_token);
 	RUN(t_lex_get_token);
 	RUN(t_lex_tokenize);
 	RUN(t_lex_print_line);
-	RUNP(t_lex_dbg, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_lex_dbg);
 
 	SEND;
 }

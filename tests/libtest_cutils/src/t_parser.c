@@ -6,8 +6,6 @@
 #include "mem.h"
 #include "parser.h"
 
-#define TEST_FILE "t_parser.txt"
-
 TEST(t_prs_init_free)
 {
 	START;
@@ -198,7 +196,7 @@ TEST(t_prs_parse)
 	END;
 }
 
-TESTP(t_prs_print, FILE *file)
+TEST(t_prs_print)
 {
 	START;
 
@@ -230,15 +228,12 @@ TESTP(t_prs_print, FILE *file)
 	prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
 	prs_add_node(&prs, prs.root, (prs_node_data_t){ .type = -1 });
 
-	EXPECT_EQ(prs_print(NULL, NULL), 0);
-	EXPECT_EQ(prs_print(&prs, NULL), 0);
+	EXPECT_EQ(prs_print(NULL, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(prs_print(&prs, PRINT_DST_NONE()), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(prs_print(&prs, file), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[64] = { 0 };
+		EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
 
 		const char exp[] = "rule\n"
 				   "├─'T'\n"
@@ -259,17 +254,12 @@ STEST(t_parser)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_prs_init_free);
 	RUN(t_prs_add_node);
 	RUN(t_prs_set_node);
 	RUN(t_prs_remove_node);
 	RUN(t_prs_parse);
-	RUNP(t_prs_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_prs_print);
 
 	SEND;
 }

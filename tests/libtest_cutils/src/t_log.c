@@ -1,6 +1,5 @@
 #include "t_cutils_c.h"
 
-#include "file.h"
 #include "log.h"
 
 TEST(t_log_init)
@@ -51,7 +50,7 @@ TEST(t_log_print_header)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 1);
 
 	log_debug("test", "log", NULL, "file test %d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -78,7 +77,7 @@ TEST(t_log_print_header_tag)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 1);
 
 	log_debug("test", "log", "file", "file test %d", 2);
 	uint exp_line = __LINE__ - 1;
@@ -105,7 +104,7 @@ TEST(t_log_print_no_header)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 0);
 
 	log_debug("test", "log", NULL, "file test %d", 3);
 
@@ -130,7 +129,7 @@ TEST(t_log_print_no_header_tag)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 0);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 0);
 
 	log_debug("test", "log", "file", "file test %d", 4);
 
@@ -236,16 +235,16 @@ TEST(t_log_add_callback)
 	const log_t *log = log_get();
 
 	log_set(NULL);
-	EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 1);
+	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 1);
 
 	log_t tmp = *log;
 	log_set(&tmp);
 
 	for (int i = 0; i < LOG_MAX_CALLBACKS; i++) {
-		EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 0);
+		EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 0);
 	}
 
-	EXPECT_EQ(log_add_callback(print_callback, NULL, LOG_TRACE, 1), 1);
+	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 1);
 
 	log_debug("test", "log", NULL, "trace");
 
@@ -283,7 +282,7 @@ TEST(t_log_trace)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_TRACE, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_TRACE, 1);
 
 	log_trace("test", "log", NULL, "trace%d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -310,7 +309,7 @@ TEST(t_log_debug)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_DEBUG, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 1);
 
 	log_debug("test", "log", NULL, "debug%d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -337,7 +336,7 @@ TEST(t_log_info)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_INFO, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_INFO, 1);
 
 	log_info("test", "log", NULL, "info%d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -364,7 +363,7 @@ TEST(t_log_warn)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_WARN, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_WARN, 1);
 
 	log_warn("test", "log", NULL, "warn%d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -391,7 +390,7 @@ TEST(t_log_error)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_ERROR, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_ERROR, 1);
 
 	log_error("test", "log", NULL, "error%d", 1);
 	uint exp_line = __LINE__ - 1;
@@ -418,7 +417,7 @@ TEST(t_log_fatal)
 	log_set(&tmp);
 
 	char buf[1024] = { 0 };
-	log_add_print(c_sprintv_cb, sizeof(buf), 0, buf, LOG_FATAL, 1);
+	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_FATAL, 1);
 
 	log_fatal("test", "log", NULL, "fatal%d", 1);
 	uint exp_line = __LINE__ - 1;

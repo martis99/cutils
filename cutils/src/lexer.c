@@ -141,7 +141,7 @@ lex_t *lex_tokenize(lex_t *lex, str_t str)
 	return lex;
 }
 
-int lex_print_line(const lex_t *lex, lex_token_t token, c_printv_fn cb, size_t size, int off, void *priv)
+int lex_print_line(const lex_t *lex, lex_token_t token, print_dst_t dst)
 {
 	const token_t *data = lex_get_token(lex, token);
 
@@ -149,36 +149,36 @@ int lex_print_line(const lex_t *lex, lex_token_t token, c_printv_fn cb, size_t s
 		return 0;
 	}
 
-	int len = 0;
+	int off = dst.off;
 
 	lex_token_t i = data->line_start;
 	const token_t *line_token;
 	arr_foreach_i(&lex->tokens, line_token, (uint)i)
 	{
-		len += str_print(line_token->value, cb, size, off + len, priv);
+		dst.off += str_print(line_token->value, dst);
 
 		if (line_token->type & (1 << TOKEN_NL)) {
 			break;
 		}
 	}
 
-	return len;
+	return dst.off - off;
 }
 
-int lex_dbg(const lex_t *lex, FILE *file)
+int lex_dbg(const lex_t *lex, print_dst_t dst)
 {
 	if (lex == NULL) {
 		return 0;
 	}
 
-	int len = 0;
+	int off = dst.off;
 
 	const token_t *token;
 	arr_foreach(&lex->tokens, token)
 	{
-		len += token_dbg(*token, file);
-		len += c_fprintf(file, "\n");
+		dst.off += token_dbg(*token, dst);
+		dst.off += c_print_exec(dst, "\n");
 	}
 
-	return len;
+	return dst.off - off;
 }

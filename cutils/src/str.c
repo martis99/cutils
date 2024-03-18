@@ -392,33 +392,20 @@ int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt)
 	return ret;
 }
 
-int cbf(c_printv_fn cb, void *stream, size_t size, int off, const char *fmt, ...)
+int str_print(str_t str, print_dst_t dst)
 {
-	va_list args;
-	va_start(args, fmt);
-	int ret = cb(stream, size, off, fmt, args);
-	va_end(args);
-	return ret;
-}
+	int off = dst.off;
 
-int str_print(str_t str, c_printv_fn cb, size_t size, int off, void *priv)
-{
-	if (cb == NULL) {
-		return 0;
-	}
-
-	int len	      = 0;
-	va_list empty = { 0 };
 	for (size_t i = 0; i < str.len; i++) {
 		const char c = str.data[i];
 		switch (c) {
-		case '\t': len += cb(priv, size, off + len, "\\t", empty); break;
-		case '\n': len += cb(priv, size, off + len, "\\n", empty); break;
-		case '\r': len += cb(priv, size, off + len, "\\r", empty); break;
-		case '\0': len += cb(priv, size, off + len, "\\0", empty); break;
-		default: len += cbf(cb, priv, size, off + len, "%c", c); break;
+		case '\t': dst.off += c_print_exec(dst, "\\t"); break;
+		case '\n': dst.off += c_print_exec(dst, "\\n"); break;
+		case '\r': dst.off += c_print_exec(dst, "\\r"); break;
+		case '\0': dst.off += c_print_exec(dst, "\\0"); break;
+		default: dst.off += c_print_exec(dst, "%c", c); break;
 		}
 	}
 
-	return len;
+	return dst.off - off;
 }
