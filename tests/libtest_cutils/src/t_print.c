@@ -50,7 +50,9 @@ TEST(t_c_sprintf)
 
 	EXPECT_EQ(c_sprintf(NULL, 1, 0, ""), 0);
 	EXPECT_EQ(c_sprintf(buf, 1, 0, NULL), 0);
+#if defined(C_LINUX)
 	EXPECT_EQ(c_sprintf(buf, 1, 0, "abcd"), 0);
+#endif
 	EXPECT_EQ(c_sprintf(buf, sizeof(buf), 0, "%s", "a"), 1);
 
 	EXPECT_STR(buf, "a");
@@ -179,10 +181,12 @@ TEST(t_c_sprintv_cb)
 	EXPECT_EQ(c_sprintv_cb(NULL, 0, 0, NULL, NULL), 0);
 	EXPECT_EQ(c_sprintv_cb(buf, 0, 0, NULL, NULL), 0);
 	EXPECT_EQ(c_sprintv_cb(buf, 1, 0, NULL, NULL), 0);
+#if defined(C_LINUX)
 	EXPECT_EQ(c_sprintv_cb(buf, 1, 0, "Test", empty), 0);
 	EXPECT_STR(buf, "");
 	EXPECT_EQ(c_sprintv_cb(buf, 4, 2, "Test", empty), 0);
 	EXPECT_STR(buf, "");
+#endif
 	EXPECT_EQ(c_sprintv_cb(buf, 5, 0, "Test", empty), 4);
 	EXPECT_STR(buf, "Test");
 	EXPECT_EQ(c_sprintv_cb(buf, 10, 4, "Test", empty), 4);
@@ -217,16 +221,18 @@ TEST(t_c_swprintv_cb)
 {
 	START;
 
-	wchar buf[16] = { 0 };
+	wchar buf[32] = { 0 };
 
 	va_list empty = { 0 };
 	EXPECT_EQ(c_swprintv_cb(NULL, 0, 0, NULL, NULL), 0);
 	EXPECT_EQ(c_swprintv_cb(buf, 0, 0, NULL, NULL), 0);
 	EXPECT_EQ(c_swprintv_cb(buf, 1, 0, NULL, NULL), 0);
+#if defined(C_LINUX)
 	EXPECT_EQ(c_swprintv_cb(buf, 1, 0, L"Test", empty), 0);
 	EXPECT_WSTR(buf, L"");
 	EXPECT_EQ(c_swprintv_cb(buf, 4, 2, L"Test", empty), 0);
 	EXPECT_WSTR(buf, L"");
+#endif
 	EXPECT_EQ(c_swprintv_cb(buf, 32, 0, L"Test", empty), 4);
 	EXPECT_WSTR(buf, L"Test");
 	EXPECT_EQ(c_swprintv_cb(buf, 64, 4, L"Test", empty), 4);

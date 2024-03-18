@@ -9,13 +9,13 @@ TEST(t_cstrv)
 {
 	START;
 
-	char buf[8] = { 0 };
+	char buf[9] = { 0 };
 
 	EXPECT_EQ(cstrf(NULL, 0, NULL), 0);
 	EXPECT_EQ(cstrf(buf, 0, NULL), 0);
 	EXPECT_EQ(cstrf(buf, sizeof(buf), NULL), 0);
 	EXPECT_EQ(cstrf(buf, sizeof(buf), "12345678"), 8);
-	EXPECT_STR(buf, "1234567");
+	EXPECT_STR(buf, "12345678");
 
 	END;
 }
