@@ -62,7 +62,7 @@ stx_term_t stx_rule_add_arr(stx_t *stx, stx_rule_t rule, stx_term_data_t term, s
 
 int stx_compile(stx_t *stx);
 
-int stx_print(const stx_t *stx, FILE *file);
+int stx_print(const stx_t *stx, print_dst_t dst);
 
 #define STX_TERM_NONE()     \
 	(stx_term_data_t)   \

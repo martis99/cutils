@@ -217,9 +217,9 @@ int stx_compile(stx_t *stx)
 	return ret;
 }
 
-static int stx_print_terms(const stx_t *stx, const stx_term_t terms, FILE *file)
+static int stx_print_terms(const stx_t *stx, const stx_term_t terms, print_dst_t dst)
 {
-	int ret = 0;
+	int off = dst.off;
 
 	const stx_term_data_t *term;
 	list_foreach(&stx->terms, terms, term)
@@ -231,50 +231,48 @@ static int stx_print_terms(const stx_t *stx, const stx_term_t terms, FILE *file)
 				log_error("cutils", "syntax", NULL, "failed to get rule: %d", term->val.rule);
 				break;
 			}
-			ret |= !c_fprintf(file, " <%.*s>", data->name.len, data->name.data);
+			dst.off += c_print_exec(dst, " <%.*s>", data->name.len, data->name.data);
 			break;
 		}
 		case STX_TERM_TOKEN: {
 			const str_t token = token_type_str(term->val.token);
-			ret |= !c_fprintf(file, " %.*s", token.len, token.data);
+			dst.off += c_print_exec(dst, " %.*s", token.len, token.data);
 			break;
 		}
 		case STX_TERM_LITERAL:
 			if (str_eq(term->val.literal, STR("'"))) {
-				ret |= !c_fprintf(file, " \"%.*s\"", term->val.literal.len, term->val.literal.data);
+				dst.off += c_print_exec(dst, " \"%.*s\"", term->val.literal.len, term->val.literal.data);
 			} else {
-				ret |= !c_fprintf(file, " \'%.*s\'", term->val.literal.len, term->val.literal.data);
+				dst.off += c_print_exec(dst, " \'%.*s\'", term->val.literal.len, term->val.literal.data);
 			}
 			break;
 		case STX_TERM_OR:
-			ret |= stx_print_terms(stx, term->val.orv.l, file);
-			ret |= !c_fprintf(file, " |");
-			ret |= stx_print_terms(stx, term->val.orv.r, file);
+			dst.off += stx_print_terms(stx, term->val.orv.l, dst);
+			dst.off += c_print_exec(dst, " |");
+			dst.off += stx_print_terms(stx, term->val.orv.r, dst);
 			break;
 		default: log_warn("cutils", "syntax", NULL, "unknown term type: %d", term->type); break;
 		}
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-int stx_print(const stx_t *stx, FILE *file)
+int stx_print(const stx_t *stx, print_dst_t dst)
 {
 	if (stx == NULL) {
-		return 1;
+		return 0;
 	}
 
-	int ret = 0;
+	int off = dst.off;
 
 	const stx_rule_data_t *rule;
 	arr_foreach(&stx->rules, rule)
 	{
-		ret |= !c_fprintf(file, "<%.*s>%*s ::=", rule->name.len, rule->name.data, MAX(stx->max_rule_len - rule->name.len, 0), "");
-		ret |= stx_print_terms(stx, rule->terms, file);
-		ret |= !c_fprintf(file, "\n");
+		dst.off += c_print_exec(dst, "<%.*s>%*s ::=", rule->name.len, rule->name.data, MAX(stx->max_rule_len - rule->name.len, 0), "");
+		dst.off += stx_print_terms(stx, rule->terms, dst);
+		dst.off += c_print_exec(dst, "\n");
 	}
 
-	c_fflush(file);
-
-	return ret;
+	return dst.off - off;
 }

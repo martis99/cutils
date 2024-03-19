@@ -2,10 +2,7 @@
 
 #include "bnf.h"
 #include "cstr.h"
-#include "file.h"
 #include "mem.h"
-
-#define TEST_FILE "t_bnf.txt"
 
 TEST(t_bnf_init_free)
 {
@@ -25,7 +22,7 @@ TEST(t_bnf_init_free)
 	END;
 }
 
-TESTP(t_bnf_get_stx, FILE *file)
+TEST(t_bnf_get_stx)
 {
 	START;
 
@@ -38,11 +35,8 @@ TESTP(t_bnf_get_stx, FILE *file)
 	EXPECT_EQ(bnf_get_stx(&stx), &stx);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(stx_print(&stx, file), 0);
-
-		char buf[1048] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[1024] = { 0 };
+		EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 902);
 
 		const char exp[] = "<file>        ::= <bnf> EOF\n"
 				   "<bnf>         ::= <rules>\n"
@@ -75,13 +69,8 @@ STEST(t_bnf)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_bnf_init_free);
-	RUNP(t_bnf_get_stx, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_bnf_get_stx);
 
 	SEND;
 }

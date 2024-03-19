@@ -1,11 +1,8 @@
 #include "t_cutils_c.h"
 
 #include "cstr.h"
-#include "file.h"
 #include "mem.h"
 #include "syntax.h"
-
-#define TEST_FILE "t_syntax.txt"
 
 TEST(t_stx_init_free)
 {
@@ -142,7 +139,7 @@ TEST(t_stx_term_add_term)
 	END;
 }
 
-TESTP(t_stx_compile_print, FILE *f)
+TEST(t_stx_compile_print)
 {
 	START;
 
@@ -167,14 +164,11 @@ TESTP(t_stx_compile_print, FILE *f)
 	EXPECT_EQ(stx_compile(NULL), 1);
 	EXPECT_EQ(stx_compile(&stx), 0);
 
-	EXPECT_EQ(stx_print(NULL, stdout), 1);
+	EXPECT_EQ(stx_print(NULL, PRINT_DST_NONE()), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", f);
-		EXPECT_EQ(stx_print(&stx, f), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(f, buf, sizeof(buf));
+		char buf[64] = { 0 };
+		EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);
 
 		const char exp[] = "<file> ::= <line>\n"
 				   "<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n";
@@ -187,11 +181,8 @@ TESTP(t_stx_compile_print, FILE *f)
 	EXPECT_EQ(stx_compile(&stx), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", f);
-		EXPECT_EQ(stx_print(&stx, f), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(f, buf, sizeof(buf));
+		char buf[64] = { 0 };
+		EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);;
 
 		const char exp[] = "<file> ::= <line>\n"
 				   "<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n";
@@ -207,8 +198,6 @@ STEST(t_syntax)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_stx_init_free);
 	RUN(t_stx_add_rule);
 	RUN(t_stx_create_term);
@@ -216,10 +205,7 @@ STEST(t_syntax)
 	RUN(t_stx_rule_add_or);
 	RUN(t_stx_rule_add_arr);
 	RUN(t_stx_term_add_term);
-	RUNP(t_stx_compile_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_stx_compile_print);
 
 	SEND;
 }
