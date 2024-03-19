@@ -727,219 +727,250 @@ const char *make_var_type_to_str(make_var_type_t type)
 	}
 }
 
-static int make_str_print(const make_t *make, make_str_data_t str, FILE *file)
+static int make_str_print(const make_t *make, make_str_data_t str, print_dst_t dst)
 {
 	str_t val = make_str(make, str);
 	if (val.data == NULL) {
 		return 0;
 	}
 
-	return !c_fprintf(file, "%.*s", val.len, val.data);
+	return c_print_exec(dst, "%.*s", val.len, val.data);
 }
 
-static int make_rule_target_print(const make_t *make, const make_rule_target_data_t *target, FILE *file)
+static int make_rule_target_print(const make_t *make, const make_rule_target_data_t *target, print_dst_t dst)
 {
-	int ret = 0;
+	int off = dst.off;
 
-	ret |= make_str_print(make, target->target, file);
+	dst.off += make_str_print(make, target->target, dst);
 	if (target->action.data != NULL) {
-		ret |= !c_fprintf(file, "/%.*s", target->action.len, target->action.data);
+		dst.off += c_print_exec(dst, "/%.*s", target->action.len, target->action.data);
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-static inline int make_var_print(const make_t *make, const make_var_data_t *var, FILE *file)
+static inline int make_var_print(const make_t *make, const make_var_data_t *var, print_dst_t dst)
 {
-	int ret = 0;
+	int off = dst.off;
 
 	if (var->ext) {
-		return ret;
+		return 0;
 	}
 
 	const char *var_type_str = make_var_type_to_str(var->type);
 	if (var_type_str == NULL) {
-		return 1;
+		return 0;
 	}
 
-	ret |= !c_fprintf(file, "%.*s %s", var->name.len, var->name.data, var_type_str);
+	dst.off += c_print_exec(dst, "%.*s %s", var->name.len, var->name.data, var_type_str);
 
 	const make_str_data_t *value;
 	list_foreach(&make->strs, var->values, value)
 	{
-		ret |= !c_fprintf(file, " ");
-		ret |= make_str_print(make, *value, file);
+		dst.off += c_print_exec(dst, " ");
+		dst.off += make_str_print(make, *value, dst);
 	}
 
-	ret |= !c_fprintf(file, "\n");
+	dst.off += c_print_exec(dst, "\n");
 
-	return ret;
+	return dst.off - off;
 }
 
-static int make_acts_print(const make_t *make, const make_act_t acts, int rule, FILE *file);
+static int make_acts_print(const make_t *make, const make_act_t acts, print_dst_t dst, int rule);
 
-static inline int make_rule_print(const make_t *make, const make_rule_data_t *rule, FILE *file)
+static inline int make_rule_print(const make_t *make, const make_rule_data_t *rule, print_dst_t dst)
 {
-	int ret = 0;
-	make_rule_target_print(make, &rule->target, file);
-	ret |= !c_fprintf(file, ":");
+	int off = dst.off;
+	dst.off += make_rule_target_print(make, &rule->target, dst);
+	dst.off += c_print_exec(dst, ":");
 
 	const make_rule_target_data_t *depend;
 	list_foreach(&make->targets, rule->depends, depend)
 	{
-		ret |= !c_fprintf(file, " ");
-		ret |= make_rule_target_print(make, depend, file);
+		dst.off += c_print_exec(dst, " ");
+		dst.off += make_rule_target_print(make, depend, dst);
 	}
 
-	ret |= !c_fprintf(file, "\n");
-	ret |= make_acts_print(make, rule->acts, 1, file);
-	ret |= !c_fprintf(file, "\n");
+	dst.off += c_print_exec(dst, "\n");
+	dst.off += make_acts_print(make, rule->acts, dst, 1);
+	dst.off += c_print_exec(dst, "\n");
 
-	return ret;
+	return dst.off - off;
 }
 
-static inline int make_cmd_print(const make_t *make, const make_cmd_data_t *cmd, int rule, FILE *file)
+static inline int make_cmd_print(const make_t *make, const make_cmd_data_t *cmd, print_dst_t dst, int rule)
 {
 	(void)make;
 
 	switch (cmd->type) {
 	case MAKE_CMD_CHILD:
 		if (cmd->arg2.data == NULL) {
-			return !c_fprintf(file, "\t@$(MAKE) -C %.*s\n", cmd->arg1.len, cmd->arg1.data);
+			return c_print_exec(dst, "\t@$(MAKE) -C %.*s\n", cmd->arg1.len, cmd->arg1.data);
 		} else {
-			return !c_fprintf(file, "\t@$(MAKE) -C %.*s %.*s\n", cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data);
+			return c_print_exec(dst, "\t@$(MAKE) -C %.*s %.*s\n", cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data);
 		}
-	case MAKE_CMD_ERR: return !c_fprintf(file, "%s$(error %.*s)\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
-	default: return !c_fprintf(file, "%s%.*s\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
+	case MAKE_CMD_ERR: return c_print_exec(dst, "%s$(error %.*s)\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
+	default: return c_print_exec(dst, "%s%.*s\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
 	}
 }
 
-static inline int make_if_print(const make_t *make, const make_if_data_t *mif, int rule, FILE *file)
+static inline int make_if_print(const make_t *make, const make_if_data_t *mif, print_dst_t dst, int rule)
 {
-	int ret = 0;
+	int off = dst.off;
 
-	ret |= !c_fprintf(file, "ifeq (");
-	ret |= make_str_print(make, mif->l, file);
+	dst.off += c_print_exec(dst, "ifeq (");
+	dst.off += make_str_print(make, mif->l, dst);
 
 	str_t r = make_str(make, mif->r);
 	if (r.data == NULL) {
-		ret |= !c_fprintf(file, ",");
+		dst.off += c_print_exec(dst, ",");
 	} else {
-		ret |= !c_fprintf(file, ", ");
-		ret |= make_str_print(make, mif->r, file);
+		dst.off += c_print_exec(dst, ", ");
+		dst.off += make_str_print(make, mif->r, dst);
 	}
 
-	ret |= !c_fprintf(file, ")\n");
+	dst.off += c_print_exec(dst, ")\n");
 
-	ret |= make_acts_print(make, mif->true_acts, rule, file);
+	dst.off += make_acts_print(make, mif->true_acts, dst, rule);
 
 	if (mif->false_acts != MAKE_END) {
-		ret |= !c_fprintf(file, "else\n");
-		ret |= make_acts_print(make, mif->false_acts, rule, file);
+		dst.off += c_print_exec(dst, "else\n");
+		dst.off += make_acts_print(make, mif->false_acts, dst, rule);
 	}
 
-	ret |= !c_fprintf(file, "endif\n");
+	dst.off += c_print_exec(dst, "endif\n");
 
-	return ret;
+	return dst.off - off;
 }
 
-static int make_acts_print(const make_t *make, make_act_t acts, int rule, FILE *file)
+static int make_acts_print(const make_t *make, make_act_t acts, print_dst_t dst, int rule)
 {
-	int ret = 0;
+	int off = dst.off;
 	const make_act_data_t *act;
 	list_foreach(&make->acts, acts, act)
 	{
 		switch (act->type) {
-		case MAKE_ACT_EMPTY: ret |= !c_fprintf(file, "\n"); break;
-		case MAKE_ACT_VAR: ret |= make_var_print(make, &act->val.var, file); break;
-		case MAKE_ACT_RULE: ret |= make_rule_print(make, &act->val.rule, file); break;
-		case MAKE_ACT_CMD: ret |= make_cmd_print(make, &act->val.cmd, rule, file); break;
-		case MAKE_ACT_IF: ret |= make_if_print(make, &act->val.mif, rule, file); break;
+		case MAKE_ACT_EMPTY: dst.off += c_print_exec(dst, "\n"); break;
+		case MAKE_ACT_VAR: dst.off += make_var_print(make, &act->val.var, dst); break;
+		case MAKE_ACT_RULE: dst.off += make_rule_print(make, &act->val.rule, dst); break;
+		case MAKE_ACT_CMD: dst.off += make_cmd_print(make, &act->val.cmd, dst, rule); break;
+		case MAKE_ACT_IF: dst.off += make_if_print(make, &act->val.mif, dst, rule); break;
 		}
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-int make_print(const make_t *make, FILE *file)
+int make_print(const make_t *make, print_dst_t dst)
 {
 	if (make == NULL) {
-		return 1;
+		return 0;
 	}
 
-	return make_acts_print(make, make->root, 0, file);
+	return make_acts_print(make, make->root, dst, 0);
 }
 
-static inline int make_empty_dbg(const make_t *make, FILE *file)
+static inline int make_empty_dbg(const make_t *make, print_dst_t dst)
 {
 	(void)make;
-	return !c_fprintf(file, "EMPTY\n\n");
+	return c_print_exec(dst, "EMPTY\n\n");
 }
 
-static inline int make_var_dbg(const make_t *make, const make_var_data_t *var, FILE *file)
+static inline int make_var_dbg(const make_t *make, const make_var_data_t *var, print_dst_t dst)
 {
-	int ret = 0;
-	ret |= !c_fprintf(file,
-			  "VAR\n"
-			  "    NAME    : %.*s %s\n"
-			  "    VALUES  :\n",
-			  var->name.len, var->name.data, var->ext ? "(ext)" : "");
+	int off = dst.off;
+	dst.off += c_print_exec(dst,
+				"VAR\n"
+				"    NAME    : %.*s %s\n"
+				"    VALUES  :\n",
+				var->name.len, var->name.data, var->ext ? "(ext)" : "");
 	const make_str_data_t *value;
 	list_foreach(&make->strs, var->values, value)
 	{
-		ret |= !c_fprintf(file, "        ");
-		ret |= make_str_print(make, *value, file);
-		ret |= !c_fprintf(file, "\n");
+		dst.off += c_print_exec(dst, "        ");
+		dst.off += make_str_print(make, *value, dst);
+		dst.off += c_print_exec(dst, "\n");
 	}
-	ret |= !c_fprintf(file,
-			  "    REF     : %.*s\n"
-			  "    EXPANDED: %.*s\n"
-			  "    RESOLVED: %.*s\n"
-			  "\n",
-			  var->ref.len, var->ref.data, var->expand.len, var->expand.data, var->resolve.len, var->resolve.data);
+	dst.off += c_print_exec(dst,
+				"    REF     : %.*s\n"
+				"    EXPANDED: %.*s\n"
+				"    RESOLVED: %.*s\n"
+				"\n",
+				var->ref.len, var->ref.data, var->expand.len, var->expand.data, var->resolve.len, var->resolve.data);
 
-	return ret;
+	return dst.off - off;
 }
 
-static inline int make_if_dbg(const make_t *make, const make_if_data_t *mif, FILE *file)
+static inline int make_rule_dbg(const make_t *make, const make_rule_data_t *rule, print_dst_t dst)
 {
-	int ret = 0;
-	ret |= !c_fprintf(file, "IF\n"
-				"    L: ");
-	ret |= make_str_print(make, mif->l, file);
-	ret |= !c_fprintf(file,
-			  "\n"
-			  "        VALUE   : %.*s\n"
-			  "    R: ",
-			  mif->l_value.len, mif->l_value.data);
+	int off = dst.off;
+	dst.off += c_print_exec(dst, "RULE\n"
+				     "    DEPENDS:\n");
+	const make_rule_target_data_t *depend;
+	list_foreach(&make->targets, rule->depends, depend)
+	{
+		dst.off += c_print_exec(dst, "        ");
+		dst.off += make_rule_target_print(make, depend, dst);
+		dst.off += c_print_exec(dst, "\n");
+	}
 
-	ret |= make_str_print(make, mif->r, file);
-	ret |= !c_fprintf(file,
-			  "\n"
-			  "        VALUE   : %.*s\n"
-			  "\n",
-			  mif->r_value.len, mif->r_value.data);
-
-	return ret;
+	return dst.off - off;
 }
 
-int make_dbg(const make_t *make, FILE *file)
+static inline int make_cmd_dbg(const make_t *make, const make_cmd_data_t *cmd, print_dst_t dst)
+{
+	(void)make;
+	int off = dst.off;
+	dst.off += c_print_exec(dst,
+				"CMD\n"
+				"    ARG1: %.*s\n"
+				"    ARG2: %.*s\n"
+				"    TYPE: %d\n",
+				cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data, cmd->type);
+
+	return dst.off - off;
+}
+
+static inline int make_if_dbg(const make_t *make, const make_if_data_t *mif, print_dst_t dst)
+{
+	int off = dst.off;
+	dst.off += c_print_exec(dst, "IF\n"
+				     "    L: ");
+	dst.off += make_str_print(make, mif->l, dst);
+	dst.off += c_print_exec(dst,
+				"\n"
+				"        VALUE   : %.*s\n"
+				"    R: ",
+				mif->l_value.len, mif->l_value.data);
+
+	dst.off += make_str_print(make, mif->r, dst);
+	dst.off += c_print_exec(dst,
+				"\n"
+				"        VALUE   : %.*s\n"
+				"\n",
+				mif->r_value.len, mif->r_value.data);
+
+	return dst.off - off;
+}
+
+int make_dbg(const make_t *make, print_dst_t dst)
 {
 	if (make == NULL) {
-		return 1;
+		return 0;
 	}
 
-	int ret = 0;
+	int off = dst.off;
 	const make_act_data_t *act;
 	list_foreach_all(&make->acts, act)
 	{
 		switch (act->type) {
-		case MAKE_ACT_EMPTY: ret |= make_empty_dbg(make, file); break;
-		case MAKE_ACT_VAR: ret |= make_var_dbg(make, &act->val.var, file); break;
-		case MAKE_ACT_IF: ret |= make_if_dbg(make, &act->val.mif, file); break;
-		default: break;
+		case MAKE_ACT_EMPTY: dst.off += make_empty_dbg(make, dst); break;
+		case MAKE_ACT_VAR: dst.off += make_var_dbg(make, &act->val.var, dst); break;
+		case MAKE_ACT_RULE: dst.off += make_rule_dbg(make, &act->val.rule, dst); break;
+		case MAKE_ACT_CMD: dst.off += make_cmd_dbg(make, &act->val.cmd, dst); break;
+		case MAKE_ACT_IF: dst.off += make_if_dbg(make, &act->val.mif, dst); break;
 		}
 	}
 
-	return ret;
+	return dst.off - off;
 }

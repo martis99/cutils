@@ -152,7 +152,7 @@ static void example_make()
 
 	make_rule_add_act(&make, compile, make_create_cmd(&make, MCMD(STR("cleanup"))));
 
-	make_print(&make, stdout);
+	make_print(&make, PRINT_DST_STD());
 
 	make_ext_set_val(&make, STR("SLNDIR"), MSTR(STR("./")));
 	make_ext_set_val(&make, STR("CONFIG"), MSTR(STR("Debug")));

@@ -1,10 +1,7 @@
 #include "t_cutils_c.h"
 
-#include "file.h"
 #include "make.h"
 #include "mem.h"
-
-#define TEST_FILE "t_make.txt"
 
 TEST(t_make_init_free)
 {
@@ -411,50 +408,52 @@ TEST(t_make_var_get_resolved)
 	END;
 }
 
-TESTP(t_make_print, FILE *file)
+TEST(t_make_print)
 {
 	START;
 
 	make_t make = { 0 };
 	make_init(&make, 1, 1, 1);
 
-	EXPECT_EQ(make_print(NULL, NULL), 1);
-	EXPECT_EQ(make_print(&make, NULL), 0);
+	char buf[8] = { 0 };
+	EXPECT_EQ(make_print(NULL, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	make_add_act(&make, make_create_empty(&make));
 
-	EXPECT_EQ(make_print(&make, NULL), 1);
-	EXPECT_EQ(make_print(&make, file), 0);
+	EXPECT_EQ(make_print(&make, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 
 	make_add_act(&make, make_create_var(&make, STRH(""), -1));
-	EXPECT_EQ(make_print(&make, file), 1);
+	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 
 	make_free(&make);
 
 	END;
 }
 
-TESTP(t_make_dbg, FILE *file)
+TEST(t_make_dbg)
 {
 	START;
 
 	make_t make = { 0 };
 	make_init(&make, 1, 1, 1);
 
-	EXPECT_EQ(make_dbg(NULL, NULL), 1);
-	EXPECT_EQ(make_dbg(&make, NULL), 0);
+	char buf[8] = { 0 };
+	EXPECT_EQ(make_dbg(NULL, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	make_add_act(&make, make_create_empty(&make));
 
-	EXPECT_EQ(make_dbg(&make, NULL), 1);
-	EXPECT_EQ(make_dbg(&make, file), 0);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 7);
 
 	make_free(&make);
 
 	END;
 }
 
-TESTP(t_make_expand_print_empty, FILE *file)
+TEST(t_make_expand_print_empty)
 {
 	START;
 
@@ -466,18 +465,15 @@ TESTP(t_make_expand_print_empty, FILE *file)
 	EXPECT_EQ(make_expand(&make), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[8] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 
 		const char exp[] = "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[8] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 7);
 	}
 
 	make_free(&make);
@@ -485,7 +481,7 @@ TESTP(t_make_expand_print_empty, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_inst_empty, FILE *file)
+TEST(t_make_expand_print_var_inst_empty)
 {
 	START;
 
@@ -501,18 +497,15 @@ TESTP(t_make_expand_print_var_inst_empty, FILE *file)
 		EXPECT_STRN(var_exp.data, "", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 7);
 
 		const char exp[] = "VAR :=\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[64] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 37);
 	}
 
 	make_free(&make);
@@ -520,7 +513,7 @@ TESTP(t_make_expand_print_var_inst_empty, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_inst, FILE *file)
+TEST(t_make_expand_print_var_inst)
 {
 	START;
 
@@ -536,11 +529,8 @@ TESTP(t_make_expand_print_var_inst, FILE *file)
 		EXPECT_STRN(var_exp.data, "VAL", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 11);
 
 		const char exp[] = "VAR := VAL\n";
 		EXPECT_STR(buf, exp);
@@ -551,7 +541,7 @@ TESTP(t_make_expand_print_var_inst, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_inst2, FILE *file)
+TEST(t_make_expand_print_var_inst2)
 {
 	START;
 
@@ -569,11 +559,8 @@ TESTP(t_make_expand_print_var_inst2, FILE *file)
 		EXPECT_STRN(var_exp.data, "VAL1 VAL2", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 17);
 
 		const char exp[] = "VAR := VAL1 VAL2\n";
 		EXPECT_STR(buf, exp);
@@ -584,7 +571,7 @@ TESTP(t_make_expand_print_var_inst2, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_app, FILE *file)
+TEST(t_make_expand_print_var_app)
 {
 	START;
 
@@ -601,19 +588,16 @@ TESTP(t_make_expand_print_var_app, FILE *file)
 		EXPECT_STRN(var_exp.data, "VAL1 VAL2", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 24);
 
 		const char exp[] = "VAR := VAL1\n"
 				   "VAR += VAL2\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[256] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 230);
 	}
 
 	make_free(&make);
@@ -621,7 +605,7 @@ TESTP(t_make_expand_print_var_app, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_ext_inst, FILE *file)
+TEST(t_make_expand_print_var_ext_inst)
 {
 	START;
 
@@ -637,11 +621,8 @@ TESTP(t_make_expand_print_var_ext_inst, FILE *file)
 		EXPECT_STRN(var_exp.data, "VAL", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[8] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 		const char exp[] = "";
 		EXPECT_STR(buf, exp);
@@ -652,7 +633,7 @@ TESTP(t_make_expand_print_var_ext_inst, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_ref, FILE *file)
+TEST(t_make_expand_print_var_ref)
 {
 	START;
 
@@ -691,11 +672,8 @@ TESTP(t_make_expand_print_var_ref, FILE *file)
 		EXPECT_STRN(out_res.data, "VAL1 VAL2 VAL3 VAL4", out_res.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
 		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 60);
 
 		const char exp[] = "VAR += $(EXT1) $(EXT2)\n"
 				   "VAR += $(EXT3) $(EXT4)\n"
@@ -708,7 +686,7 @@ TESTP(t_make_expand_print_var_ref, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_if_empty, FILE *file)
+TEST(t_make_expand_print_if_empty)
 {
 	START;
 
@@ -720,19 +698,16 @@ TESTP(t_make_expand_print_if_empty, FILE *file)
 	EXPECT_EQ(make_expand(&make), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 15);
 
 		const char exp[] = "ifeq (,)\n"
 				   "endif\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[64] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 58);
 	}
 
 	make_free(&make);
@@ -740,7 +715,7 @@ TESTP(t_make_expand_print_if_empty, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_if_lr, FILE *file)
+TEST(t_make_expand_print_if_lr)
 {
 	START;
 
@@ -752,19 +727,16 @@ TESTP(t_make_expand_print_if_lr, FILE *file)
 	EXPECT_EQ(make_expand(&make), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
 
 		const char exp[] = "ifeq (L, R)\n"
 				   "endif\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[64] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 62);
 	}
 
 	make_free(&make);
@@ -772,7 +744,7 @@ TESTP(t_make_expand_print_if_lr, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_if_true, FILE *file)
+TEST(t_make_expand_print_var_if_true)
 {
 	START;
 
@@ -800,11 +772,8 @@ TESTP(t_make_expand_print_var_if_true, FILE *file)
 		EXPECT_STRN(var_exp.data, NULL, var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
 		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 35);
 
 		const char exp[] = "ifeq ($(COND), A)\n"
 				   "VAR := VAL\n"
@@ -812,8 +781,8 @@ TESTP(t_make_expand_print_var_if_true, FILE *file)
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[512] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 283);
 	}
 
 	make_free(&make);
@@ -821,7 +790,7 @@ TESTP(t_make_expand_print_var_if_true, FILE *file)
 	END;
 }
 
-TESTP(t_make_expand_print_var_if_false, FILE *file)
+TEST(t_make_expand_print_var_if_false)
 {
 	START;
 
@@ -850,11 +819,8 @@ TESTP(t_make_expand_print_var_if_false, FILE *file)
 		EXPECT_STRN(var_exp.data, "VAL2", var_exp.len);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
 		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 53);
 
 		const char exp[] = "ifeq ($(COND), A)\n"
 				   "VAR := VAL1\n"
@@ -864,8 +830,8 @@ TESTP(t_make_expand_print_var_if_false, FILE *file)
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[512] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 406);
 	}
 
 	make_free(&make);
@@ -873,7 +839,7 @@ TESTP(t_make_expand_print_var_if_false, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_empty, FILE *file)
+TEST(t_make_print_rule_empty)
 {
 	START;
 
@@ -883,19 +849,16 @@ TESTP(t_make_print_rule_empty, FILE *file)
 	make_add_act(&make, make_create_rule(&make, MRULE(MSTR(STRH("rule"))), 1));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 7);
 
 		const char exp[] = "rule:\n"
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
 	}
 
 	make_free(&make);
@@ -903,7 +866,7 @@ TESTP(t_make_print_rule_empty, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_empty_var, FILE *file)
+TEST(t_make_print_rule_empty_var)
 {
 	START;
 
@@ -913,19 +876,16 @@ TESTP(t_make_print_rule_empty_var, FILE *file)
 	make_add_act(&make, make_create_rule(&make, MRULE(MVAR(MAKE_END)), 1));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[8] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 3);
 
 		const char exp[] = ":\n"
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
 	}
 
 	make_free(&make);
@@ -933,7 +893,7 @@ TESTP(t_make_print_rule_empty_var, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_empty_action, FILE *file)
+TEST(t_make_print_rule_empty_action)
 {
 	START;
 
@@ -943,19 +903,16 @@ TESTP(t_make_print_rule_empty_action, FILE *file)
 	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("rule")), STRH("action")), 1));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 14);
 
 		const char exp[] = "rule/action:\n"
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
 	}
 
 	make_free(&make);
@@ -963,7 +920,7 @@ TESTP(t_make_print_rule_empty_action, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_depend, FILE *file)
+TEST(t_make_print_rule_depend)
 {
 	START;
 
@@ -974,19 +931,16 @@ TESTP(t_make_print_rule_depend, FILE *file)
 	make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("depend"))));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 14);
 
 		const char exp[] = "rule: depend\n"
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[64] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 33);
 	}
 
 	make_free(&make);
@@ -994,7 +948,7 @@ TESTP(t_make_print_rule_depend, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_depends, FILE *file)
+TEST(t_make_print_rule_depends)
 {
 	START;
 
@@ -1006,19 +960,16 @@ TESTP(t_make_print_rule_depends, FILE *file)
 	make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("depend2"))));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
-		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[32] = { 0 };
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 23);
 
 		const char exp[] = "rule: depend1 depend2\n"
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_dbg(&make, file), 0);
+		char buf[64] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 50);
 	}
 
 	make_free(&make);
@@ -1026,7 +977,7 @@ TESTP(t_make_print_rule_depends, FILE *file)
 	END;
 }
 
-TESTP(t_make_print_rule_acts, FILE *file)
+TEST(t_make_print_rule_acts)
 {
 	START;
 
@@ -1042,11 +993,8 @@ TESTP(t_make_print_rule_acts, FILE *file)
 	make_if_add_false_act(&make, if_rule, make_create_cmd(&make, MCMD(STRH("cmd4"))));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
 		char buf[64] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 54);
 
 		const char exp[] = "rule:\n"
 				   "\tcmd1\n"
@@ -1059,13 +1007,17 @@ TESTP(t_make_print_rule_acts, FILE *file)
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
+	{
+		char buf[256] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 246);
+	}
 
 	make_free(&make);
 
 	END;
 }
 
-TESTP(t_make_print_cmd, FILE *file)
+TEST(t_make_print_cmd)
 {
 	START;
 
@@ -1079,11 +1031,8 @@ TESTP(t_make_print_cmd, FILE *file)
 	make_rule_add_act(&make, rule, make_create_cmd(&make, MCMDERR(STRH("msg"))));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(make_print(&make, file), 0);
-
 		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 67);
 
 		const char exp[] = "rule:\n"
 				   "\tcmd\n"
@@ -1093,39 +1042,43 @@ TESTP(t_make_print_cmd, FILE *file)
 				   "\n";
 		EXPECT_STR(buf, exp);
 	}
+	{
+		char buf[256] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 188);
+	}
 
 	make_free(&make);
 
 	END;
 }
 
-TESTP(t_make_expand_print, FILE *file)
+TEST(t_make_expand_print)
 {
 	SSTART;
 	RUN(t_make_ext_set_val);
 	RUN(t_make_expand);
 	RUN(t_make_var_get_expanded);
 	RUN(t_make_var_get_resolved);
-	RUNP(t_make_print, file);
-	RUNP(t_make_dbg, file);
-	RUNP(t_make_expand_print_empty, file);
-	RUNP(t_make_expand_print_var_inst_empty, file);
-	RUNP(t_make_expand_print_var_inst, file);
-	RUNP(t_make_expand_print_var_inst2, file);
-	RUNP(t_make_expand_print_var_app, file);
-	RUNP(t_make_expand_print_var_ext_inst, file);
-	RUNP(t_make_expand_print_var_ref, file);
-	RUNP(t_make_expand_print_if_empty, file);
-	RUNP(t_make_expand_print_if_lr, file);
-	RUNP(t_make_expand_print_var_if_true, file);
-	RUNP(t_make_expand_print_var_if_false, file);
-	RUNP(t_make_print_rule_empty, file);
-	RUNP(t_make_print_rule_empty_var, file);
-	RUNP(t_make_print_rule_empty_action, file);
-	RUNP(t_make_print_rule_depend, file);
-	RUNP(t_make_print_rule_depends, file);
-	RUNP(t_make_print_rule_acts, file);
-	RUNP(t_make_print_cmd, file);
+	RUN(t_make_print);
+	RUN(t_make_dbg);
+	RUN(t_make_expand_print_empty);
+	RUN(t_make_expand_print_var_inst_empty);
+	RUN(t_make_expand_print_var_inst);
+	RUN(t_make_expand_print_var_inst2);
+	RUN(t_make_expand_print_var_app);
+	RUN(t_make_expand_print_var_ext_inst);
+	RUN(t_make_expand_print_var_ref);
+	RUN(t_make_expand_print_if_empty);
+	RUN(t_make_expand_print_if_lr);
+	RUN(t_make_expand_print_var_if_true);
+	RUN(t_make_expand_print_var_if_false);
+	RUN(t_make_print_rule_empty);
+	RUN(t_make_print_rule_empty_var);
+	RUN(t_make_print_rule_empty_action);
+	RUN(t_make_print_rule_depend);
+	RUN(t_make_print_rule_depends);
+	RUN(t_make_print_rule_acts);
+	RUN(t_make_print_cmd);
 	SEND;
 }
 
@@ -1133,16 +1086,11 @@ STEST(t_make)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_make_init_free);
 	RUN(t_make_create);
 	RUN(t_make_add);
 	RUN(t_make_rule_get_target);
-	RUNP(t_make_expand_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_make_expand_print);
 
 	SEND;
 }

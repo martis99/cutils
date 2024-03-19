@@ -88,9 +88,9 @@ int make_expand(make_t *make);
 str_t make_var_get_expanded(const make_t *make, str_t var);
 str_t make_var_get_resolved(const make_t *make, str_t var);
 
-int make_print(const make_t *make, FILE *file);
+int make_print(const make_t *make, print_dst_t dst);
 
-int make_dbg(const make_t *make, FILE *file);
+int make_dbg(const make_t *make, print_dst_t dst);
 
 #define MSTR(_str)                                     \
 	(make_str_data_t)                              \
