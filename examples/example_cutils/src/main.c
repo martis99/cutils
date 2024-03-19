@@ -168,11 +168,10 @@ static void example_make()
 	make_free(&make);
 }
 
-static int print_tree(FILE *file, void *data, int ret, const void *priv)
+static int print_tree(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
 static void example_tree()
@@ -214,7 +213,7 @@ static void example_tree()
 
 	*(int *)tree_get_data(&tree, (n1111 = tree_add_child(&tree, n111))) = 1111;
 
-	tree_print(&tree, 0, stdout, print_tree, 0, NULL);
+	tree_print(&tree, 0, print_tree, PRINT_DST_STD(), NULL);
 
 	tree_free(&tree);
 }
