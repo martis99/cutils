@@ -10,6 +10,6 @@ typedef struct cutils_s {
 } cutils_t;
 
 cutils_t *c_init(cutils_t *cutils);
-int c_free(cutils_t *cutils, FILE *file);
+int c_free(cutils_t *cutils, print_dst_t dst);
 
 #endif

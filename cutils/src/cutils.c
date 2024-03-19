@@ -12,15 +12,13 @@ cutils_t *c_init(cutils_t *cutils)
 	return cutils;
 }
 
-int c_free(cutils_t *cutils, FILE *file)
+int c_free(cutils_t *cutils, print_dst_t dst)
 {
 	if (cutils == NULL) {
 		return 1;
 	}
 
-	if (file != NULL && mem_print(file) == 0) {
-		return 1;
-	}
+	 mem_print(dst);
 
 	if (mem_check()) {
 		return 1;

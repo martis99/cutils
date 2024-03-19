@@ -1,9 +1,6 @@
 #include "t_cutils_c.h"
 
 #include "cutils.h"
-#include "file.h"
-
-#define TEST_FILE "t_cutils.txt"
 
 TEST(t_c_init)
 {
@@ -23,27 +20,22 @@ TEST(t_c_init)
 	END;
 }
 
-TESTP(t_c_free, FILE *file)
+TEST(t_c_free)
 {
 	START;
 
 	cutils_t cutils = { 0 };
 
-	EXPECT_EQ(c_free(NULL, NULL), 1);
+	EXPECT_EQ(c_free(NULL, PRINT_DST_NONE()), 1);
 
-	file_reopen(TEST_FILE, "r", file);
-	EXPECT_EQ(c_free(&cutils, file), 1);
-
-	file_reopen(TEST_FILE, "wb+", file);
-	EXPECT_EQ(c_free(&cutils, file), 0);
+	EXPECT_EQ(c_free(&cutils, PRINT_DST_NONE()), 0);
 
 	mem_t *mem = (mem_t *)mem_get();
 
 	size_t m = mem->mem;
 
 	mem->mem = 1;
-	file_reopen(TEST_FILE, "wb+", file);
-	EXPECT_EQ(c_free(&cutils, file), 1);
+	EXPECT_EQ(c_free(&cutils, PRINT_DST_NONE()), 1);
 	mem->mem = m;
 
 	END;
@@ -53,8 +45,6 @@ STEST(t_cutils)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	const mem_t *mem = mem_get();
 	const log_t *log = log_get();
 
@@ -63,10 +53,7 @@ STEST(t_cutils)
 	cu.cplatform.log = *log;
 
 	RUN(t_c_init);
-	RUNP(t_c_free, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_c_free);
 
 	mem_sset((mem_t *)mem);
 	log_set((log_t *)log);

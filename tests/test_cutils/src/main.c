@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 
 	log_set_level(level);
 
-	ret |= c_free(&cutils, stdout);
+	ret |= c_free(&cutils, PRINT_DST_STD());
 
 	return ret;
 }

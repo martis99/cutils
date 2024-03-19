@@ -265,7 +265,7 @@ int main(int argc, char **argv)
 
 	c_printf(SEP, "----------");
 
-	c_free(&cutils, stdout);
+	c_free(&cutils, PRINT_DST_STD());
 
 	return 0;
 }

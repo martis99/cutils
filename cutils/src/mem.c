@@ -28,16 +28,16 @@ const mem_t *mem_get()
 	return s_mem;
 }
 
-int mem_print(FILE *file)
+int mem_print(print_dst_t dst)
 {
-	if (file == NULL || s_mem == NULL) {
+	if (s_mem == NULL) {
 		return 0;
 	}
 
 	size_t mem_max = s_mem->mem_max;
 
 	char s	= '\0';
-	int ret = 0;
+	int off = dst.off;
 
 	if (mem_max > (size_t)1024 * 1024) {
 		mem_max /= (size_t)1024 * 1024;
@@ -48,16 +48,14 @@ int mem_print(FILE *file)
 	}
 
 	if (s == '\0') {
-		ret += c_fprintf(file, "mem:      %zu max: %zu B\n", s_mem->mem, s_mem->mem_max);
+		dst.off += c_print_exec(dst, "mem:      %zu max: %zu B\n", s_mem->mem, s_mem->mem_max);
 	} else {
-		ret += c_fprintf(file, "mem:      %zu max: %zu %cB (%zu B)\n", s_mem->mem, mem_max, s, s_mem->mem_max);
+		dst.off += c_print_exec(dst, "mem:      %zu max: %zu %cB (%zu B)\n", s_mem->mem, mem_max, s, s_mem->mem_max);
 	}
-	ret += c_fprintf(file, "allocs:   %d\n", s_mem->allocs);
-	ret += c_fprintf(file, "reallocs: %d\n", s_mem->reallocs);
+	dst.off += c_print_exec(dst, "allocs:   %d\n", s_mem->allocs);
+	dst.off += c_print_exec(dst, "reallocs: %d\n", s_mem->reallocs);
 
-	c_fflush(file);
-
-	return ret;
+	return dst.off - off;
 }
 
 int mem_check()

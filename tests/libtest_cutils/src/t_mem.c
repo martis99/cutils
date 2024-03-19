@@ -1,9 +1,6 @@
 #include "t_cutils_c.h"
 
-#include "file.h"
 #include "mem.h"
-
-#define TEST_FILE "t_mem.txt"
 
 TESTP(t_mem_init, mem_t *mem)
 {
@@ -24,7 +21,7 @@ TEST(t_mem_get_stats)
 	END;
 }
 
-TESTP(t_mem_print, FILE *file)
+TEST(t_mem_print)
 {
 	START;
 
@@ -32,30 +29,22 @@ TESTP(t_mem_print, FILE *file)
 
 	size_t mem_max = mem->mem_max;
 
+	char buf[64] = { 0 };
+
 	mem->mem_max = 10;
-
-	EXPECT_EQ(mem_print(NULL), 0);
-
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_GT(mem_print(file), 0);
-	}
+	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	mem->mem_max = 1024 + 10;
-
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_GT(mem_print(file), 0);
-	}
+	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	mem->mem_max = 1024 * 1024 + 10;
-
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_GT(mem_print(file), 0);
-	}
+	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	mem->mem_max = mem_max;
+
+	mem_sset(NULL);
+	EXPECT_EQ(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
+	mem_sset(mem);
 
 	END;
 }
@@ -72,7 +61,6 @@ TEST(t_mem_check)
 	mem->mem = 1;
 	EXPECT_EQ(mem_check(), 1);
 	mem->mem = m;
-	EXPECT_EQ(mem_print(NULL), 0);
 
 	END;
 }
@@ -201,8 +189,6 @@ STEST(t_mem)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	const mem_t *mem = mem_get();
 
 	mem_t mm = { 0 };
@@ -210,7 +196,7 @@ STEST(t_mem)
 
 	RUNP(t_mem_init, &mm);
 	RUN(t_mem_get_stats);
-	RUNP(t_mem_print, file);
+	RUN(t_mem_print);
 	RUN(t_mem_check);
 	RUN(t_mem_alloc);
 	RUN(t_mem_calloc);
@@ -220,9 +206,6 @@ STEST(t_mem)
 	RUN(t_mem_cmp);
 	RUN(t_mem_swap);
 	RUN(t_mem_oom);
-
-	file_close(file);
-	file_delete(TEST_FILE);
 
 	mem_sset((mem_t *)mem);
 
