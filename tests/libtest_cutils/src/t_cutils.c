@@ -39,7 +39,7 @@ TESTP(t_c_free, FILE *file)
 
 	mem_t *mem = (mem_t *)mem_get();
 
-	int m = mem->mem;
+	size_t m = mem->mem;
 
 	mem->mem = 1;
 	file_reopen(TEST_FILE, "wb+", file);

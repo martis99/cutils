@@ -504,8 +504,8 @@ TEST(t_make_expand_print_var_inst_empty)
 		EXPECT_STR(buf, exp);
 	}
 	{
-		char buf[64] = { 0 };
-		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 37);
+		char buf[128] = { 0 };
+		EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 89);
 	}
 
 	make_free(&make);

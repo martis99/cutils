@@ -151,7 +151,7 @@ int lex_print_line(const lex_t *lex, lex_token_t token, print_dst_t dst)
 
 	int off = dst.off;
 
-	lex_token_t i = data->line_start;
+	uint i = data->line_start;
 	const token_t *line_token;
 	arr_foreach_i(&lex->tokens, line_token, i)
 	{
