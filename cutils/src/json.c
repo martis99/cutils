@@ -75,81 +75,81 @@ json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_da
 	return val;
 }
 
-static int json_mem_print(const json_t *json, json_mem_t *mem, int name, int depth, const char *indent, FILE *file)
+static int json_mem_print(const json_t *json, json_mem_t *mem, print_dst_t dst, int name, int depth, const char *indent)
 {
 	if (mem == NULL) {
-		return 1;
+		return 0;
 	}
 
-	int ret = 0;
+	int off = dst.off;
 
 	for (int i = 0; i < depth; i++) {
-		ret |= !c_fprintf(file, "%s", indent);
+		dst.off += c_print_exec(dst, "%s", indent);
 	}
 
 	if (name) {
-		ret |= !c_fprintf(file, "\"%.*s\": ", mem->name.len, mem->name.data);
+		dst.off += c_print_exec(dst, "\"%.*s\": ", mem->name.len, mem->name.data);
 	}
 
 	json_mem_t *child;
 
 	switch (mem->value.type) {
-	case JSON_VAL_INT: ret |= !c_fprintf(file, "%d", mem->value.val.i); break;
-	case JSON_VAL_FLOAT: ret |= !c_fprintf(file, "%.7f", mem->value.val.f); break;
-	case JSON_VAL_DOUBLE: ret |= !c_fprintf(file, "%.15f", mem->value.val.d); break;
-	case JSON_VAL_BOOL: ret |= !c_fprintf(file, "%s", mem->value.val.b ? "true" : "false"); break;
-	case JSON_VAL_STR: ret |= !c_fprintf(file, "\"%.*s\"", mem->value.val.s.len, mem->value.val.s.data); break;
+	case JSON_VAL_INT: dst.off += c_print_exec(dst, "%d", mem->value.val.i); break;
+	case JSON_VAL_FLOAT: dst.off += c_print_exec(dst, "%.7f", mem->value.val.f); break;
+	case JSON_VAL_DOUBLE: dst.off += c_print_exec(dst, "%.15f", mem->value.val.d); break;
+	case JSON_VAL_BOOL: dst.off += c_print_exec(dst, "%s", mem->value.val.b ? "true" : "false"); break;
+	case JSON_VAL_STR: dst.off += c_print_exec(dst, "\"%.*s\"", mem->value.val.s.len, mem->value.val.s.data); break;
 	case JSON_VAL_OBJ:
 		if (mem->value.val.o.values == LIST_END) {
-			ret |= !c_fprintf(file, "{}");
+			dst.off += c_print_exec(dst, "{}");
 			break;
 		}
-		ret |= !c_fprintf(file, "{\n");
+		dst.off += c_print_exec(dst, "{\n");
 		list_foreach(&json->values, mem->value.val.o.values, child)
 		{
-			ret |= json_mem_print(json, child, 1, depth + 1, indent, file);
+			dst.off += json_mem_print(json, child, dst, 1, depth + 1, indent);
 			if (list_get_next(&json->values, _i) != LIST_END) {
-				ret |= !c_fprintf(file, ",");
+				dst.off += c_print_exec(dst, ",");
 			}
-			ret |= !c_fprintf(file, "\n");
+			dst.off += c_print_exec(dst, "\n");
 		}
 		for (int i = 0; i < depth; i++) {
-			ret |= !c_fprintf(file, "%s", indent);
+			dst.off += c_print_exec(dst, "%s", indent);
 		}
 
-		ret |= !c_fprintf(file, "}");
+		dst.off += c_print_exec(dst, "}");
 		break;
 	case JSON_VAL_ARR:
 		if (mem->value.val.a.values == LIST_END) {
-			ret |= !c_fprintf(file, "[]");
+			dst.off += c_print_exec(dst, "[]");
 			break;
 		}
-		ret |= !c_fprintf(file, "[\n");
+		dst.off += c_print_exec(dst, "[\n");
 
 		list_foreach(&json->values, mem->value.val.a.values, child)
 		{
-			ret |= json_mem_print(json, child, 0, depth + 1, indent, file);
+			dst.off += json_mem_print(json, child, dst, 0, depth + 1, indent);
 			if (list_get_next(&json->values, _i) != LIST_END) {
-				ret |= !c_fprintf(file, ",");
+				dst.off += c_print_exec(dst, ",");
 			}
-			ret |= !c_fprintf(file, "\n");
+			dst.off += c_print_exec(dst, "\n");
 		}
 		for (int i = 0; i < depth; i++) {
-			ret |= !c_fprintf(file, "%s", indent);
+			dst.off += c_print_exec(dst, "%s", indent);
 		}
 
-		ret |= !c_fprintf(file, "]");
+		dst.off += c_print_exec(dst, "]");
 		break;
 	default:
-		ret = 1;
+		dst.off = off;
 		log_warn("cutils", "json", NULL, "unknown value type: %d", mem->value.type);
 		break;
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-int json_print(const json_t *json, json_val_t val, const char *indent, FILE *file)
+int json_print(const json_t *json, json_val_t val, print_dst_t dst, const char *indent)
 {
-	return json_mem_print(json, list_get_data(&json->values, val), 0, 0, indent, file);
+	return json_mem_print(json, list_get_data(&json->values, val), dst, 0, 0, indent);
 }

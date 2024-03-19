@@ -1,11 +1,8 @@
 #include "t_cutils_c.h"
 
 #include "cstr.h"
-#include "file.h"
 #include "json.h"
 #include "mem.h"
-
-#define TEST_FILE "t_json.txt"
 
 TEST(t_json_init_free)
 {
@@ -56,15 +53,15 @@ TEST(t_json_print)
 	json_t json = { 0 };
 	json_init(&json, 1);
 
-	EXPECT_EQ(json_print(NULL, JSON_END, "\t", NULL), 1);
-	EXPECT_EQ(json_print(&json, JSON_END, "\t", NULL), 1);
+	EXPECT_EQ(json_print(NULL, JSON_END, PRINT_DST_NONE(), "\t"), 0);
+	EXPECT_EQ(json_print(&json, JSON_END, PRINT_DST_NONE(), "\t"), 0);
 
 	json_free(&json);
 
 	END;
 }
 
-TESTP(t_json_print_all, FILE *file)
+TEST(t_json_print_all)
 {
 	START;
 
@@ -87,11 +84,8 @@ TESTP(t_json_print_all, FILE *file)
 	json_add_val(&json, obj, STRH("int"), JSON_INT(4));
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(json_print(&json, root, "\t", file), 0);
-
 		char buf[256] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		EXPECT_EQ(json_print(&json, root, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 159);
 
 		const char exp[] = "{\n"
 				   "\t\"int\": 1,\n"
@@ -115,21 +109,18 @@ TESTP(t_json_print_all, FILE *file)
 
 	json_add_val(&json, root, STRH("invalid"), (json_val_data_t){ .type = -1 });
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(json_print(&json, root, "\t", file), 1);
-	}
+	EXPECT_EQ(json_print(&json, root, PRINT_DST_NONE(), "\t"), 0);
 
 	json_free(&json);
 
 	END;
 }
 
-TESTP(t_json_prints, FILE *file)
+TEST(t_json_prints)
 {
 	SSTART;
 	RUN(t_json_print);
-	RUNP(t_json_print_all, file);
+	RUN(t_json_print_all);
 	SEND;
 }
 
@@ -137,14 +128,9 @@ STEST(t_json)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_json_init_free);
 	RUN(t_json_add_val);
-	RUNP(t_json_prints, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_json_prints);
 
 	SEND;
 }

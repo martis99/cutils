@@ -56,7 +56,7 @@ void json_free(json_t *json);
 
 json_val_t json_add_val(json_t *json, json_val_t parent, str_t name, json_val_data_t value);
 
-int json_print(const json_t *json, json_val_t val, const char *ident, FILE *file);
+int json_print(const json_t *json, json_val_t val, print_dst_t dst, const char *indent);
 
 #define JSON_INT(_val)                               \
 	(json_val_data_t)                            \
