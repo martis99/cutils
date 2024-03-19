@@ -22,8 +22,8 @@ lnode_t list_get_next(const list_t *list, lnode_t node);
 
 void *list_get_data(const list_t *list, lnode_t node);
 
-typedef int (*list_print_cb)(FILE *file, void *value, int ret);
-int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret);
+typedef int (*list_print_cb)(void *value, print_dst_t dst, const void *priv);
+int list_print(const list_t *list, lnode_t node, list_print_cb cb, print_dst_t dst, const void *priv);
 
 #define list_foreach(_list, _node, _val) for (lnode_t _i = _node; _i < (_list)->cnt && (_val = list_get_data(_list, _i)); _i = list_get_next(_list, _i))
 

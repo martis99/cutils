@@ -1,11 +1,8 @@
 #include "t_cutils_c.h"
 
-#include "file.h"
 #include "list.h"
 #include "mem.h"
 #include "print.h"
-
-#define TEST_FILE "t_list.txt"
 
 TEST(t_list_init_free)
 {
@@ -345,13 +342,13 @@ TEST(t_list_foreachs)
 	SEND;
 }
 
-static int print_list(FILE *file, void *data, int ret)
+static int print_list(void *data, print_dst_t dst, const void *priv)
 {
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret;
+	(void)priv;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
-TESTP(t_list_print, FILE *file)
+TEST(t_list_print)
 {
 	START;
 
@@ -364,17 +361,13 @@ TESTP(t_list_print, FILE *file)
 	*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
 	*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
 
-	EXPECT_EQ(list_print(NULL, LIST_END, NULL, NULL, 0), 0);
-	EXPECT_EQ(list_print(&list, LIST_END, NULL, NULL, 0), 0);
-	EXPECT_EQ(list_print(&list, node, NULL, NULL, 0), 0);
+	EXPECT_EQ(list_print(NULL, LIST_END, NULL, PRINT_DST_NONE(), NULL), 0);
+	EXPECT_EQ(list_print(&list, LIST_END, NULL, PRINT_DST_NONE(), NULL), 0);
+	EXPECT_EQ(list_print(&list, node, NULL, PRINT_DST_NONE(), NULL), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(list_print(&list, node, file, NULL, 0), 0);
-		EXPECT_EQ(list_print(&list, node, file, print_list, 0), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(list_print(&list, node, print_list, PRINT_DST_BUF(buf, sizeof(buf), 0), 0), 6);
 
 		const char exp[] = "0\n"
 				   "1\n"
@@ -391,17 +384,12 @@ STEST(t_list)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_list_init_free);
 	RUN(t_list_add_remove);
 	RUN(t_list_next);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);
-	RUNP(t_list_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_list_print);
 
 	SEND;
 }

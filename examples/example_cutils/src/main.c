@@ -59,10 +59,10 @@ static void example_json()
 	json_free(&json);
 }
 
-static int print_list(FILE *file, void *data, int ret)
+static int print_list(void *data, print_dst_t dst, const void *priv)
 {
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret;
+	(void)priv;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
 static void example_list()
@@ -93,9 +93,9 @@ static void example_list()
 	*(int *)list_get_data(&list, (n32 = list_add_next(&list, n3))) = 32;
 	*(int *)list_get_data(&list, (n33 = list_add_next(&list, n3))) = 33;
 
-	list_print(&list, n1, stdout, print_list, 0);
-	list_print(&list, n2, stdout, print_list, 0);
-	list_print(&list, n3, stdout, print_list, 0);
+	list_print(&list, n1, print_list, PRINT_DST_STD(), NULL);
+	list_print(&list, n2, print_list, PRINT_DST_STD(), NULL);
+	list_print(&list, n3, print_list, PRINT_DST_STD(), NULL);
 
 	list_free(&list);
 }

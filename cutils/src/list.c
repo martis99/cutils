@@ -105,17 +105,18 @@ void *list_get_data(const list_t *list, lnode_t node)
 	return (byte *)header + sizeof(header_t);
 }
 
-int list_print(const list_t *list, lnode_t node, FILE *file, list_print_cb cb, int ret)
+int list_print(const list_t *list, lnode_t node, list_print_cb cb, print_dst_t dst, const void *priv)
 {
 	if (list == NULL || cb == NULL) {
-		return ret;
+		return 0;
 	}
 
+	int off = dst.off;
 	void *value;
 	list_foreach(list, node, value)
 	{
-		ret = cb(file, value, ret);
+		dst.off += cb(value, dst, priv);
 	}
 
-	return ret;
+	return dst.off - off;
 }
