@@ -2,11 +2,8 @@
 
 #include "arr.h"
 #include "cstr.h"
-#include "file.h"
 #include "mem.h"
 #include "print.h"
-
-#define TEST_FILE "t_arr.txt"
 
 TEST(t_arr_init_free)
 {
@@ -389,13 +386,13 @@ TEST(t_arr_foreach)
 	END;
 }
 
-static int print_arr(FILE *file, void *data, int ret)
+static int print_arr(void *data, print_dst_t dst, const void *priv)
 {
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret + 1;
+	(void)priv;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
-TESTP(t_arr_print, FILE *file)
+TEST(t_arr_print)
 {
 	START;
 
@@ -406,18 +403,12 @@ TESTP(t_arr_print, FILE *file)
 	*(int *)arr_get(&arr, arr_add(&arr)) = 1;
 	*(int *)arr_get(&arr, arr_add(&arr)) = 2;
 
-	EXPECT_EQ(arr_print(NULL, NULL, NULL, 0), 0);
-	EXPECT_EQ(arr_print(&arr, NULL, NULL, 0), 0);
-	EXPECT_EQ(arr_print(&arr, file, NULL, 0), 0);
-	EXPECT_EQ(arr_print(&arr, file, print_arr, 0), 3);
+	EXPECT_EQ(arr_print(NULL, NULL, PRINT_DST_NONE(), NULL), 0);
+	EXPECT_EQ(arr_print(&arr, NULL, PRINT_DST_NONE(), NULL), 0);
 
 	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(arr_print(&arr, file, NULL, 0), 0);
-		EXPECT_EQ(arr_print(&arr, file, print_arr, 0), 3);
-
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
+		char buf[16] = { 0 };
+		EXPECT_EQ(arr_print(&arr, print_arr, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 6);
 
 		const char exp[] = "0\n"
 				   "1\n"
@@ -434,8 +425,6 @@ STEST(t_arr)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_arr_init_free);
 	RUN(t_arr_add);
 	RUN(t_arr_get);
@@ -449,10 +438,7 @@ STEST(t_arr)
 	RUN(t_arr_merge_unique);
 	RUN(t_arr_sort);
 	RUN(t_arr_foreach);
-	RUNP(t_arr_print, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_arr_print);
 
 	SEND;
 }

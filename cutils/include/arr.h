@@ -39,8 +39,8 @@ arr_t *arr_merge_unique(arr_t *arr, const arr_t *arr1, const arr_t *arr2);
 
 arr_t *arr_sort(arr_t *arr, arr_cmp_cb cb);
 
-typedef int (*arr_print_cb)(FILE *file, void *value, int ret);
-int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret);
+typedef int (*arr_print_cb)(void *value, print_dst_t dst, const void *priv);
+int arr_print(const arr_t *arr, arr_print_cb cb, print_dst_t dst, const void *priv);
 
 #define arr_foreach(_arr, _val)	      for (uint _i = 0; _i < (_arr)->cnt && (_val = arr_get(_arr, _i)); _i++)
 #define arr_foreach_i(_arr, _val, _i) for (; _i < (_arr)->cnt && (_val = arr_get(_arr, _i)); _i++)

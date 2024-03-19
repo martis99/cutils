@@ -238,17 +238,18 @@ arr_t *arr_sort(arr_t *arr, arr_cmp_cb cb)
 	return arr;
 }
 
-int arr_print(const arr_t *arr, FILE *file, arr_print_cb cb, int ret)
+int arr_print(const arr_t *arr, arr_print_cb cb, print_dst_t dst, const void *priv)
 {
 	if (arr == NULL || cb == NULL) {
-		return ret;
+		return 0;
 	}
 
+	int off = dst.off;
 	void *value;
 	arr_foreach(arr, value)
 	{
-		ret = cb(file, value, ret);
+		dst.off += cb(value, dst, priv);
 	}
 
-	return ret;
+	return dst.off - off;
 }

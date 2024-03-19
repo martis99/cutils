@@ -10,10 +10,10 @@
 
 #define SEP "\n------%s------\n\n"
 
-static int print_arr(FILE *file, void *data, int ret)
+static int print_arr(void *data, print_dst_t dst, const void *priv)
 {
-	c_fprintf(file, "%d\n", *(int *)data);
-	return ret;
+	(void)priv;
+	return c_print_exec(dst, "%d\n", *(int *)data);
 }
 
 static void example_arr()
@@ -29,7 +29,7 @@ static void example_arr()
 	*(int *)arr_get(&arr, arr_add(&arr)) = 2;
 	*(int *)arr_get(&arr, arr_add(&arr)) = 3;
 
-	arr_print(&arr, stdout, print_arr, 0);
+	arr_print(&arr, print_arr, PRINT_DST_STD(), NULL);
 
 	arr_free(&arr);
 }
