@@ -2,5 +2,5 @@ NAME: libtest_cutils
 TYPE: LIB
 SOURCE: src
 INCLUDE: include
-DEPENDS: cutils, make, libtest_test
-INCLUDES: cutils, make, libtest_test
+DEPENDS: cutils, make, transpiler, libtest_test
+INCLUDES: cutils, make, transpiler, libtest_test
