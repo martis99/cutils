@@ -1,11 +1,8 @@
 #include "t_cutils_c.h"
 
 #include "cstr.h"
-#include "file.h"
 #include "mem.h"
 #include "xml.h"
-
-#define TEST_FILE "t_xml.txt"
 
 TEST(t_xml_init_free)
 {
@@ -130,37 +127,29 @@ TEST(t_xml_add)
 	SEND;
 }
 
-TESTP(t_xml_print, FILE *file)
+TEST(t_xml_print)
 {
 	START;
 
 	xml_t xml = { 0 };
 	xml_init(&xml, 1, 1);
 
-	EXPECT_EQ(xml_print(NULL, XML_END, NULL), 1);
-	EXPECT_EQ(xml_print(&xml, XML_END, NULL), 1);
+	char buf[64] = { 0 };
+	EXPECT_EQ(xml_print(NULL, XML_END, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
+	EXPECT_EQ(xml_print(&xml, XML_END, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
 
 	xml_tag_t tag = xml_add_tag(&xml, XML_END, STRH(""));
-	EXPECT_EQ(xml_print(&xml, tag, NULL), 1);
+	EXPECT_EQ(xml_print(&xml, tag, PRINT_DST_BUF(buf, sizeof(buf), 0)), 44);
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, tag, file), 0);
-
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "< />\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"< />\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag, FILE *file)
+TEST(t_xml_print_tag)
 {
 	START;
 
@@ -169,24 +158,18 @@ TESTP(t_xml_print_tag, FILE *file)
 
 	xml_add_tag(&xml, XML_END, STRH("Project"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 51);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project />\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project />\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag_val, FILE *file)
+TEST(t_xml_print_tag_val)
 {
 	START;
 
@@ -195,24 +178,18 @@ TESTP(t_xml_print_tag_val, FILE *file)
 
 	xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Name"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 63);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project>Name</Project>\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project>Name</Project>\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag_val_nl, FILE *file)
+TEST(t_xml_print_tag_val_nl)
 {
 	START;
 
@@ -221,25 +198,19 @@ TESTP(t_xml_print_tag_val_nl, FILE *file)
 
 	xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Name\n"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 64);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project>Name\n"
-				   "</Project>\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project>Name\n"
+			"</Project>\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag_attr, FILE *file)
+TEST(t_xml_print_tag_attr)
 {
 	START;
 
@@ -249,24 +220,18 @@ TESTP(t_xml_print_tag_attr, FILE *file)
 	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	xml_add_attr(&xml, project, STRH("Name"), STRH("Project1"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 67);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project Name=\"Project1\" />\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project Name=\"Project1\" />\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag_val_attr, FILE *file)
+TEST(t_xml_print_tag_val_attr)
 {
 	START;
 
@@ -276,24 +241,18 @@ TESTP(t_xml_print_tag_val_attr, FILE *file)
 	const xml_tag_t project = xml_add_tag_val(&xml, XML_END, STRH("Project"), STRH("Value"));
 	xml_add_attr(&xml, project, STRH("Name"), STRH("Project1"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 80);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project Name=\"Project1\">Value</Project>\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project Name=\"Project1\">Value</Project>\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_tag_child, FILE *file)
+TEST(t_xml_print_tag_child)
 {
 	START;
 
@@ -303,26 +262,20 @@ TESTP(t_xml_print_tag_child, FILE *file)
 	const xml_tag_t project = xml_add_tag(&xml, XML_END, STRH("Project"));
 	xml_add_tag(&xml, project, STRH("Child"));
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 72);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project>\n"
-				   "  <Child />\n"
-				   "</Project>\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project>\n"
+			"  <Child />\n"
+			"</Project>\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_remove_tag, FILE *file)
+TEST(t_xml_print_remove_tag)
 {
 	START;
 
@@ -334,24 +287,18 @@ TESTP(t_xml_print_remove_tag, FILE *file)
 
 	xml_remove_tag(&xml, child);
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 51);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project />\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project />\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_remove_tag_attr, FILE *file)
+TEST(t_xml_print_remove_tag_attr)
 {
 	START;
 
@@ -364,24 +311,18 @@ TESTP(t_xml_print_remove_tag_attr, FILE *file)
 
 	xml_remove_tag(&xml, child);
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 51);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project />\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project />\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_print_remove_tag_middle, FILE *file)
+TEST(t_xml_print_remove_tag_middle)
 {
 	START;
 
@@ -395,39 +336,33 @@ TESTP(t_xml_print_remove_tag_middle, FILE *file)
 
 	xml_remove_tag(&xml, child2);
 
-	{
-		file_reopen(TEST_FILE, "wb+", file);
-		EXPECT_EQ(xml_print(&xml, 0, file), 0);
+	char buf[128] = { 0 };
+	EXPECT_EQ(xml_print(&xml, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 86);
 
-		char buf[128] = { 0 };
-		file_read_ft(file, buf, sizeof(buf));
-
-		const char exp[] = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
-				   "<Project>\n"
-				   "  <Child1 />\n"
-				   "  <Child3 />\n"
-				   "</Project>\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_STR(buf, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+			"<Project>\n"
+			"  <Child1 />\n"
+			"  <Child3 />\n"
+			"</Project>\n");
 
 	xml_free(&xml);
 
 	END;
 }
 
-TESTP(t_xml_prints, FILE *file)
+TEST(t_xml_prints)
 {
 	SSTART;
-	RUNP(t_xml_print, file);
-	RUNP(t_xml_print_tag, file);
-	RUNP(t_xml_print_tag_val, file);
-	RUNP(t_xml_print_tag_val_nl, file);
-	RUNP(t_xml_print_tag_attr, file);
-	RUNP(t_xml_print_tag_val_attr, file);
-	RUNP(t_xml_print_tag_child, file);
-	RUNP(t_xml_print_remove_tag, file);
-	RUNP(t_xml_print_remove_tag_attr, file);
-	RUNP(t_xml_print_remove_tag_middle, file);
+	RUN(t_xml_print);
+	RUN(t_xml_print_tag);
+	RUN(t_xml_print_tag_val);
+	RUN(t_xml_print_tag_val_nl);
+	RUN(t_xml_print_tag_attr);
+	RUN(t_xml_print_tag_val_attr);
+	RUN(t_xml_print_tag_child);
+	RUN(t_xml_print_remove_tag);
+	RUN(t_xml_print_remove_tag_attr);
+	RUN(t_xml_print_remove_tag_middle);
 	SEND;
 }
 
@@ -435,14 +370,9 @@ STEST(t_xml)
 {
 	SSTART;
 
-	FILE *file = file_open(TEST_FILE, "wb+");
-
 	RUN(t_xml_init_free);
 	RUN(t_xml_add);
-	RUNP(t_xml_prints, file);
-
-	file_close(file);
-	file_delete(TEST_FILE);
+	RUN(t_xml_prints);
 
 	SEND;
 }

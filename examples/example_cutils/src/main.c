@@ -242,7 +242,7 @@ static void example_xml()
 	xml_add_tag(&xml, child4, STR("Child41"));
 	xml_add_tag(&xml, child4, STR("Child42"));
 
-	xml_print(&xml, parent, stdout);
+	xml_print(&xml, parent, PRINT_DST_STD());
 
 	xml_free(&xml);
 }

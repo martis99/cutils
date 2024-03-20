@@ -29,6 +29,6 @@ bool xml_has_child(const xml_t *xml, xml_tag_t tag);
 
 xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val);
 
-int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file);
+int xml_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst);
 
 #endif

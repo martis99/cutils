@@ -146,56 +146,56 @@ xml_attr_t xml_add_attr(xml_t *xml, xml_tag_t tag, str_t name, str_t val)
 	return attr;
 }
 
-static int xml_tag_print(const xml_t *xml, xml_tag_t tag, FILE *file, uint depth)
+static int xml_tag_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst, uint depth)
 {
 	if (xml == NULL) {
-		return 1;
+		return 0;
 	}
 
 	const xml_tag_data_t *data = get_tag(&xml->tags, tag);
 
 	if (data == NULL) {
-		return 1;
+		return 0;
 	}
 
-	int ret = 0;
-	ret |= !c_fprintf(file, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
+	int off = dst.off;
+	dst.off += c_print_exec(dst, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
 	if (data->attrs != LIST_END) {
 		xml_attr_data_t *attr;
 		list_foreach(&xml->attrs, data->attrs, attr)
 		{
-			ret |= !c_fprintf(file, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
+			dst.off += c_print_exec(dst, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
 		}
 	}
 
 	if (tree_get_child(&xml->tags, tag) != TREE_END) {
-		ret |= !c_fprintf(file, ">\n");
+		dst.off += c_print_exec(dst, ">\n");
 
 		xml_tag_t child;
 		tree_foreach_child(&xml->tags, tag, child)
 		{
-			ret |= xml_tag_print(xml, child, file, depth + 1);
+			dst.off += xml_tag_print(xml, child, dst, depth + 1);
 		}
 
-		ret |= !c_fprintf(file, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
+		dst.off += c_print_exec(dst, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
 	} else if (data->val.data) {
 		if (data->val.len > 0 && data->val.data[data->val.len - 1] == '\n') {
-			ret |= !c_fprintf(file, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
+			dst.off += c_print_exec(dst, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
 		} else {
-			ret |= !c_fprintf(file, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
+			dst.off += c_print_exec(dst, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
 		}
 	} else {
-		ret |= !c_fprintf(file, " />\n");
+		dst.off += c_print_exec(dst, " />\n");
 	}
 
-	return ret;
+	return dst.off - off;
 }
 
-int xml_print(const xml_t *xml, xml_tag_t tag, FILE *file)
+int xml_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst)
 {
-	int ret = 0;
-	ret |= !c_fprintf(file, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-	ret |= xml_tag_print(xml, tag, file, 0);
-	return ret;
+	int off = dst.off;
+	dst.off += c_print_exec(dst, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	dst.off += xml_tag_print(xml, tag, dst, 0);
+	return dst.off - off;
 }
