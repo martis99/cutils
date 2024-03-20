@@ -1,5 +1,5 @@
 NAME: example_cutils
 TYPE: EXE
 SOURCE: src
-DEPENDS: cutils
-INCLUDES: cutils
+DEPENDS: cutils, make
+INCLUDES: cutils, make
