@@ -7,7 +7,7 @@ TEST(t_log_init)
 	START;
 
 	const log_t *log = log_get();
-	log_t tmp = *log;
+	log_t tmp	 = *log;
 
 	EXPECT_EQ(log_init(NULL), NULL);
 	EXPECT_EQ(log_init(&tmp), &tmp);
@@ -235,16 +235,18 @@ TEST(t_log_add_callback)
 	const log_t *log = log_get();
 
 	log_set(NULL);
-	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 1);
+
+	char buf[8] = { 0 };
+	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_TRACE, 1), 1);
 
 	log_t tmp = *log;
 	log_set(&tmp);
 
 	for (int i = 0; i < LOG_MAX_CALLBACKS; i++) {
-		EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 0);
+		EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_TRACE, 1), 0);
 	}
 
-	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_NONE(), LOG_TRACE, 1), 1);
+	EXPECT_EQ(log_add_callback(print_callback, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_TRACE, 1), 1);
 
 	log_debug("test", "log", NULL, "trace");
 
@@ -284,8 +286,10 @@ TEST(t_log_trace)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_TRACE, 1);
 
+	int quiet = log_set_quiet(1);
 	log_trace("test", "log", NULL, "trace%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -311,8 +315,10 @@ TEST(t_log_debug)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_DEBUG, 1);
 
+	int quiet = log_set_quiet(1);
 	log_debug("test", "log", NULL, "debug%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -338,8 +344,10 @@ TEST(t_log_info)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_INFO, 1);
 
+	int quiet = log_set_quiet(1);
 	log_info("test", "log", NULL, "info%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -365,8 +373,10 @@ TEST(t_log_warn)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_WARN, 1);
 
+	int quiet = log_set_quiet(1);
 	log_warn("test", "log", NULL, "warn%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -392,8 +402,10 @@ TEST(t_log_error)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_ERROR, 1);
 
+	int quiet = log_set_quiet(1);
 	log_error("test", "log", NULL, "error%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 
@@ -419,8 +431,10 @@ TEST(t_log_fatal)
 	char buf[1024] = { 0 };
 	log_add_callback(log_std_cb, PRINT_DST_BUF(buf, sizeof(buf), 0), LOG_FATAL, 1);
 
+	int quiet = log_set_quiet(1);
 	log_fatal("test", "log", NULL, "fatal%d", 1);
 	uint exp_line = __LINE__ - 1;
+	log_set_quiet(quiet);
 
 	uint y, m, d, H, M, S, U, line, x;
 

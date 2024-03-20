@@ -26,16 +26,17 @@ TEST(t_c_free)
 
 	cutils_t cutils = { 0 };
 
-	EXPECT_EQ(c_free(NULL, PRINT_DST_NONE()), 1);
+	char buf[8] = { 0 };
+	EXPECT_EQ(c_free(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 
-	EXPECT_EQ(c_free(&cutils, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(c_free(&cutils, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	mem_t *mem = (mem_t *)mem_get();
 
 	size_t m = mem->mem;
 
 	mem->mem = 1;
-	EXPECT_EQ(c_free(&cutils, PRINT_DST_NONE()), 1);
+	EXPECT_EQ(c_free(&cutils, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 	mem->mem = m;
 
 	END;

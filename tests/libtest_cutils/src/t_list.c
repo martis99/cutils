@@ -361,19 +361,15 @@ TEST(t_list_print)
 	*(int *)list_get_data(&list, list_add_next(&list, node)) = 1;
 	*(int *)list_get_data(&list, list_add_next(&list, node)) = 2;
 
-	EXPECT_EQ(list_print(NULL, LIST_END, NULL, PRINT_DST_NONE(), NULL), 0);
-	EXPECT_EQ(list_print(&list, LIST_END, NULL, PRINT_DST_NONE(), NULL), 0);
-	EXPECT_EQ(list_print(&list, node, NULL, PRINT_DST_NONE(), NULL), 0);
+	char buf[16] = { 0 };
+	EXPECT_EQ(list_print(NULL, LIST_END, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(list_print(&list, LIST_END, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(list_print(&list, node, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
 
-	{
-		char buf[16] = { 0 };
-		EXPECT_EQ(list_print(&list, node, print_list, PRINT_DST_BUF(buf, sizeof(buf), 0), 0), 6);
-
-		const char exp[] = "0\n"
-				   "1\n"
-				   "2\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(list_print(&list, node, print_list, PRINT_DST_BUF(buf, sizeof(buf), 0), 0), 6);
+	EXPECT_STR(buf, "0\n"
+			"1\n"
+			"2\n");
 
 	list_free(&list);
 

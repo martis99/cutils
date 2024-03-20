@@ -12,6 +12,7 @@ TEST(tests)
 	RUN(t_args);
 	RUN(t_arr);
 	RUN(t_bnf);
+	RUN(t_cplatform);
 	RUN(t_cstr);
 	RUN(t_cutils);
 	RUN(t_dict);

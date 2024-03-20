@@ -26,20 +26,16 @@ TEST(t_token_dbg)
 {
 	START;
 
-	{
-		token_t token = {
-			.value = STR("\t\r\n\0a"),
-			.line  = 0,
-			.col   = 0,
-			.type  = 1 << TOKEN_ALPHA | 1 << TOKEN_LOWER,
-		};
+	token_t token = {
+		.value = STR("\t\r\n\0a"),
+		.line  = 0,
+		.col   = 0,
+		.type  = 1 << TOKEN_ALPHA | 1 << TOKEN_LOWER,
+	};
 
-		char buf[64] = { 0 };
-		EXPECT_EQ(token_dbg(token, PRINT_DST_BUF(buf, sizeof(buf), 0)), 34);
-
-		const char exp[] = "ALPHA | LOWER ( 0,  0) \"\\t\\r\\n\\0a\"";
-		EXPECT_STR(buf, exp);
-	}
+	char buf[64] = { 0 };
+	EXPECT_EQ(token_dbg(token, PRINT_DST_BUF(buf, sizeof(buf), 0)), 34);
+	EXPECT_STR(buf, "ALPHA | LOWER ( 0,  0) \"\\t\\r\\n\\0a\"");
 
 	END;
 }

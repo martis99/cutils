@@ -108,11 +108,11 @@ TEST(t_stx_rule_add_arr)
 
 	stx_t stx = { 0 };
 	stx_init(&stx, 0, 0);
-	
+
 	stx_rule_t rule = stx_add_rule(&stx, STRH(""));
 
 	stx_term_t term = stx_create_term(&stx, STX_TERM_LITERAL(STR("T")));
-	
+
 	EXPECT_EQ(stx_rule_add_arr(NULL, STX_RULE_END, STX_TERM_TOKEN(TOKEN_UPPER), STX_TERM_NONE()), STX_TERM_END);
 	EXPECT_EQ(stx_rule_add_arr(&stx, STX_RULE_END, STX_TERM_TOKEN(TOKEN_UPPER), STX_TERM_RULE(rule)), STX_TERM_END);
 
@@ -164,30 +164,21 @@ TEST(t_stx_compile_print)
 	EXPECT_EQ(stx_compile(NULL), 1);
 	EXPECT_EQ(stx_compile(&stx), 0);
 
-	EXPECT_EQ(stx_print(NULL, PRINT_DST_NONE()), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(stx_print(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	{
-		char buf[64] = { 0 };
-		EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);
-
-		const char exp[] = "<file> ::= <line>\n"
-				   "<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);
+	EXPECT_STR(buf, "<file> ::= <line>\n"
+			"<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n");
 
 	stx_rule_add_term(&stx, line, (stx_term_data_t){ .type = -1 });
 	//stx_rule_add_term(&stx, line, STX_TERM_OR(-1, -1)); //TODO
 
 	EXPECT_EQ(stx_compile(&stx), 0);
 
-	{
-		char buf[64] = { 0 };
-		EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);;
-
-		const char exp[] = "<file> ::= <line>\n"
-				   "<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(stx_print(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 61);
+	EXPECT_STR(buf, "<file> ::= <line>\n"
+			"<line> ::= UNKNOWN ALPHA ';' \"'\" 'A' | 'B'\n");
 
 	stx_free(&stx);
 

@@ -403,18 +403,14 @@ TEST(t_arr_print)
 	*(int *)arr_get(&arr, arr_add(&arr)) = 1;
 	*(int *)arr_get(&arr, arr_add(&arr)) = 2;
 
-	EXPECT_EQ(arr_print(NULL, NULL, PRINT_DST_NONE(), NULL), 0);
-	EXPECT_EQ(arr_print(&arr, NULL, PRINT_DST_NONE(), NULL), 0);
+	char buf[16] = { 0 };
+	EXPECT_EQ(arr_print(NULL, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(arr_print(&arr, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
 
-	{
-		char buf[16] = { 0 };
-		EXPECT_EQ(arr_print(&arr, print_arr, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 6);
-
-		const char exp[] = "0\n"
-				   "1\n"
-				   "2\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(arr_print(&arr, print_arr, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 6);
+	EXPECT_STR(buf, "0\n"
+			"1\n"
+			"2\n");
 
 	arr_free(&arr);
 

@@ -228,20 +228,15 @@ TEST(t_prs_print)
 	prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
 	prs_add_node(&prs, prs.root, (prs_node_data_t){ .type = -1 });
 
-	EXPECT_EQ(prs_print(NULL, PRINT_DST_NONE()), 0);
-	EXPECT_EQ(prs_print(&prs, PRINT_DST_NONE()), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(prs_print(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	{
-		char buf[64] = { 0 };
-		EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
-
-		const char exp[] = "rule\n"
-				   "├─'T'\n"
-				   "├─'L'\n"
-				   "├─0\n"
-				   "└─";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
+	EXPECT_STR(buf, "rule\n"
+			"├─'T'\n"
+			"├─'L'\n"
+			"├─0\n"
+			"└─");
 
 	lex_free(&lex);
 	stx_free(&stx);

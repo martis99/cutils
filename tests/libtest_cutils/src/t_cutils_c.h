@@ -1,13 +1,14 @@
 #ifndef T_CUTILS_C_H
 #define T_CUTILS_C_H
 
-#include "test_h.h"
 #include "test.h"
+#include "test_h.h"
 
 STEST(t_args);
 STEST(t_arr);
 STEST(t_bnf);
 STEST(t_cstr);
+STEST(t_cplatform);
 STEST(t_cutils);
 STEST(t_dict);
 STEST(t_file);

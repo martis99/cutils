@@ -53,8 +53,9 @@ TEST(t_json_print)
 	json_t json = { 0 };
 	json_init(&json, 1);
 
-	EXPECT_EQ(json_print(NULL, JSON_END, PRINT_DST_NONE(), "\t"), 0);
-	EXPECT_EQ(json_print(&json, JSON_END, PRINT_DST_NONE(), "\t"), 0);
+	char buf[8] = { 0 };
+	EXPECT_EQ(json_print(NULL, JSON_END, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 0);
+	EXPECT_EQ(json_print(&json, JSON_END, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 0);
 
 	json_free(&json);
 
@@ -83,33 +84,29 @@ TEST(t_json_print_all)
 	const json_val_t obj = json_add_val(&json, root, STRH("obj"), JSON_OBJ());
 	json_add_val(&json, obj, STRH("int"), JSON_INT(4));
 
-	{
-		char buf[256] = { 0 };
-		EXPECT_EQ(json_print(&json, root, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 159);
-
-		const char exp[] = "{\n"
-				   "\t\"int\": 1,\n"
-				   "\t\"float\": 2.1234567,\n"
-				   "\t\"double\": 3.123456789012345,\n"
-				   "\t\"bool\": true,\n"
-				   "\t\"str\": \"str\",\n"
-				   "\t\"arr\": [\n"
-				   "\t\t0,\n"
-				   "\t\t1,\n"
-				   "\t\t2,\n"
-				   "\t\t{},\n"
-				   "\t\t[]\n"
-				   "\t],\n"
-				   "\t\"obj\": {\n"
-				   "\t\t\"int\": 4\n"
-				   "\t}\n"
-				   "}";
-		EXPECT_STR(buf, exp);
-	}
+	char buf[256] = { 0 };
+	EXPECT_EQ(json_print(&json, root, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 159);
+	EXPECT_STR(buf, "{\n"
+			"\t\"int\": 1,\n"
+			"\t\"float\": 2.1234567,\n"
+			"\t\"double\": 3.123456789012345,\n"
+			"\t\"bool\": true,\n"
+			"\t\"str\": \"str\",\n"
+			"\t\"arr\": [\n"
+			"\t\t0,\n"
+			"\t\t1,\n"
+			"\t\t2,\n"
+			"\t\t{},\n"
+			"\t\t[]\n"
+			"\t],\n"
+			"\t\"obj\": {\n"
+			"\t\t\"int\": 4\n"
+			"\t}\n"
+			"}");
 
 	json_add_val(&json, root, STRH("invalid"), (json_val_data_t){ .type = -1 });
 
-	EXPECT_EQ(json_print(&json, root, PRINT_DST_NONE(), "\t"), 0);
+	EXPECT_EQ(json_print(&json, root, PRINT_DST_BUF(buf, sizeof(buf), 0), "\t"), 161);
 
 	json_free(&json);
 

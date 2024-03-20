@@ -99,8 +99,7 @@ TEST(t_lex_print_line)
 	lex_tokenize(&lex, STR("Test\nNew Line"));
 
 	char buf[64] = { 0 };
-	EXPECT_EQ(lex_print_line(NULL, 0, PRINT_DST_NONE()), 0);
-	EXPECT_EQ(lex_print_line(&lex, 0, PRINT_DST_NONE()), 0);
+	EXPECT_EQ(lex_print_line(NULL, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 	EXPECT_EQ(lex_print_line(&lex, 1, PRINT_DST_BUF(buf, sizeof(buf), 0)), 6);
 
 	EXPECT_STR(buf, "Test\\n");
@@ -114,24 +113,20 @@ TEST(t_lex_dbg)
 {
 	START;
 
-	EXPECT_EQ(lex_dbg(NULL, PRINT_DST_NONE()), 0);
+	char buf[256] = { 0 };
+	EXPECT_EQ(lex_dbg(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	lex_t lex = { 0 };
 	lex_init(&lex, 0);
 
 	lex_tokenize(&lex, STR("A\nLN"));
 
-	{
-		char buf[256] = { 0 };
-		EXPECT_EQ(lex_dbg(&lex, PRINT_DST_BUF(buf, sizeof(buf), 0)), 137);
-
-		const char exp[] = "ALPHA | UPPER ( 0,  0) \"A\"\n"
-				   "WS    | NL    ( 0,  1) \"\\n\"\n"
-				   "ALPHA | UPPER ( 1,  0) \"L\"\n"
-				   "ALPHA | UPPER ( 1,  1) \"N\"\n"
-				   "EOF           ( 1,  2) \"\\0\"\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(lex_dbg(&lex, PRINT_DST_BUF(buf, sizeof(buf), 0)), 137);
+	EXPECT_STR(buf, "ALPHA | UPPER ( 0,  0) \"A\"\n"
+			"WS    | NL    ( 0,  1) \"\\n\"\n"
+			"ALPHA | UPPER ( 1,  0) \"L\"\n"
+			"ALPHA | UPPER ( 1,  1) \"N\"\n"
+			"EOF           ( 1,  2) \"\\0\"\n");
 
 	lex_free(&lex);
 

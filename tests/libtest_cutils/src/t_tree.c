@@ -1118,22 +1118,18 @@ TEST(t_tree_print)
 
 	*(int *)tree_get_data(&tree, (n111 = tree_add_child(&tree, n11))) = 111;
 
-	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, PRINT_DST_NONE(), NULL), 0);
-	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, PRINT_DST_NONE(), NULL), 0);
-	EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_NONE(), NULL), 0);
+	char buf[64] = { 0 };
+	EXPECT_EQ(tree_print(NULL, TREE_END, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(tree_print(&tree, TREE_END, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
 
-	{
-		char buf[64] = { 0 };
-		EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
-		EXPECT_EQ(tree_print(&tree, root, print_tree, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 47);
-
-		const char exp[] = "0\n"
-				   "├─1\n"
-				   "│ └─11\n"
-				   "│   └─111\n"
-				   "└─2\n";
-		EXPECT_STR(buf, exp);
-	}
+	EXPECT_EQ(tree_print(&tree, root, NULL, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 0);
+	EXPECT_EQ(tree_print(&tree, root, print_tree, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 47);
+	EXPECT_STR(buf, "0\n"
+			"├─1\n"
+			"│ └─11\n"
+			"│   └─111\n"
+			"└─2\n");
 
 	tree_free(&tree);
 
