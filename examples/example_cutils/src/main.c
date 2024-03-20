@@ -1,3 +1,4 @@
+#include "args.h"
 #include "arr.h"
 #include "cutils.h"
 #include "json.h"
@@ -14,6 +15,50 @@ static int print_arr(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
 	return c_print_exec(dst, "%d\n", *(int *)data);
+}
+
+static int handle_dir(const char *param, void *ret)
+{
+	(void)param;
+	(void)ret;
+	return 0;
+}
+
+static void example_args()
+{
+	c_printf(SEP, __func__);
+
+	arg_t args[] = {
+		[0] = ARG('T', "test", PARAM_NONE, "", "Run tests", NULL),
+		[1] = ARG('B', "dir", PARAM_STR, "<dir>", "Set directory", handle_dir),
+		[2] = ARG('S', "dir", PARAM_STR, "<dir>", "Set directory", NULL),
+		[3] = ARG('D', "debug", PARAM_SWITCH, "<0/1>", "Turn on/off debug messages (default: 0)", NULL),
+		[4] = ARG('M', "mode", PARAM_MODE, "<mode>", "Set mode (default: A)", NULL),
+	};
+
+	mode_t mode_modes[] = {
+		[0] = { .c = 'A', .desc = "A mode" },
+		[1] = { .c = 'B', .desc = "B mode" },
+	};
+
+	mode_desc_t modes[] = {
+		{ .name = "Modes", .modes = mode_modes, .len = 2 },
+	};
+
+	char *dir = NULL;
+	int debug = 0;
+
+	void *params[] = {
+		[2] = &dir,
+		[3] = &debug,
+	};
+
+	const char *argv[] = {
+		"example",
+		"-H",
+	};
+
+	args_handle("example", "example program", args, sizeof(args), modes, sizeof(modes), sizeof(argv) / sizeof(char *), argv, params, PRINT_DST_STD());
 }
 
 static void example_arr()
@@ -255,6 +300,7 @@ int main(int argc, char **argv)
 	cutils_t cutils = { 0 };
 	c_init(&cutils);
 
+	example_args();
 	example_arr();
 	example_json();
 	example_list();

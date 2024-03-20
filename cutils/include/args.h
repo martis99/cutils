@@ -39,8 +39,8 @@ typedef struct arg_s {
 	char c;
 } arg_t;
 
-void args_usage(const char *name, const char *description, FILE *file);
+int args_usage(const char *name, const char *description, print_dst_t dst);
 int args_handle(const char *name, const char *description, const arg_t *args, size_t args_size, const mode_desc_t *modes, size_t modes_size, int argc, const char **argv,
-		void **params, FILE *file);
+		void **params, print_dst_t dst);
 
 #endif
