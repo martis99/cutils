@@ -69,10 +69,12 @@ TEST(t_file_read)
 
 	FILE *file = file_open(TEST_FILE, "wb+");
 
-	c_fprintf(file, "Test");
-
 	char data[64] = { 0 };
 
+	c_fprintf(file, "");
+	EXPECT_EQ(file_read_ft(file, data, sizeof(data)), 0);
+
+	c_fprintf(file, "Test");
 	EXPECT_EQ(file_read(NULL, 0, NULL, 0), 0);
 	EXPECT_EQ(file_read(file, 0, NULL, 0), 0);
 	EXPECT_EQ(file_read(file, 10, NULL, 0), 0);
