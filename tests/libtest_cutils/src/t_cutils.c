@@ -26,7 +26,7 @@ TEST(t_c_free)
 
 	cutils_t cutils = { 0 };
 
-	char buf[8] = { 0 };
+	char buf[64] = { 0 };
 	EXPECT_EQ(c_free(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 1);
 
 	EXPECT_EQ(c_free(&cutils, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
