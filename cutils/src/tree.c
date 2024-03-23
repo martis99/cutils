@@ -156,25 +156,17 @@ int tree_print(const tree_t *tree, tnode_t node, tree_print_cb cb, print_dst_t d
 		return 0;
 	}
 
-	int off =dst.off;
+	int off = dst.off;
 	tnode_t cur;
 	int depth;
 	tree_foreach(tree, node, cur, depth)
 	{
 		for (int i = 0; i < depth - 1; i++) {
-			if (tree_get_next(tree, _it.stack[i + 1]) >= tree->cnt) {
-				dst.off += c_print_exec(dst, "  ");
-			} else {
-				dst.off += c_v(dst);
-			}
+			dst.off += dprintf(dst, tree_get_next(tree, _it.stack[i + 1]) < tree->cnt ? "│ " : "  ");
 		}
 
 		if (depth > 0) {
-			if (tree_get_next(tree, _it.stack[depth]) >= tree->cnt) {
-				dst.off += c_ur(dst);
-			} else {
-				dst.off += c_vr(dst);
-			}
+			dst.off += dprintf(dst, tree_get_next(tree, _it.stack[depth]) < tree->cnt ? "├─" : "└─");
 		}
 
 		dst.off += cb(tree_get_data(tree, cur), dst, priv);

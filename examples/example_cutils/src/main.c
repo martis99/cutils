@@ -2,10 +2,12 @@
 #include "arr.h"
 #include "cutils.h"
 #include "json.h"
+#include "lexer.h"
 #include "list.h"
 #include "log.h"
 #include "make.h"
 #include "print.h"
+#include "syntax.h"
 #include "tree.h"
 #include "xml.h"
 
@@ -14,7 +16,7 @@
 static int print_arr(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	return c_print_exec(dst, "%d\n", *(int *)data);
+	return dprintf(dst, "%d\n", *(int *)data);
 }
 
 static int handle_dir(const char *param, void *ret)
@@ -107,7 +109,30 @@ static void example_json()
 static int print_list(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	return c_print_exec(dst, "%d\n", *(int *)data);
+	return dprintf(dst, "%d\n", *(int *)data);
+}
+
+static void example_lexer()
+{
+	c_printf(SEP, __func__);
+
+	lex_t lex = { 0 };
+
+	lex_init(&lex, 10);
+
+	str_t src = STR("int main() {\n"
+			"	return 0;\n"
+			"}\n");
+
+	str_print(src, PRINT_DST_STD());
+
+	printf("\n\n");
+
+	lex_tokenize(&lex, src);
+
+	lex_dbg(&lex, PRINT_DST_STD());
+
+	lex_free(&lex);
 }
 
 static void example_list()
@@ -208,15 +233,74 @@ static void example_make()
 
 	str_t target_path = make_var_get_expanded(&make, STR("TARGET"));
 
-	printf("TARGET: %.*s\n\n", (int)target_path.len, target_path.data);
+	printf("TARGET: %.*s\n", (int)target_path.len, target_path.data);
 
 	make_free(&make);
 }
 
+static void example_syntax()
+{
+	c_printf(SEP, __func__);
+
+	stx_t stx = { 0 };
+
+	stx_init(&stx, 10, 10);
+
+	const stx_rule_t file	     = stx_add_rule(&stx, STR("file"));
+	const stx_rule_t c	     = stx_add_rule(&stx, STR("c"));
+	const stx_rule_t functions   = stx_add_rule(&stx, STR("functions"));
+	const stx_rule_t function    = stx_add_rule(&stx, STR("function"));
+	const stx_rule_t type	     = stx_add_rule(&stx, STR("type"));
+	const stx_rule_t name	     = stx_add_rule(&stx, STR("name"));
+	const stx_rule_t identifier  = stx_add_rule(&stx, STR("identifier"));
+	const stx_rule_t chars	     = stx_add_rule(&stx, STR("chars"));
+	const stx_rule_t expressions = stx_add_rule(&stx, STR("expressions"));
+	const stx_rule_t expression  = stx_add_rule(&stx, STR("expression"));
+
+	stx_rule_add_term(&stx, file, STX_TERM_RULE(c));
+	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
+
+	stx_rule_add_term(&stx, c, STX_TERM_RULE(functions));
+
+	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(function), STX_TERM_NONE());
+
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(type));
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(name));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("(")));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR(")")));
+	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(TOKEN_WS));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("{")));
+	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(TOKEN_NL));
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(expressions));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("}")));
+
+	stx_rule_add_term(&stx, type, STX_TERM_LITERAL(STR("int")));
+
+	stx_rule_add_term(&stx, name, STX_TERM_RULE(identifier));
+
+	stx_rule_add_arr(&stx, identifier, STX_TERM_RULE(chars), STX_TERM_NONE());
+
+	stx_rule_add_or(&stx, chars, 3, stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_ALPHA)), stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_DIGIT)),
+			stx_create_term(&stx, STX_TERM_LITERAL(STR("_"))));
+
+	stx_rule_add_arr(&stx, expressions, STX_TERM_RULE(expression), STX_TERM_TOKEN(TOKEN_NL));
+
+	stx_rule_add_term(&stx, expression, STX_TERM_LITERAL(STR("return 0;")));
+
+	stx_compile(&stx);
+
+	stx_print(&stx, PRINT_DST_STD());
+
+	printf("\n");
+
+	stx_print_tree(&stx, PRINT_DST_STD());
+
+	stx_free(&stx);
+}
 static int print_tree(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	return c_print_exec(dst, "%d\n", *(int *)data);
+	return dprintf(dst, "%d\n", *(int *)data);
 }
 
 static void example_tree()
@@ -303,9 +387,11 @@ int main(int argc, char **argv)
 	example_args();
 	example_arr();
 	example_json();
+	example_lexer();
 	example_list();
 	example_log();
 	example_make();
+	example_syntax();
 	example_tree();
 	example_xml();
 

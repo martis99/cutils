@@ -46,16 +46,16 @@ int token_dbg(token_t token, print_dst_t dst)
 	for (token_type_t type = TOKEN_UNKNOWN; type < __TOKEN_MAX; type++) {
 		if (token.type & (1 << type)) {
 			if (first == 0) {
-				dst.off += c_print_exec(dst, " | ");
+				dst.off += dprintf(dst, " | ");
 			}
-			dst.off += c_print_exec(dst, "%-5s", token_type_str(type).data);
+			dst.off += dprintf(dst, "%-5s", token_type_str(type).data);
 			first = 0;
 		}
 	}
 
-	dst.off += c_print_exec(dst, "%*s (%2d, %2d) \"", MAX(13 - (dst.off - off), 0), "", token.line, token.col, token.value.len, token.value.data);
+	dst.off += dprintf(dst, "%*s (%2d, %2d) \"", MAX(13 - (dst.off - off), 0), "", token.line, token.col, token.value.len, token.value.data);
 	dst.off += str_print(token.value, dst);
-	dst.off += c_print_exec(dst, "\"");
+	dst.off += dprintf(dst, "\"");
 
 	return dst.off - off;
 }

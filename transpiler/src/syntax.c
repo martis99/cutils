@@ -1,5 +1,6 @@
 #include "syntax.h"
 
+#include "list.h"
 #include "log.h"
 
 #include <stdarg.h>
@@ -217,7 +218,7 @@ int stx_compile(stx_t *stx)
 	return ret;
 }
 
-static int stx_print_terms(const stx_t *stx, const stx_term_t terms, print_dst_t dst)
+static int stx_terms_print(const stx_t *stx, const stx_term_t terms, print_dst_t dst)
 {
 	int off = dst.off;
 
@@ -231,25 +232,25 @@ static int stx_print_terms(const stx_t *stx, const stx_term_t terms, print_dst_t
 				log_error("cutils", "syntax", NULL, "failed to get rule: %d", term->val.rule);
 				break;
 			}
-			dst.off += c_print_exec(dst, " <%.*s>", data->name.len, data->name.data);
+			dst.off += dprintf(dst, " <%.*s>", data->name.len, data->name.data);
 			break;
 		}
 		case STX_TERM_TOKEN: {
 			const str_t token = token_type_str(term->val.token);
-			dst.off += c_print_exec(dst, " %.*s", token.len, token.data);
+			dst.off += dprintf(dst, " %.*s", token.len, token.data);
 			break;
 		}
 		case STX_TERM_LITERAL:
 			if (str_eq(term->val.literal, STR("'"))) {
-				dst.off += c_print_exec(dst, " \"%.*s\"", term->val.literal.len, term->val.literal.data);
+				dst.off += dprintf(dst, " \"%.*s\"", term->val.literal.len, term->val.literal.data);
 			} else {
-				dst.off += c_print_exec(dst, " \'%.*s\'", term->val.literal.len, term->val.literal.data);
+				dst.off += dprintf(dst, " \'%.*s\'", term->val.literal.len, term->val.literal.data);
 			}
 			break;
 		case STX_TERM_OR:
-			dst.off += stx_print_terms(stx, term->val.orv.l, dst);
-			dst.off += c_print_exec(dst, " |");
-			dst.off += stx_print_terms(stx, term->val.orv.r, dst);
+			dst.off += stx_terms_print(stx, term->val.orv.l, dst);
+			dst.off += dprintf(dst, " |");
+			dst.off += stx_terms_print(stx, term->val.orv.r, dst);
 			break;
 		default: log_warn("cutils", "syntax", NULL, "unknown term type: %d", term->type); break;
 		}
@@ -269,10 +270,168 @@ int stx_print(const stx_t *stx, print_dst_t dst)
 	const stx_rule_data_t *rule;
 	arr_foreach(&stx->rules, rule)
 	{
-		dst.off += c_print_exec(dst, "<%.*s>%*s ::=", rule->name.len, rule->name.data, MAX(stx->max_rule_len - rule->name.len, 0), "");
-		dst.off += stx_print_terms(stx, rule->terms, dst);
-		dst.off += c_print_exec(dst, "\n");
+		dst.off += dprintf(dst, "<%.*s>%*s ::=", rule->name.len, rule->name.data, MAX(stx->max_rule_len - rule->name.len, 0), "");
+		dst.off += stx_terms_print(stx, rule->terms, dst);
+		dst.off += dprintf(dst, "\n");
 	}
+
+	return dst.off - off;
+}
+
+static int print_header(const stx_t *stx, stx_term_t *stack, int *state, int top, print_dst_t dst)
+{
+	int off = dst.off;
+	stx_term_data_t *term;
+	stx_term_data_t *parent;
+
+	for (int i = 0; i < top - 1; i++) {
+		// if 'or' column
+		if ((term = stx_get_term_data(stx, stack[i]))->type == STX_TERM_OR) {
+			const char *str = "  ";
+			if (stack[top - 1] == term->val.orv.l) { // if left branch start row
+				str = "or";
+			} else if (stack[top - 1] == term->val.orv.r) { // if right branch start row
+				str = "└─";
+			} else if (state[i] == 1) { // if left branch row
+				str = "│ ";
+			}
+
+			dst.off += dprintf(dst, str);
+			continue;
+		}
+
+		// │ until last child
+		dst.off += dprintf(dst, list_get_next(&stx->terms, stack[i]) < stx->terms.cnt ? "│ " : "  ");
+	}
+
+	// if 'or' row
+	if (top > 1 && (parent = stx_get_term_data(stx, stack[top - 2]))->type == STX_TERM_OR) {
+		const char *str = NULL;
+		if (stack[top - 1] == parent->val.orv.l) { // if left branch row
+			// ── if last, ┬─ otherwise
+			str = list_get_next(&stx->terms, stack[top - 1]) < stx->terms.cnt ? "┬─" : "──";
+		} else if (stack[top - 1] == parent->val.orv.r) { // if right branch row
+			str = "──";
+		}
+		if (str != NULL) {
+			return dst.off + dprintf(dst, str) - off;
+		}
+	}
+
+	// └─ if last, ├─ otherwise
+	return dst.off + dprintf(dst, list_get_next(&stx->terms, stack[top - 1]) < stx->terms.cnt ? "├─" : "└─") - off;
+}
+
+static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_dst_t dst, int depth)
+{
+	int off = dst.off;
+
+	dst.off += str_print(rule->name, dst);
+	dst.off += dprintf(dst, "\n");
+
+	stx_term_t stack[64] = { 0 };
+	int state[64]	     = { 0 };
+	stack[0]	     = rule->terms;
+	int top		     = 1;
+
+	while (top > 0) {
+		if (stack[top - 1] >= stx->terms.cnt) {
+			top--;
+			if (top <= 0) {
+				break;
+			}
+			stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
+			if (term->type != STX_TERM_OR) {
+				stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
+				continue;
+			}
+		}
+
+		stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
+
+		switch (term->type) {
+		case STX_TERM_RULE: {
+			stx_rule_data_t *rule = stx_get_rule_data(stx, term->val.rule);
+
+			int same = 0;
+			for (int i = 0; i < top - 1; i++) {
+				stx_term_data_t *term = stx_get_term_data(stx, stack[i]);
+				if (term->type != STX_TERM_RULE) {
+					continue;
+				}
+
+				stx_rule_data_t *prev = stx_get_rule_data(stx, stx_get_term_data(stx, stack[i])->val.rule);
+				if (str_eq(rule->name, prev->name)) {
+					same = 1;
+					break;
+				}
+			}
+			dst.off += print_header(stx, stack, state, top, dst);
+			if (same) {
+				dst.off += dprintf(dst, "<");
+				dst.off += str_print(rule->name, dst);
+				dst.off += dprintf(dst, ">\n");
+				stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
+				break;
+			}
+			dst.off += str_print(rule->name, dst);
+			dst.off += dprintf(dst, "\n");
+			stack[top++] = rule->terms;
+			break;
+		}
+		case STX_TERM_TOKEN: {
+			dst.off += print_header(stx, stack, state, top, dst);
+			dst.off += str_print(token_type_str(term->val.token), dst);
+			dst.off += dprintf(dst, "\n");
+			stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
+			break;
+		}
+		case STX_TERM_LITERAL:
+			dst.off += print_header(stx, stack, state, top, dst);
+			if (str_eq(term->val.literal, STR("'"))) {
+				dst.off += dprintf(dst, "\"%.*s\"", term->val.literal.len, term->val.literal.data);
+			} else {
+				dst.off += dprintf(dst, "\'%.*s\'", term->val.literal.len, term->val.literal.data);
+			}
+			dst.off += dprintf(dst, "\n");
+			stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
+			break;
+		case STX_TERM_OR:
+			if (state[top - 1] == 0) {
+				state[top - 1] = 1;
+				stack[top++]   = term->val.orv.l;
+			} else if (state[top - 1] == 1) {
+				state[top - 1] = 2;
+				stack[top++]   = term->val.orv.r;
+			} else {
+				state[top - 1] = 0;
+				top--;
+				stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
+				if (term->type != STX_TERM_OR) {
+					stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
+				}
+			}
+			break;
+		default:
+			log_warn("cutils", "syntax", NULL, "unknown term type: %d", term->type);
+			top--;
+			break;
+		}
+	}
+
+	return dst.off - off;
+}
+
+int stx_print_tree(const stx_t *stx, print_dst_t dst)
+{
+	if (stx == NULL) {
+		return 0;
+	}
+
+	int off = dst.off;
+
+	stx_rule_data_t *rule = stx_get_rule_data(stx, stx->root);
+	dst.off += stx_rule_print_tree(stx, rule, dst, 0);
 
 	return dst.off - off;
 }

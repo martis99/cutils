@@ -107,8 +107,7 @@ TEST(t_args_handle)
 			"\n"
 			"Modes\n"
 			"  A = A mode\n"
-			"  B = B mode\n"
-			"\n");
+			"  B = B mode\n");
 
 	const char *argv_d[] = {
 		NAME,
@@ -132,8 +131,7 @@ TEST(t_args_handle)
 			"\n"
 			"Modes\n"
 			"  A = A mode\n"
-			"  B = B mode\n"
-			"\n");
+			"  B = B mode\n");
 
 	const char *argv_h[] = {
 		NAME,
@@ -157,8 +155,7 @@ TEST(t_args_handle)
 			"\n"
 			"Modes\n"
 			"  A = A mode\n"
-			"  B = B mode\n"
-			"\n");
+			"  B = B mode\n");
 
 	END;
 }

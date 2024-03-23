@@ -1096,7 +1096,7 @@ TEST(t_tree_foreach)
 static int print_tree(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	return c_print_exec(dst, "%d\n", *(int *)data);
+	return dprintf(dst, "%d\n", *(int *)data);
 }
 
 TEST(t_tree_print)

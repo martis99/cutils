@@ -734,7 +734,7 @@ static int make_str_print(const make_t *make, make_str_data_t str, print_dst_t d
 		return 0;
 	}
 
-	return c_print_exec(dst, "%.*s", val.len, val.data);
+	return dprintf(dst, "%.*s", val.len, val.data);
 }
 
 static int make_rule_target_print(const make_t *make, const make_rule_target_data_t *target, print_dst_t dst)
@@ -743,7 +743,7 @@ static int make_rule_target_print(const make_t *make, const make_rule_target_dat
 
 	dst.off += make_str_print(make, target->target, dst);
 	if (target->action.data != NULL) {
-		dst.off += c_print_exec(dst, "/%.*s", target->action.len, target->action.data);
+		dst.off += dprintf(dst, "/%.*s", target->action.len, target->action.data);
 	}
 
 	return dst.off - off;
@@ -762,16 +762,16 @@ static inline int make_var_print(const make_t *make, const make_var_data_t *var,
 		return 0;
 	}
 
-	dst.off += c_print_exec(dst, "%.*s %s", var->name.len, var->name.data, var_type_str);
+	dst.off += dprintf(dst, "%.*s %s", var->name.len, var->name.data, var_type_str);
 
 	const make_str_data_t *value;
 	list_foreach(&make->strs, var->values, value)
 	{
-		dst.off += c_print_exec(dst, " ");
+		dst.off += dprintf(dst, " ");
 		dst.off += make_str_print(make, *value, dst);
 	}
 
-	dst.off += c_print_exec(dst, "\n");
+	dst.off += dprintf(dst, "\n");
 
 	return dst.off - off;
 }
@@ -782,18 +782,18 @@ static inline int make_rule_print(const make_t *make, const make_rule_data_t *ru
 {
 	int off = dst.off;
 	dst.off += make_rule_target_print(make, &rule->target, dst);
-	dst.off += c_print_exec(dst, ":");
+	dst.off += dprintf(dst, ":");
 
 	const make_rule_target_data_t *depend;
 	list_foreach(&make->targets, rule->depends, depend)
 	{
-		dst.off += c_print_exec(dst, " ");
+		dst.off += dprintf(dst, " ");
 		dst.off += make_rule_target_print(make, depend, dst);
 	}
 
-	dst.off += c_print_exec(dst, "\n");
+	dst.off += dprintf(dst, "\n");
 	dst.off += make_acts_print(make, rule->acts, dst, 1);
-	dst.off += c_print_exec(dst, "\n");
+	dst.off += dprintf(dst, "\n");
 
 	return dst.off - off;
 }
@@ -805,12 +805,12 @@ static inline int make_cmd_print(const make_t *make, const make_cmd_data_t *cmd,
 	switch (cmd->type) {
 	case MAKE_CMD_CHILD:
 		if (cmd->arg2.data == NULL) {
-			return c_print_exec(dst, "\t@$(MAKE) -C %.*s\n", cmd->arg1.len, cmd->arg1.data);
+			return dprintf(dst, "\t@$(MAKE) -C %.*s\n", cmd->arg1.len, cmd->arg1.data);
 		} else {
-			return c_print_exec(dst, "\t@$(MAKE) -C %.*s %.*s\n", cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data);
+			return dprintf(dst, "\t@$(MAKE) -C %.*s %.*s\n", cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data);
 		}
-	case MAKE_CMD_ERR: return c_print_exec(dst, "%s$(error %.*s)\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
-	default: return c_print_exec(dst, "%s%.*s\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
+	case MAKE_CMD_ERR: return dprintf(dst, "%s$(error %.*s)\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
+	default: return dprintf(dst, "%s%.*s\n", rule ? "\t" : "", cmd->arg1.len, cmd->arg1.data);
 	}
 }
 
@@ -818,27 +818,27 @@ static inline int make_if_print(const make_t *make, const make_if_data_t *mif, p
 {
 	int off = dst.off;
 
-	dst.off += c_print_exec(dst, "ifeq (");
+	dst.off += dprintf(dst, "ifeq (");
 	dst.off += make_str_print(make, mif->l, dst);
 
 	str_t r = make_str(make, mif->r);
 	if (r.data == NULL) {
-		dst.off += c_print_exec(dst, ",");
+		dst.off += dprintf(dst, ",");
 	} else {
-		dst.off += c_print_exec(dst, ", ");
+		dst.off += dprintf(dst, ", ");
 		dst.off += make_str_print(make, mif->r, dst);
 	}
 
-	dst.off += c_print_exec(dst, ")\n");
+	dst.off += dprintf(dst, ")\n");
 
 	dst.off += make_acts_print(make, mif->true_acts, dst, rule);
 
 	if (mif->false_acts != MAKE_END) {
-		dst.off += c_print_exec(dst, "else\n");
+		dst.off += dprintf(dst, "else\n");
 		dst.off += make_acts_print(make, mif->false_acts, dst, rule);
 	}
 
-	dst.off += c_print_exec(dst, "endif\n");
+	dst.off += dprintf(dst, "endif\n");
 
 	return dst.off - off;
 }
@@ -850,7 +850,7 @@ static int make_acts_print(const make_t *make, make_act_t acts, print_dst_t dst,
 	list_foreach(&make->acts, acts, act)
 	{
 		switch (act->type) {
-		case MAKE_ACT_EMPTY: dst.off += c_print_exec(dst, "\n"); break;
+		case MAKE_ACT_EMPTY: dst.off += dprintf(dst, "\n"); break;
 		case MAKE_ACT_VAR: dst.off += make_var_print(make, &act->val.var, dst); break;
 		case MAKE_ACT_RULE: dst.off += make_rule_print(make, &act->val.rule, dst); break;
 		case MAKE_ACT_CMD: dst.off += make_cmd_print(make, &act->val.cmd, dst, rule); break;
@@ -873,30 +873,30 @@ int make_print(const make_t *make, print_dst_t dst)
 static inline int make_empty_dbg(const make_t *make, print_dst_t dst)
 {
 	(void)make;
-	return c_print_exec(dst, "EMPTY\n\n");
+	return dprintf(dst, "EMPTY\n\n");
 }
 
 static inline int make_var_dbg(const make_t *make, const make_var_data_t *var, print_dst_t dst)
 {
 	int off = dst.off;
-	dst.off += c_print_exec(dst,
-				"VAR\n"
-				"    NAME    : %.*s %s\n"
-				"    VALUES  :\n",
-				var->name.len, var->name.data, var->ext ? "(ext)" : "");
+	dst.off += dprintf(dst,
+			   "VAR\n"
+			   "    NAME    : %.*s %s\n"
+			   "    VALUES  :\n",
+			   var->name.len, var->name.data, var->ext ? "(ext)" : "");
 	const make_str_data_t *value;
 	list_foreach(&make->strs, var->values, value)
 	{
-		dst.off += c_print_exec(dst, "        ");
+		dst.off += dprintf(dst, "        ");
 		dst.off += make_str_print(make, *value, dst);
-		dst.off += c_print_exec(dst, "\n");
+		dst.off += dprintf(dst, "\n");
 	}
-	dst.off += c_print_exec(dst,
-				"    REF     : %.*s\n"
-				"    EXPANDED: %.*s\n"
-				"    RESOLVED: %.*s\n"
-				"\n",
-				var->ref.len, var->ref.data, var->expand.len, var->expand.data, var->resolve.len, var->resolve.data);
+	dst.off += dprintf(dst,
+			   "    REF     : %.*s\n"
+			   "    EXPANDED: %.*s\n"
+			   "    RESOLVED: %.*s\n"
+			   "\n",
+			   var->ref.len, var->ref.data, var->expand.len, var->expand.data, var->resolve.len, var->resolve.data);
 
 	return dst.off - off;
 }
@@ -904,14 +904,14 @@ static inline int make_var_dbg(const make_t *make, const make_var_data_t *var, p
 static inline int make_rule_dbg(const make_t *make, const make_rule_data_t *rule, print_dst_t dst)
 {
 	int off = dst.off;
-	dst.off += c_print_exec(dst, "RULE\n"
-				     "    DEPENDS:\n");
+	dst.off += dprintf(dst, "RULE\n"
+				"    DEPENDS:\n");
 	const make_rule_target_data_t *depend;
 	list_foreach(&make->targets, rule->depends, depend)
 	{
-		dst.off += c_print_exec(dst, "        ");
+		dst.off += dprintf(dst, "        ");
 		dst.off += make_rule_target_print(make, depend, dst);
-		dst.off += c_print_exec(dst, "\n");
+		dst.off += dprintf(dst, "\n");
 	}
 
 	return dst.off - off;
@@ -921,12 +921,12 @@ static inline int make_cmd_dbg(const make_t *make, const make_cmd_data_t *cmd, p
 {
 	(void)make;
 	int off = dst.off;
-	dst.off += c_print_exec(dst,
-				"CMD\n"
-				"    ARG1: %.*s\n"
-				"    ARG2: %.*s\n"
-				"    TYPE: %d\n",
-				cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data, cmd->type);
+	dst.off += dprintf(dst,
+			   "CMD\n"
+			   "    ARG1: %.*s\n"
+			   "    ARG2: %.*s\n"
+			   "    TYPE: %d\n",
+			   cmd->arg1.len, cmd->arg1.data, cmd->arg2.len, cmd->arg2.data, cmd->type);
 
 	return dst.off - off;
 }
@@ -934,21 +934,21 @@ static inline int make_cmd_dbg(const make_t *make, const make_cmd_data_t *cmd, p
 static inline int make_if_dbg(const make_t *make, const make_if_data_t *mif, print_dst_t dst)
 {
 	int off = dst.off;
-	dst.off += c_print_exec(dst, "IF\n"
-				     "    L: ");
+	dst.off += dprintf(dst, "IF\n"
+				"    L: ");
 	dst.off += make_str_print(make, mif->l, dst);
-	dst.off += c_print_exec(dst,
-				"\n"
-				"        VALUE   : %.*s\n"
-				"    R: ",
-				mif->l_value.len, mif->l_value.data);
+	dst.off += dprintf(dst,
+			   "\n"
+			   "        VALUE   : %.*s\n"
+			   "    R: ",
+			   mif->l_value.len, mif->l_value.data);
 
 	dst.off += make_str_print(make, mif->r, dst);
-	dst.off += c_print_exec(dst,
-				"\n"
-				"        VALUE   : %.*s\n"
-				"\n",
-				mif->r_value.len, mif->r_value.data);
+	dst.off += dprintf(dst,
+			   "\n"
+			   "        VALUE   : %.*s\n"
+			   "\n",
+			   mif->r_value.len, mif->r_value.data);
 
 	return dst.off - off;
 }

@@ -177,7 +177,7 @@ int lex_dbg(const lex_t *lex, print_dst_t dst)
 	arr_foreach(&lex->tokens, token)
 	{
 		dst.off += token_dbg(*token, dst);
-		dst.off += c_print_exec(dst, "\n");
+		dst.off += dprintf(dst, "\n");
 	}
 
 	return dst.off - off;

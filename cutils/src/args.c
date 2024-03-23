@@ -42,11 +42,11 @@ static param_handler_fn s_handlers[] = {
 static inline int header(const char *name, const char *description, print_dst_t dst)
 {
 	int off = dst.off;
-	dst.off += c_print_exec(dst,
-				"%s\n\n"
-				"Usage\n"
-				"  %s [options]\n\n",
-				description, name);
+	dst.off += dprintf(dst,
+			   "%s\n\n"
+			   "Usage\n"
+			   "  %s [options]\n\n",
+			   description, name);
 	return dst.off - off;
 }
 
@@ -54,7 +54,7 @@ int args_usage(const char *name, const char *description, print_dst_t dst)
 {
 	int off = dst.off;
 	dst.off += header(name, description, dst);
-	dst.off += c_print_exec(dst, "Run '%s --help' for more information\n", name);
+	dst.off += dprintf(dst, "Run '%s --help' for more information\n", name);
 	return dst.off - off;
 }
 
@@ -62,21 +62,19 @@ static inline int help(const char *name, const char *description, const arg_t *a
 {
 	int off = 0;
 	dst.off += header(name, description, dst);
-	dst.off += c_print_exec(dst, "Options\n");
+	dst.off += dprintf(dst, "Options\n");
 
 	size_t args_len = args_size / sizeof(arg_t);
 	for (size_t i = 0; i < args_len; i++) {
-		dst.off += c_print_exec(dst, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
+		dst.off += dprintf(dst, "  -%c --%-12s %-10s %s\n", args[i].c, args[i].l, args[i].name, args[i].desc);
 	}
-	dst.off += c_print_exec(dst, "\n");
 
 	size_t modes_len = modes_size / sizeof(mode_desc_t);
 	for (size_t mode = 0; mode < modes_len; mode++) {
-		dst.off += c_print_exec(dst, "%s\n", modes[mode].name);
+		dst.off += dprintf(dst, "\n%s\n", modes[mode].name);
 		for (size_t i = 0; i < modes[mode].len; i++) {
-			dst.off += c_print_exec(dst, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
+			dst.off += dprintf(dst, "  %c = %s\n", modes[mode].modes[i].c, modes[mode].modes[i].desc);
 		}
-		dst.off += c_print_exec(dst, "\n");
 	}
 	return dst.off - off;
 }

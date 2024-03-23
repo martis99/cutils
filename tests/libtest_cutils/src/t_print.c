@@ -141,72 +141,6 @@ TEST(t_c_setmode)
 	END;
 }
 
-TEST(t_c_ur)
-{
-	START;
-
-	char buf[8] = { 0 };
-	EXPECT_EQ(c_ur(PRINT_DST_BUF(buf, sizeof(buf), 0)), sizeof("└─") - 1);
-	EXPECT_STR(buf, "└─");
-
-	END;
-}
-
-TEST(t_c_v)
-{
-	START;
-
-	char buf[8] = { 0 };
-	EXPECT_EQ(c_v(PRINT_DST_BUF(buf, sizeof(buf), 0)), sizeof("│ ") - 1);
-	EXPECT_STR(buf, "│ ");
-
-	END;
-}
-
-TEST(t_c_vr)
-{
-	START;
-
-	char buf[8] = { 0 };
-	EXPECT_EQ(c_vr(PRINT_DST_BUF(buf, sizeof(buf), 0)), sizeof("├─") - 1);
-	EXPECT_STR(buf, "├─");
-
-	END;
-}
-
-TEST(t_c_wur)
-{
-	START;
-
-	wchar buf[8] = { 0 };
-	EXPECT_EQ(c_wur(PRINT_DST_WBUF(buf, sizeof(buf), 0)), 2);
-	EXPECT_WSTR(buf, L"\u2514\u2500");
-
-	END;
-}
-
-TEST(t_c_wv)
-{
-	START;
-
-	wchar buf[8] = { 0 };
-	EXPECT_EQ(c_wv(PRINT_DST_WBUF(buf, sizeof(buf), 0)), 2);
-	EXPECT_WSTR(buf, L"\u2502 ");
-
-	END;
-}
-
-TEST(t_c_wvr)
-{
-	START;
-
-	wchar buf[8] = { 0 };
-	EXPECT_EQ(c_wvr(PRINT_DST_WBUF(buf, sizeof(buf), 0)), 2);
-	EXPECT_WSTR(buf, L"\u251C\u2500");
-
-	END;
-}
-
 TEST(t_c_printv_cb)
 {
 	START;
@@ -331,12 +265,6 @@ STEST(t_print)
 	RUNP(t_c_fwprintf, file);
 	RUNP(t_c_fflush, file);
 	RUN(t_c_setmode);
-	RUN(t_c_ur);
-	RUN(t_c_v);
-	RUN(t_c_vr);
-	RUN(t_c_wur);
-	RUN(t_c_wv);
-	RUN(t_c_wvr);
 	RUN(t_c_printv_cb);
 	RUN(t_c_sprintv_cb);
 	RUNP(t_c_fprintv_cb, file);

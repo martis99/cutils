@@ -399,11 +399,11 @@ int str_print(str_t str, print_dst_t dst)
 	for (size_t i = 0; i < str.len; i++) {
 		const char c = str.data[i];
 		switch (c) {
-		case '\t': dst.off += c_print_exec(dst, "\\t"); break;
-		case '\n': dst.off += c_print_exec(dst, "\\n"); break;
-		case '\r': dst.off += c_print_exec(dst, "\\r"); break;
-		case '\0': dst.off += c_print_exec(dst, "\\0"); break;
-		default: dst.off += c_print_exec(dst, "%c", c); break;
+		case '\t': dst.off += dprintf(dst, "\\t"); break;
+		case '\n': dst.off += dprintf(dst, "\\n"); break;
+		case '\r': dst.off += dprintf(dst, "\\r"); break;
+		case '\0': dst.off += dprintf(dst, "\\0"); break;
+		default: dst.off += dprintf(dst, "%c", c); break;
 		}
 	}
 

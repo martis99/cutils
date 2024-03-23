@@ -185,6 +185,49 @@ TEST(t_stx_compile_print)
 	END;
 }
 
+
+TEST(t_stx_print_tree)
+{
+	START;
+
+	stx_t stx = { 0 };
+
+	stx_init(&stx, 10, 10);
+
+	const stx_rule_t file	     = stx_add_rule(&stx, STR("file"));
+	const stx_rule_t functions   = stx_add_rule(&stx, STR("functions"));
+	const stx_rule_t function    = stx_add_rule(&stx, STR("function"));
+	const stx_rule_t identifier  = stx_add_rule(&stx, STR("identifier"));
+	const stx_rule_t chars	     = stx_add_rule(&stx, STR("chars"));
+
+	stx_rule_add_term(&stx, file, STX_TERM_RULE(functions));
+	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
+
+	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(function), STX_TERM_NONE());
+
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(identifier));
+
+	stx_rule_add_arr(&stx, identifier, STX_TERM_RULE(chars), STX_TERM_NONE());
+
+	stx_rule_add_or(&stx, chars, 4, stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_ALPHA)), stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_DIGIT)),
+			stx_create_term(&stx, STX_TERM_LITERAL(STR("_"))), stx_create_term(&stx, STX_TERM_LITERAL(STR("'"))));
+
+	stx_compile(&stx);
+
+	char buf[1024] = {0};
+
+	EXPECT_EQ(stx_print_tree(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
+	
+	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+
+	stx_rule_add_term(&stx, file, (stx_term_data_t){ .type = -1 });
+	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+
+	stx_free(&stx);
+
+	END;
+}
+
 STEST(t_syntax)
 {
 	SSTART;
@@ -197,6 +240,7 @@ STEST(t_syntax)
 	RUN(t_stx_rule_add_arr);
 	RUN(t_stx_term_add_term);
 	RUN(t_stx_compile_print);
+	RUN(t_stx_print_tree);
 
 	SEND;
 }

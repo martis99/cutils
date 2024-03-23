@@ -309,7 +309,7 @@ static int print_nodes(void *data, print_dst_t dst, const void *priv)
 	switch (node->type) {
 	case PRS_NODE_RULE: {
 		const stx_rule_data_t *rule = stx_get_rule_data(prs->stx, node->val.rule);
-		dst.off += c_print_exec(dst, "%.*s\n", rule->name.len, rule->name.data);
+		dst.off += dprintf(dst, "%.*s\n", rule->name.len, rule->name.data);
 		break;
 	}
 	case PRS_NODE_TOKEN: {
@@ -317,17 +317,17 @@ static int print_nodes(void *data, print_dst_t dst, const void *priv)
 
 		char buf[256] = { 0 };
 		const int len = str_print(token->value, PRINT_DST_BUF(buf, sizeof(buf), 0));
-		dst.off += c_print_exec(dst, "\'%.*s\'\n", len, buf);
+		dst.off += dprintf(dst, "\'%.*s\'\n", len, buf);
 		break;
 	}
 	case PRS_NODE_LITERAL: {
 		const str_t literal = node->val.literal;
-		dst.off += c_print_exec(dst, "\'%.*s\'\n", literal.len, literal.data);
+		dst.off += dprintf(dst, "\'%.*s\'\n", literal.len, literal.data);
 		break;
 	}
 	case PRS_NODE_ALT: {
 		const int alt = node->val.alt;
-		dst.off += c_print_exec(dst, "%d\n", alt);
+		dst.off += dprintf(dst, "%d\n", alt);
 		break;
 	}
 	default: break;

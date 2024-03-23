@@ -345,7 +345,7 @@ TEST(t_list_foreachs)
 static int print_list(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
-	return c_print_exec(dst, "%d\n", *(int *)data);
+	return dprintf(dst, "%d\n", *(int *)data);
 }
 
 TEST(t_list_print)

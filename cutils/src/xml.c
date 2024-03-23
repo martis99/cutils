@@ -159,18 +159,18 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst, uint 
 	}
 
 	int off = dst.off;
-	dst.off += c_print_exec(dst, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
+	dst.off += dprintf(dst, "%*s<%.*s", depth * 2, "", data->name.len, data->name.data);
 
 	if (data->attrs != LIST_END) {
 		xml_attr_data_t *attr;
 		list_foreach(&xml->attrs, data->attrs, attr)
 		{
-			dst.off += c_print_exec(dst, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
+			dst.off += dprintf(dst, " %.*s=\"%.*s\"", attr->name.len, attr->name.data, attr->val.len, attr->val.data);
 		}
 	}
 
 	if (tree_get_child(&xml->tags, tag) != TREE_END) {
-		dst.off += c_print_exec(dst, ">\n");
+		dst.off += dprintf(dst, ">\n");
 
 		xml_tag_t child;
 		tree_foreach_child(&xml->tags, tag, child)
@@ -178,15 +178,15 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst, uint 
 			dst.off += xml_tag_print(xml, child, dst, depth + 1);
 		}
 
-		dst.off += c_print_exec(dst, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
+		dst.off += dprintf(dst, "%*s</%.*s>\n", depth * 2, "", data->name.len, data->name.data);
 	} else if (data->val.data) {
 		if (data->val.len > 0 && data->val.data[data->val.len - 1] == '\n') {
-			dst.off += c_print_exec(dst, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
+			dst.off += dprintf(dst, ">%.*s%*s</%.*s>\n", data->val.len, data->val.data, depth * 2, "", data->name.len, data->name.data);
 		} else {
-			dst.off += c_print_exec(dst, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
+			dst.off += dprintf(dst, ">%.*s</%.*s>\n", data->val.len, data->val.data, data->name.len, data->name.data);
 		}
 	} else {
-		dst.off += c_print_exec(dst, " />\n");
+		dst.off += dprintf(dst, " />\n");
 	}
 
 	return dst.off - off;
@@ -195,7 +195,7 @@ static int xml_tag_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst, uint 
 int xml_print(const xml_t *xml, xml_tag_t tag, print_dst_t dst)
 {
 	int off = dst.off;
-	dst.off += c_print_exec(dst, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+	dst.off += dprintf(dst, "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 	dst.off += xml_tag_print(xml, tag, dst, 0);
 	return dst.off - off;
 }

@@ -48,12 +48,12 @@ int mem_print(print_dst_t dst)
 	}
 
 	if (s == '\0') {
-		dst.off += c_print_exec(dst, "mem:      %zu max: %zu B\n", s_mem->mem, s_mem->mem_max);
+		dst.off += dprintf(dst, "mem:      %zu max: %zu B\n", s_mem->mem, s_mem->mem_max);
 	} else {
-		dst.off += c_print_exec(dst, "mem:      %zu max: %zu %cB (%zu B)\n", s_mem->mem, mem_max, s, s_mem->mem_max);
+		dst.off += dprintf(dst, "mem:      %zu max: %zu %cB (%zu B)\n", s_mem->mem, mem_max, s, s_mem->mem_max);
 	}
-	dst.off += c_print_exec(dst, "allocs:   %d\n", s_mem->allocs);
-	dst.off += c_print_exec(dst, "reallocs: %d\n", s_mem->reallocs);
+	dst.off += dprintf(dst, "allocs:   %d\n", s_mem->allocs);
+	dst.off += dprintf(dst, "reallocs: %d\n", s_mem->reallocs);
 
 	return dst.off - off;
 }
