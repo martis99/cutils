@@ -84,7 +84,53 @@ TEST(t_prs_remove_node)
 	END;
 }
 
-TEST(t_prs_parse)
+TEST(t_prs_parse_cache)
+{
+	START;
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 100);
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 100);
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 10, 10);
+
+	const stx_rule_t file = stx_add_rule(&stx, STR("file"));
+	const stx_rule_t line = stx_add_rule(&stx, STR("line"));
+	const stx_rule_t ra   = stx_add_rule(&stx, STR("ra"));
+
+	stx_rule_add_term(&stx, file, STX_TERM_RULE(line));
+	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
+
+	stx_rule_add_arr(&stx, line, STX_TERM_RULE(ra), STX_TERM_NONE());
+
+	stx_rule_add_term(&stx, ra, STX_TERM_LITERAL(STR("a")));
+
+	str_t bnf = STR("a");
+
+	lex_tokenize(&lex, bnf);
+
+	EXPECT_EQ(prs_parse(&prs, &stx, &lex), 0);
+
+	char buf[512] = { 0 };
+	EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, sizeof(buf), 0)), 72);
+	EXPECT_STR(buf, "file\n"
+			"├─line\n"
+			"│ └─1\n"
+			"│   └─ra\n"
+			"│     └─'a'\n"
+			"└─'\\0'\n");
+
+	prs_free(&prs);
+	lex_free(&lex);
+	stx_free(&stx);
+
+	END;
+}
+
+TEST(t_prs_parse_bnf)
 {
 	START;
 
@@ -186,6 +232,9 @@ TEST(t_prs_parse)
 		lex_tokenize(&lex, bnf);
 
 		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 0);
+		char *buf = malloc(320000);
+		EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, 320000, 0)), 296661);
+		free(buf);
 
 		lex_free(&lex);
 	}
@@ -194,6 +243,16 @@ TEST(t_prs_parse)
 	prs_free(&prs);
 
 	END;
+}
+
+TEST(t_prs_parse)
+{
+	SSTART;
+
+	RUN(t_prs_parse_cache);
+	RUN(t_prs_parse_bnf);
+
+	SEND;
 }
 
 TEST(t_prs_print)
@@ -230,6 +289,7 @@ TEST(t_prs_print)
 
 	char buf[64] = { 0 };
 	EXPECT_EQ(prs_print(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
+	EXPECT_EQ(prs_print_node(NULL, 0, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
 	EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, sizeof(buf), 0)), 39);
 	EXPECT_STR(buf, "rule\n"

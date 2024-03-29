@@ -6,6 +6,7 @@
 #include "list.h"
 #include "log.h"
 #include "make.h"
+#include "parser.h"
 #include "print.h"
 #include "syntax.h"
 #include "tree.h"
@@ -238,6 +239,48 @@ static void example_make()
 	make_free(&make);
 }
 
+static void example_parser()
+{
+	c_printf(SEP, __func__);
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 100);
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 100);
+
+	stx_t stx = { 0 };
+
+	lex_token_t a		= lex_add_token(&lex);
+	*lex_get_token(&lex, a) = (token_t){
+		.value = STR("a"),
+	};
+
+	lex_token_t b		= lex_add_token(&lex);
+	*lex_get_token(&lex, b) = (token_t){
+		.value = STR("b"),
+	};
+
+	stx_init(&stx, 10, 10);
+
+	prs.stx = &stx;
+	prs.lex = &lex;
+
+	stx_rule_t file_rule = stx_add_rule(&stx, STR("file"));
+
+	prs.root	  = prs_add_node(&prs, prs.root, PRS_NODE_RULE(file_rule));
+	prs_node_t alt0	  = prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
+	prs_node_t child0 = prs_add_node(&prs, alt0, PRS_NODE_TOKEN(a));
+	prs_node_t alt1	  = prs_add_node(&prs, child0, PRS_NODE_ALT(1));
+	prs_add_node(&prs, alt1, PRS_NODE_TOKEN(b));
+
+	prs_print(&prs, PRINT_DST_STD());
+
+	prs_free(&prs);
+	lex_free(&lex);
+	stx_free(&stx);
+}
+
 static void example_syntax()
 {
 	c_printf(SEP, __func__);
@@ -391,6 +434,7 @@ int main(int argc, char **argv)
 	example_list();
 	example_log();
 	example_make();
+	example_parser();
 	example_syntax();
 	example_tree();
 	example_xml();

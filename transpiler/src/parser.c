@@ -93,10 +93,10 @@ int prs_remove_node(prs_t *prs, prs_node_t node)
 
 static lex_token_t prs_parse_rule(prs_t *prs, stx_rule_t rule_id, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp);
 static lex_token_t prs_parse_terms(prs_t *prs, stx_term_t terms, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp, stx_rule_t *rule_cache,
-				   lex_token_t *rule_app);
+				   lex_token_t *rule_app, int *from_cache);
 
 static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp, stx_rule_t *rule_cache,
-				  lex_token_t *rule_app)
+				  lex_token_t *rule_app, int *from_cache)
 {
 	const stx_term_data_t *term = stx_get_term_data(prs->stx, term_id);
 
@@ -104,6 +104,9 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 	case STX_TERM_RULE: {
 		if (rule_cache) {
 			if (*rule_cache == term->val.rule) {
+				if (from_cache) {
+					*from_cache = 1;
+				}
 				return *rule_app;
 			} else {
 				*rule_cache = term->val.rule;
@@ -181,19 +184,27 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 	case STX_TERM_OR: {
 		stx_rule_t cache_rule = STX_RULE_END;
 		lex_token_t cache_app = 0;
+		int from_cache	      = 0;
 
 		prs_node_t child0 = prs_add(prs, PRS_NODE_ALT(0));
-		lex_token_t l	  = prs_parse_terms(prs, term->val.orv.l, cur, child0, err, exp, &cache_rule, &cache_app);
+		lex_token_t l	  = prs_parse_terms(prs, term->val.orv.l, cur, child0, err, exp, &cache_rule, &cache_app, NULL);
 		if (l == 0) {
 			log_trace("cutils", "parser", NULL, "left: failed");
 			prs_node_t child1 = prs_add(prs, PRS_NODE_ALT(1));
-			lex_token_t r	  = prs_parse_terms(prs, term->val.orv.r, cur, child1, err, exp, &cache_rule, &cache_app);
+			lex_token_t r	  = prs_parse_terms(prs, term->val.orv.r, cur, child1, err, exp, &cache_rule, &cache_app, &from_cache);
 			if (r == 0) {
 				log_trace("cutils", "parser", NULL, "right: failed");
 				return 0;
 			} else {
-				prs_set_node(prs, node, child1);
-				log_trace("cutils", "parser", NULL, "right: success");
+				if (from_cache) {
+					prs_node_data_t *child0_data = tree_get_data(&prs->nodes, child0);
+					child0_data->val.alt	     = 1;
+					prs_set_node(prs, node, child0);
+					log_trace("cutils", "parser", NULL, "right: from cache");
+				} else {
+					prs_set_node(prs, node, child1);
+					log_trace("cutils", "parser", NULL, "right: success");
+				}
 				return r;
 			}
 		} else {
@@ -210,14 +221,14 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 }
 
 static lex_token_t prs_parse_terms(prs_t *prs, stx_term_t terms, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp, stx_rule_t *rule_cache,
-				   lex_token_t *rule_app)
+				   lex_token_t *rule_app, int *from_cache)
 {
 	lex_token_t ret = 0;
 
 	const stx_term_data_t *term;
 	stx_term_foreach(&prs->stx->terms, terms, term)
 	{
-		lex_token_t app = prs_parse_term(prs, _i, cur + ret, node, err, exp, _i == terms ? rule_cache : NULL, _i == terms ? rule_app : NULL);
+		lex_token_t app = prs_parse_term(prs, _i, cur + ret, node, err, exp, _i == terms ? rule_cache : NULL, _i == terms ? rule_app : NULL, from_cache);
 		if (app == 0) {
 			return 0;
 		}
@@ -241,7 +252,7 @@ static lex_token_t prs_parse_rule(prs_t *prs, const stx_rule_t rule_id, lex_toke
 
 	log_trace("cutils", "parser", NULL, "<%*s>", rule->name.len, rule->name.data);
 
-	lex_token_t app = prs_parse_terms(prs, rule->terms, cur, node, err, exp, NULL, 0);
+	lex_token_t app = prs_parse_terms(prs, rule->terms, cur, node, err, exp, NULL, 0, NULL);
 	if (app == 0) {
 		log_trace("cutils", "parser", NULL, "<%*s>: failed", rule->name.len, rule->name.data);
 	} else {
@@ -336,10 +347,18 @@ static int print_nodes(void *data, print_dst_t dst, const void *priv)
 	return dst.off - off;
 }
 
+int prs_print_node(const prs_t *prs, prs_node_t node, print_dst_t dst)
+{
+	if (prs == NULL) {
+		return 0;
+	}
+	return tree_print(&prs->nodes, node, print_nodes, dst, prs);
+}
+
 int prs_print(const prs_t *prs, print_dst_t dst)
 {
 	if (prs == NULL) {
 		return 0;
 	}
-	return tree_print(&prs->nodes, prs->root, print_nodes, dst, prs);
+	return prs_print_node(prs, prs->root, dst);
 }
