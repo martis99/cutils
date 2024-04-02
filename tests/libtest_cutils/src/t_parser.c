@@ -6,6 +6,8 @@
 #include "mem.h"
 #include "parser.h"
 
+#include <stdlib.h>
+
 TEST(t_prs_init_free)
 {
 	START;
@@ -79,6 +81,89 @@ TEST(t_prs_remove_node)
 	EXPECT_EQ(prs_remove_node(&prs, PRS_NODE_END), 1);
 	EXPECT_EQ(prs_remove_node(&prs, node), 0);
 
+	prs_free(&prs);
+
+	END;
+}
+
+TEST(t_prs_get_rule)
+{
+	START;
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 0);
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 1, 1);
+
+	stx_rule_t rule0 = stx_add_rule(&stx, STR("rule0"));
+	stx_rule_t rule1 = stx_add_rule(&stx, STR("rule1"));
+
+	prs.root       = prs_add_node(&prs, prs.root, PRS_NODE_LITERAL(""));
+	prs_node_t alt = prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
+
+	prs_add_node(&prs, alt, PRS_NODE_LITERAL(""));
+	prs_add_node(&prs, alt, PRS_NODE_RULE(rule0));
+	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(rule1));
+
+	EXPECT_EQ(prs_get_rule(NULL, PRS_NODE_END, STX_RULE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_get_rule(&prs, PRS_NODE_END, STX_RULE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_get_rule(&prs, prs.root, STX_RULE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_get_rule(&prs, prs.root, rule1), node);
+
+	stx_free(&stx);
+	prs_free(&prs);
+
+	END;
+}
+
+TEST(t_prs_get_str)
+{
+	START;
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 0);
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 1, 1);
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 1);
+	lex_token_t token = lex_add_token(&lex);
+
+	*lex_get_token(&lex, token) = (token_t){
+		.value	    = STR("b"),
+		.line_start = 0,
+		.line	    = 0,
+		.col	    = 0,
+		.type	    = (1 << TOKEN_ALPHA) | (1 << TOKEN_LOWER),
+	};
+
+	stx_rule_t rule0 = stx_add_rule(&stx, STR("rule0"));
+	stx_rule_t rule1 = stx_add_rule(&stx, STR("rule1"));
+
+	prs.root       = prs_add_node(&prs, prs.root, PRS_NODE_RULE(rule0));
+	prs_node_t alt = prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
+
+	prs_add_node(&prs, alt, PRS_NODE_LITERAL(STR("a")));
+	prs_add_node(&prs, alt, PRS_NODE_TOKEN(token));
+	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(rule1));
+
+	str_t str = strz(16);
+
+	EXPECT_EQ(prs_get_str(NULL, PRS_NODE_END, NULL), 1);
+	EXPECT_EQ(prs_get_str(&prs, PRS_NODE_END, NULL), 1);
+	EXPECT_EQ(prs_get_str(&prs, prs.root, &str), 0);
+	EXPECT_STR(str.data, "a");
+	str.len = 0;
+	prs.lex = &lex;
+	EXPECT_EQ(prs_get_str(&prs, prs.root, &str), 0);
+
+	EXPECT_STR(str.data, "ab");
+
+	str_free(&str);
+	lex_free(&lex);
+	stx_free(&stx);
 	prs_free(&prs);
 
 	END;
@@ -177,8 +262,9 @@ TEST(t_prs_parse_bnf)
 		lex_free(&lex);
 	}
 
+	bnf_t bnf = { 0 };
 	stx_t stx = { 0 };
-	bnf_get_stx(&stx);
+	bnf_get_stx(&bnf, &stx);
 
 	{
 		str_t bnf = STR("<file> ::= <");
@@ -313,6 +399,8 @@ STEST(t_parser)
 	RUN(t_prs_add_node);
 	RUN(t_prs_set_node);
 	RUN(t_prs_remove_node);
+	RUN(t_prs_get_rule);
+	RUN(t_prs_get_str);
 	RUN(t_prs_parse);
 	RUN(t_prs_print);
 

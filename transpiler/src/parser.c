@@ -91,6 +91,59 @@ int prs_remove_node(prs_t *prs, prs_node_t node)
 	return tree_remove(&prs->nodes, node);
 }
 
+prs_node_t prs_get_rule(const prs_t *prs, prs_node_t parent, stx_rule_t rule)
+{
+	if (prs == NULL) {
+		return PRS_NODE_END;
+	}
+
+	prs_node_t child;
+	tree_foreach_child(&prs->nodes, parent, child)
+	{
+		prs_node_data_t *cdata = tree_get_data(&prs->nodes, child);
+		switch (cdata->type) {
+		case PRS_NODE_ALT: return prs_get_rule(prs, child, rule);
+		case PRS_NODE_RULE:
+			if (cdata->val.rule == rule) {
+				return child;
+			}
+			break;
+		default: break;
+		}
+	}
+
+	return PRS_NODE_END;
+}
+
+int prs_get_str(const prs_t *prs, prs_node_t parent, str_t *out)
+{
+	if (prs == NULL || out == NULL) {
+		return 1;
+	}
+
+	prs_node_t child;
+	tree_foreach_child(&prs->nodes, parent, child)
+	{
+		prs_node_data_t *data = tree_get_data(&prs->nodes, child);
+		switch (data->type) {
+		case PRS_NODE_ALT: prs_get_str(prs, child, out); break;
+		case PRS_NODE_TOKEN: {
+			const token_t *token = lex_get_token(prs->lex, data->token);
+			if (token == NULL) {
+				log_warn("cutils", "parser", NULL, "token not found: %d", data->token);
+				break;
+			}
+
+			str_cat(out, token->value);
+			break;
+		}
+		case PRS_NODE_LITERAL: str_cat(out, data->val.literal); break;
+		case PRS_NODE_RULE: prs_get_str(prs, child, out); break;
+		}
+	}
+
+	return 0;
+}
 static lex_token_t prs_parse_rule(prs_t *prs, stx_rule_t rule_id, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp);
 static lex_token_t prs_parse_terms(prs_t *prs, stx_term_t terms, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp, stx_rule_t *rule_cache,
 				   lex_token_t *rule_app, int *from_cache);

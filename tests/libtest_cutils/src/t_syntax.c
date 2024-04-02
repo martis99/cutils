@@ -47,6 +47,25 @@ TEST(t_stx_add_rule)
 	END;
 }
 
+TEST(t_stx_get_rule)
+{
+	START;
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 0, 0);
+
+	stx_add_rule(&stx, STR("rule0"));
+	stx_rule_t rule1 = stx_add_rule(&stx, STR("rule1"));
+
+	EXPECT_EQ(stx_get_rule(NULL, str_null()), STX_RULE_END);
+	EXPECT_EQ(stx_get_rule(&stx, STR("none")), STX_RULE_END);
+	EXPECT_EQ(stx_get_rule(&stx, STR("rule1")), rule1);
+
+	stx_free(&stx);
+
+	END;
+}
+
 TEST(t_stx_create_term)
 {
 	START;
@@ -59,6 +78,24 @@ TEST(t_stx_create_term)
 	EXPECT_EQ(stx_create_term(&stx, STX_TERM_RULE(-1)), STX_TERM_END);
 	mem_oom(0);
 	EXPECT_EQ(stx_create_term(&stx, STX_TERM_RULE(-1)), 0);
+
+	stx_free(&stx);
+
+	END;
+}
+
+TEST(t_stx_rule_set_term)
+{
+	START;
+
+	stx_t stx = { 0 };
+	stx_init(&stx, 0, 0);
+
+	stx_rule_t rule = stx_add_rule(&stx, STRH(""));
+
+	EXPECT_EQ(stx_rule_set_term(NULL, STX_RULE_END, -1), STX_TERM_END);
+	EXPECT_EQ(stx_rule_set_term(&stx, STX_RULE_END, -1), STX_TERM_END);
+	EXPECT_EQ(stx_rule_set_term(&stx, rule, 0), 0);
 
 	stx_free(&stx);
 
@@ -185,7 +222,6 @@ TEST(t_stx_compile_print)
 	END;
 }
 
-
 TEST(t_stx_print_tree)
 {
 	START;
@@ -194,11 +230,11 @@ TEST(t_stx_print_tree)
 
 	stx_init(&stx, 10, 10);
 
-	const stx_rule_t file	     = stx_add_rule(&stx, STR("file"));
-	const stx_rule_t functions   = stx_add_rule(&stx, STR("functions"));
-	const stx_rule_t function    = stx_add_rule(&stx, STR("function"));
-	const stx_rule_t identifier  = stx_add_rule(&stx, STR("identifier"));
-	const stx_rule_t chars	     = stx_add_rule(&stx, STR("chars"));
+	const stx_rule_t file	    = stx_add_rule(&stx, STR("file"));
+	const stx_rule_t functions  = stx_add_rule(&stx, STR("functions"));
+	const stx_rule_t function   = stx_add_rule(&stx, STR("function"));
+	const stx_rule_t identifier = stx_add_rule(&stx, STR("identifier"));
+	const stx_rule_t chars	    = stx_add_rule(&stx, STR("chars"));
 
 	stx_rule_add_term(&stx, file, STX_TERM_RULE(functions));
 	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
@@ -214,10 +250,10 @@ TEST(t_stx_print_tree)
 
 	stx_compile(&stx);
 
-	char buf[1024] = {0};
+	char buf[1024] = { 0 };
 
 	EXPECT_EQ(stx_print_tree(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
-	
+
 	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
 
 	stx_rule_add_term(&stx, file, (stx_term_data_t){ .type = -1 });
@@ -234,7 +270,9 @@ STEST(t_syntax)
 
 	RUN(t_stx_init_free);
 	RUN(t_stx_add_rule);
+	RUN(t_stx_get_rule);
 	RUN(t_stx_create_term);
+	RUN(t_stx_rule_set_term);
 	RUN(t_stx_rule_add_term);
 	RUN(t_stx_rule_add_or);
 	RUN(t_stx_rule_add_arr);

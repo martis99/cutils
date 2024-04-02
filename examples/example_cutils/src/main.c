@@ -1,5 +1,6 @@
 #include "args.h"
 #include "arr.h"
+#include "bnf.h"
 #include "cutils.h"
 #include "json.h"
 #include "lexer.h"
@@ -80,6 +81,55 @@ static void example_arr()
 	arr_print(&arr, print_arr, PRINT_DST_STD(), NULL);
 
 	arr_free(&arr);
+}
+
+static void example_bnf()
+{
+	c_printf(SEP, __func__);
+
+	bnf_t bnf = { 0 };
+	stx_t stx = { 0 };
+	bnf_get_stx(&bnf, &stx);
+
+	str_t sbnf = STR("<file>        ::= <bnf> EOF\n"
+			 "<bnf>         ::= <rules>\n"
+			 "<rules>       ::= <rule> <rules> | <rule>\n"
+			 "<rule>        ::= '<' <rule-name> '>' <spaces> '::=' <space> <expression> NL\n"
+			 "<rule-name>   ::= LOWER <rule-chars> | LOWER\n"
+			 "<rule-chars>  ::= <rule-char> <rule-chars> | <rule-char>\n"
+			 "<rule-char>   ::= LOWER | '-'\n"
+			 "<expression>  ::= <terms> <space> '|' <space> <expression> | <terms>\n"
+			 "<terms>       ::= <term> <terms> | <term>\n"
+			 "<term>        ::= <literal> | <token> | '<' <rule-name> '>'\n"
+			 "<literal>     ::= \"'\" <text-double> \"'\" | '\"' <text-single> '\"'\n"
+			 "<token>       ::= UPPER <token> | UPPER\n"
+			 "<text-double> ::= <char-double> <text-double> | <char-double>\n"
+			 "<text-single> ::= <char-single> <text-single> | <char-single>\n"
+			 "<char-double> ::= <character> | '\"'\n"
+			 "<char-single> ::= <character> | \"'\"\n"
+			 "<character>   ::= ALPHA | DIGIT | SYMBOL\n"
+			 "<spaces>      ::= <space> <spaces> | <space>\n"
+			 "<space>       ::= ' '\n");
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 100);
+	lex_tokenize(&lex, sbnf);
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 100);
+
+	prs_parse(&prs, &stx, &lex);
+
+	stx_t new_stx = { 0 };
+	stx_init(&new_stx, 10, 10);
+	stx_from_bnf(&bnf, &new_stx, &prs);
+
+	stx_print(&stx, PRINT_DST_STD());
+
+	stx_free(&new_stx);
+	lex_free(&lex);
+	prs_free(&prs);
+	stx_free(&stx);
 }
 
 static void example_json()
@@ -427,6 +477,7 @@ int main(int argc, char **argv)
 	cutils_t cutils = { 0 };
 	c_init(&cutils);
 
+	example_bnf();
 	example_args();
 	example_arr();
 	example_json();

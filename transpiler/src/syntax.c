@@ -78,6 +78,23 @@ stx_rule_t stx_add_rule(stx_t *stx, str_t name)
 	return rule;
 }
 
+stx_rule_t stx_get_rule(stx_t *stx, str_t name)
+{
+	if (stx == NULL) {
+		return STX_RULE_END;
+	}
+
+	stx_rule_data_t *rule;
+	arr_foreach(&stx->rules, rule)
+	{
+		if (str_eq(rule->name, name)) {
+			return _i;
+		}
+	}
+
+	return STX_RULE_END;
+}
+
 stx_rule_data_t *stx_get_rule_data(const stx_t *stx, stx_rule_t rule)
 {
 	if (stx == NULL) {
@@ -129,6 +146,18 @@ stx_term_data_t *stx_get_term_data(const stx_t *stx, stx_term_t term)
 	return data;
 }
 
+stx_term_t stx_rule_set_term(stx_t *stx, stx_rule_t rule, stx_term_t term)
+{
+	stx_rule_data_t *data = stx_get_rule_data(stx, rule);
+
+	if (data == NULL) {
+		log_error("cutils", "syntax", NULL, "failed to get rule: %d", rule);
+		return STX_TERM_END;
+	}
+
+	return data->terms = term;
+}
+
 stx_term_t stx_rule_add_term_id(stx_t *stx, stx_rule_t rule, stx_term_t term)
 {
 	stx_rule_data_t *data = stx_get_rule_data(stx, rule);
@@ -151,7 +180,7 @@ stx_term_t stx_rule_add_term(stx_t *stx, stx_rule_t rule, stx_term_data_t term)
 	return stx_rule_add_term_id(stx, rule, stx_create_term(stx, term));
 }
 
-static stx_term_t stx_term_add_term_id(stx_t *stx, stx_term_t term, stx_term_t next)
+stx_term_t stx_term_add_term_id(stx_t *stx, stx_term_t term, stx_term_t next)
 {
 	return list_set_next_node(&stx->terms, term, next);
 }

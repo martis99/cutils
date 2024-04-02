@@ -14,6 +14,7 @@ typedef uint stx_rule_t;
 typedef lnode_t stx_term_t;
 
 typedef enum stx_term_type_e {
+	STX_TERM_NONE,
 	STX_TERM_RULE,
 	STX_TERM_TOKEN,
 	STX_TERM_LITERAL,
@@ -49,12 +50,15 @@ stx_t *stx_init(stx_t *stx, uint rules_cap, uint terms_cap);
 void stx_free(stx_t *stx);
 
 stx_rule_t stx_add_rule(stx_t *stx, str_t name);
+stx_rule_t stx_get_rule(stx_t *stx, str_t name);
 stx_rule_data_t *stx_get_rule_data(const stx_t *stx, stx_rule_t rule);
 
 stx_term_t stx_create_term(stx_t *stx, stx_term_data_t term);
 stx_term_data_t *stx_get_term_data(const stx_t *stx, stx_term_t term);
 
+stx_term_t stx_rule_set_term(stx_t *stx, stx_rule_t rule, stx_term_t term);
 stx_term_t stx_rule_add_term(stx_t *stx, stx_rule_t rule, stx_term_data_t term);
+stx_term_t stx_term_add_term_id(stx_t *stx, stx_term_t term, stx_term_t next);
 stx_term_t stx_term_add_term(stx_t *stx, stx_term_t term, stx_term_data_t next);
 
 stx_term_t stx_rule_add_or(stx_t *stx, stx_rule_t rule, size_t n, ...);
