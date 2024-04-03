@@ -1,6 +1,5 @@
 #include "syntax.h"
 
-#include "list.h"
 #include "log.h"
 
 #include <stdarg.h>
@@ -78,13 +77,13 @@ stx_rule_t stx_add_rule(stx_t *stx, str_t name)
 	return rule;
 }
 
-stx_rule_t stx_get_rule(stx_t *stx, str_t name)
+stx_rule_t stx_get_rule(const stx_t *stx, str_t name)
 {
 	if (stx == NULL) {
 		return STX_RULE_END;
 	}
 
-	stx_rule_data_t *rule;
+	const stx_rule_data_t *rule;
 	arr_foreach(&stx->rules, rule)
 	{
 		if (str_eq(rule->name, name)) {
@@ -158,7 +157,7 @@ stx_term_t stx_rule_set_term(stx_t *stx, stx_rule_t rule, stx_term_t term)
 	return data->terms = term;
 }
 
-stx_term_t stx_rule_add_term_id(stx_t *stx, stx_rule_t rule, stx_term_t term)
+stx_term_t stx_rule_add_term(stx_t *stx, stx_rule_t rule, stx_term_t term)
 {
 	stx_rule_data_t *data = stx_get_rule_data(stx, rule);
 
@@ -170,29 +169,14 @@ stx_term_t stx_rule_add_term_id(stx_t *stx, stx_rule_t rule, stx_term_t term)
 	return list_set_next_node(&stx->terms, data->terms, term);
 }
 
-stx_term_t stx_rule_add_term(stx_t *stx, stx_rule_t rule, stx_term_data_t term)
-{
-	if (stx_get_rule_data(stx, rule) == NULL) {
-		log_error("cutils", "syntax", NULL, "failed to get rule: %d", rule);
-		return STX_TERM_END;
-	}
-
-	return stx_rule_add_term_id(stx, rule, stx_create_term(stx, term));
-}
-
-stx_term_t stx_term_add_term_id(stx_t *stx, stx_term_t term, stx_term_t next)
-{
-	return list_set_next_node(&stx->terms, term, next);
-}
-
-stx_term_t stx_term_add_term(stx_t *stx, stx_term_t term, stx_term_data_t next)
+stx_term_t stx_term_add_term(stx_t *stx, stx_term_t term, stx_term_t next)
 {
 	if (stx_get_term_data(stx, term) == NULL) {
 		log_error("cutils", "syntax", NULL, "failed to get term: %d", term);
 		return STX_TERM_END;
 	}
 
-	return stx_term_add_term_id(stx, term, stx_create_term(stx, next));
+	return list_set_next_node(&stx->terms, term, next);
 }
 
 stx_term_t stx_rule_add_or(stx_t *stx, stx_rule_t rule, size_t n, ...)
@@ -207,23 +191,27 @@ stx_term_t stx_rule_add_or(stx_t *stx, stx_rule_t rule, size_t n, ...)
 	stx_term_t term = va_arg(args, stx_term_t);
 
 	for (size_t i = 1; i < n; i++) {
-		term = stx_create_term(stx, STX_TERM_OR(term, va_arg(args, stx_term_t)));
+		term = STX_TERM_OR(stx, term, va_arg(args, stx_term_t));
 	}
 
 	va_end(args);
 
-	return stx_rule_add_term_id(stx, rule, term);
+	return stx_rule_add_term(stx, rule, term);
 }
 
-stx_term_t stx_rule_add_arr(stx_t *stx, stx_rule_t rule, stx_term_data_t term, stx_term_data_t sep)
+stx_term_t stx_rule_add_arr(stx_t *stx, stx_rule_t rule, stx_term_t term, stx_term_t sep)
 {
-	const stx_term_t l = stx_create_term(stx, term);
-	if (sep.type != (stx_term_t)-1) {
+	stx_term_data_t *data = stx_get_term_data(stx, term);
+	if (data == NULL) {
+		return STX_TERM_END;
+	}
+
+	stx_term_t l = stx_create_term(stx, *data);
+	if (sep < STX_TERM_END) {
 		stx_term_add_term(stx, l, sep);
 	}
-	stx_term_add_term(stx, l, STX_TERM_RULE(rule));
-	const stx_term_t r = stx_create_term(stx, term);
-	return stx_rule_add_term(stx, rule, STX_TERM_OR(l, r));
+	stx_term_add_term(stx, l, STX_TERM_RULE(stx, rule));
+	return stx_rule_add_term(stx, rule, STX_TERM_OR(stx, l, term));
 }
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

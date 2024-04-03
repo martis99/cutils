@@ -186,12 +186,12 @@ TEST(t_prs_parse_cache)
 	const stx_rule_t line = stx_add_rule(&stx, STR("line"));
 	const stx_rule_t ra   = stx_add_rule(&stx, STR("ra"));
 
-	stx_rule_add_term(&stx, file, STX_TERM_RULE(line));
-	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
+	stx_rule_add_term(&stx, file, STX_TERM_RULE(&stx, line));
+	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(&stx, TOKEN_EOF));
 
-	stx_rule_add_arr(&stx, line, STX_TERM_RULE(ra), STX_TERM_NONE());
+	stx_rule_add_arr(&stx, line, STX_TERM_RULE(&stx, ra), STX_TERM_NONE(&stx));
 
-	stx_rule_add_term(&stx, ra, STX_TERM_LITERAL(STR("a")));
+	stx_rule_add_term(&stx, ra, STX_TERM_LITERAL(&stx, STR("a")));
 
 	str_t bnf = STR("a");
 
@@ -235,7 +235,7 @@ TEST(t_prs_parse_bnf)
 		stx_init(&stx, 0, 0);
 
 		stx_rule_t rule = stx_add_rule(&stx, STRH(""));
-		stx_rule_add_term(&stx, rule, (stx_term_data_t){ .type = -1 });
+		stx_rule_add_term(&stx, rule, stx_create_term(&stx, (stx_term_data_t){ .type = -1 }));
 
 		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 1);
 
@@ -254,7 +254,7 @@ TEST(t_prs_parse_bnf)
 		stx_init(&stx, 0, 0);
 
 		stx_rule_t rule = stx_add_rule(&stx, STRH(""));
-		EXPECT_EQ(stx_rule_add_term(&stx, rule, STX_TERM_RULE(-1)), 0);
+		EXPECT_EQ(stx_rule_add_term(&stx, rule, STX_TERM_RULE(&stx, -1)), 0);
 
 		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 1);
 
@@ -262,9 +262,8 @@ TEST(t_prs_parse_bnf)
 		lex_free(&lex);
 	}
 
-	bnf_t bnf = { 0 };
-	stx_t stx = { 0 };
-	bnf_get_stx(&bnf, &stx);
+	bnf_t bnf	 = { 0 };
+	const stx_t *stx = bnf_get_stx(&bnf);
 
 	{
 		str_t bnf = STR("<file> ::= <");
@@ -274,7 +273,7 @@ TEST(t_prs_parse_bnf)
 		lex_tokenize(&lex, bnf);
 		lex.tokens.cnt--; //Remove EOF
 
-		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 1);
+		EXPECT_EQ(prs_parse(&prs, stx, &lex), 1);
 
 		lex_free(&lex);
 	}
@@ -287,45 +286,45 @@ TEST(t_prs_parse_bnf)
 		lex_tokenize(&lex, bnf);
 		lex.tokens.cnt--; //Remove EOF
 
-		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 1);
+		EXPECT_EQ(prs_parse(&prs, stx, &lex), 1);
 
 		lex_free(&lex);
 	}
 
 	{
-		str_t bnf = STR("<file>        ::= <bnf> EOF\n"
-				"<bnf>         ::= <rules>\n"
-				"<rules>       ::= <rule> <rules> | <rule>\n"
-				"<rule>        ::= '<' <rule-name> '>' <spaces> '::=' <space> <expression> NL\n"
-				"<rule-name>   ::= LOWER <rule-chars> | LOWER\n"
-				"<rule-chars>  ::= <rule-char> <rule-chars> | <rule-char>\n"
-				"<rule-char>   ::= LOWER | '-'\n"
-				"<expression>  ::= <terms> <space> '|' <space> <expression> | <terms>\n"
-				"<terms>       ::= <term> <terms> | <term>\n"
-				"<term>        ::= <literal> | <token> | '<' <rule-name> '>'\n"
-				"<literal>     ::= \"'\" <text-double> \"'\" | '\"' <text-single> '\"'\n"
-				"<token>       ::= UPPER <token> | UPPER\n"
-				"<text-double> ::= <char-double> <text-double> | <char-double>\n"
-				"<text-single> ::= <char-single> <text-single> | <char-single>\n"
-				"<char-double> ::= <character> | '\"'\n"
-				"<char-single> ::= <character> | \"'\"\n"
-				"<character>   ::= ALPHA | DIGIT | SYMBOL\n"
-				"<spaces>      ::= <space> <spaces> | <space>\n"
-				"<space>       ::= ' '\n");
+		str_t bnf = STR("<file>    ::= <bnf> EOF\n"
+				"<bnf>     ::= <rules>\n"
+				"<rules>   ::= <rule> <rules> | <rule>\n"
+				"<rule>    ::= '<' <rname> '>' <spaces> '::=' <space> <expr> NL\n"
+				"<rname>   ::= LOWER <rchars> | LOWER\n"
+				"<rchars>  ::= <rchar> <rchars> | <rchar>\n"
+				"<rchar>   ::= LOWER | '-'\n"
+				"<expr>    ::= <terms> <space> '|' <space> <expr> | <terms>\n"
+				"<terms>   ::= <term> <space> <terms> | <term>\n"
+				"<term>    ::= <literal> | <token> | '<' <rname> '>'\n"
+				"<literal> ::= \"'\" <tdouble> \"'\" | '\"' <tsingle> '\"'\n"
+				"<token>   ::= UPPER <token> | UPPER\n"
+				"<tdouble> ::= <cdouble> <tdouble> | <cdouble>\n"
+				"<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
+				"<cdouble> ::= <char> | '\"'\n"
+				"<csingle> ::= <char> | \"'\"\n"
+				"<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+				"<spaces>  ::= <space> <spaces> | <space>\n"
+				"<space>   ::= ' '\n");
 
 		lex_t lex = { 0 };
 		lex_init(&lex, 1);
 		lex_tokenize(&lex, bnf);
 
-		EXPECT_EQ(prs_parse(&prs, &stx, &lex), 0);
+		EXPECT_EQ(prs_parse(&prs, stx, &lex), 0);
 		char *buf = malloc(320000);
-		EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, 320000, 0)), 296661);
+		EXPECT_EQ(prs_print(&prs, PRINT_DST_BUF(buf, 320000, 0)), 223672);
 		free(buf);
 
 		lex_free(&lex);
 	}
 
-	stx_free(&stx);
+	bnf_free(&bnf);
 	prs_free(&prs);
 
 	END;

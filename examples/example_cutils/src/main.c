@@ -87,29 +87,28 @@ static void example_bnf()
 {
 	c_printf(SEP, __func__);
 
-	bnf_t bnf = { 0 };
-	stx_t stx = { 0 };
-	bnf_get_stx(&bnf, &stx);
+	bnf_t bnf	 = { 0 };
+	const stx_t *stx = bnf_get_stx(&bnf);
 
-	str_t sbnf = STR("<file>        ::= <bnf> EOF\n"
-			 "<bnf>         ::= <rules>\n"
-			 "<rules>       ::= <rule> <rules> | <rule>\n"
-			 "<rule>        ::= '<' <rule-name> '>' <spaces> '::=' <space> <expression> NL\n"
-			 "<rule-name>   ::= LOWER <rule-chars> | LOWER\n"
-			 "<rule-chars>  ::= <rule-char> <rule-chars> | <rule-char>\n"
-			 "<rule-char>   ::= LOWER | '-'\n"
-			 "<expression>  ::= <terms> <space> '|' <space> <expression> | <terms>\n"
-			 "<terms>       ::= <term> <terms> | <term>\n"
-			 "<term>        ::= <literal> | <token> | '<' <rule-name> '>'\n"
-			 "<literal>     ::= \"'\" <text-double> \"'\" | '\"' <text-single> '\"'\n"
-			 "<token>       ::= UPPER <token> | UPPER\n"
-			 "<text-double> ::= <char-double> <text-double> | <char-double>\n"
-			 "<text-single> ::= <char-single> <text-single> | <char-single>\n"
-			 "<char-double> ::= <character> | '\"'\n"
-			 "<char-single> ::= <character> | \"'\"\n"
-			 "<character>   ::= ALPHA | DIGIT | SYMBOL\n"
-			 "<spaces>      ::= <space> <spaces> | <space>\n"
-			 "<space>       ::= ' '\n");
+	str_t sbnf = STR("<file>    ::= <bnf> EOF\n"
+			 "<bnf>     ::= <rules>\n"
+			 "<rules>   ::= <rule> <rules> | <rule>\n"
+			 "<rule>    ::= '<' <rname> '>' <spaces> '::=' <space> <expr> NL\n"
+			 "<rname>   ::= LOWER <rchars> | LOWER\n"
+			 "<rchars>  ::= <rchar> <rchars> | <rchar>\n"
+			 "<rchar>   ::= LOWER | '-'\n"
+			 "<expr>    ::= <terms> <space> '|' <space> <expr> | <terms>\n"
+			 "<terms>   ::= <term> <space> <terms> | <term>\n"
+			 "<term>    ::= <literal> | <token> | '<' <rname> '>'\n"
+			 "<literal> ::= \"'\" <tdouble> \"'\" | '\"' <tsingle> '\"'\n"
+			 "<token>   ::= UPPER <token> | UPPER\n"
+			 "<tdouble> ::= <cdouble> <tdouble> | <cdouble>\n"
+			 "<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
+			 "<cdouble> ::= <char> | '\"'\n"
+			 "<csingle> ::= <char> | \"'\"\n"
+			 "<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+			 "<spaces>  ::= <space> <spaces> | <space>\n"
+			 "<space>   ::= ' '\n");
 
 	lex_t lex = { 0 };
 	lex_init(&lex, 100);
@@ -118,18 +117,18 @@ static void example_bnf()
 	prs_t prs = { 0 };
 	prs_init(&prs, 100);
 
-	prs_parse(&prs, &stx, &lex);
+	prs_parse(&prs, stx, &lex);
 
 	stx_t new_stx = { 0 };
 	stx_init(&new_stx, 10, 10);
-	stx_from_bnf(&bnf, &new_stx, &prs);
+	stx_from_bnf(&bnf, &prs, &new_stx);
 
-	stx_print(&stx, PRINT_DST_STD());
+	stx_print(&new_stx, PRINT_DST_STD());
 
 	stx_free(&new_stx);
 	lex_free(&lex);
 	prs_free(&prs);
-	stx_free(&stx);
+	bnf_free(&bnf);
 }
 
 static void example_json()
@@ -350,35 +349,34 @@ static void example_syntax()
 	const stx_rule_t expressions = stx_add_rule(&stx, STR("expressions"));
 	const stx_rule_t expression  = stx_add_rule(&stx, STR("expression"));
 
-	stx_rule_add_term(&stx, file, STX_TERM_RULE(c));
-	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(TOKEN_EOF));
+	stx_rule_add_term(&stx, file, STX_TERM_RULE(&stx, c));
+	stx_rule_add_term(&stx, file, STX_TERM_TOKEN(&stx, TOKEN_EOF));
 
-	stx_rule_add_term(&stx, c, STX_TERM_RULE(functions));
+	stx_rule_add_term(&stx, c, STX_TERM_RULE(&stx, functions));
 
-	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(function), STX_TERM_NONE());
+	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(&stx, function), STX_TERM_NONE());
 
-	stx_rule_add_term(&stx, function, STX_TERM_RULE(type));
-	stx_rule_add_term(&stx, function, STX_TERM_RULE(name));
-	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("(")));
-	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR(")")));
-	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(TOKEN_WS));
-	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("{")));
-	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(TOKEN_NL));
-	stx_rule_add_term(&stx, function, STX_TERM_RULE(expressions));
-	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(STR("}")));
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(&stx, type));
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(&stx, name));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(&stx, STR("(")));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(&stx, STR(")")));
+	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(&stx, TOKEN_WS));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(&stx, STR("{")));
+	stx_rule_add_term(&stx, function, STX_TERM_TOKEN(&stx, TOKEN_NL));
+	stx_rule_add_term(&stx, function, STX_TERM_RULE(&stx, expressions));
+	stx_rule_add_term(&stx, function, STX_TERM_LITERAL(&stx, STR("}")));
 
-	stx_rule_add_term(&stx, type, STX_TERM_LITERAL(STR("int")));
+	stx_rule_add_term(&stx, type, STX_TERM_LITERAL(&stx, STR("int")));
 
-	stx_rule_add_term(&stx, name, STX_TERM_RULE(identifier));
+	stx_rule_add_term(&stx, name, STX_TERM_RULE(&stx, identifier));
 
-	stx_rule_add_arr(&stx, identifier, STX_TERM_RULE(chars), STX_TERM_NONE());
+	stx_rule_add_arr(&stx, identifier, STX_TERM_RULE(&stx, chars), STX_TERM_NONE(&stx));
 
-	stx_rule_add_or(&stx, chars, 3, stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_ALPHA)), stx_create_term(&stx, STX_TERM_TOKEN(TOKEN_DIGIT)),
-			stx_create_term(&stx, STX_TERM_LITERAL(STR("_"))));
+	stx_rule_add_or(&stx, chars, 3, STX_TERM_TOKEN(&stx, TOKEN_ALPHA), STX_TERM_TOKEN(&stx, TOKEN_DIGIT), STX_TERM_LITERAL(&stx, STR("_")));
 
-	stx_rule_add_arr(&stx, expressions, STX_TERM_RULE(expression), STX_TERM_TOKEN(TOKEN_NL));
+	stx_rule_add_arr(&stx, expressions, STX_TERM_RULE(&stx, expression), STX_TERM_TOKEN(&stx, TOKEN_NL));
 
-	stx_rule_add_term(&stx, expression, STX_TERM_LITERAL(STR("return 0;")));
+	stx_rule_add_term(&stx, expression, STX_TERM_LITERAL(&stx, STR("return 0;")));
 
 	stx_compile(&stx);
 
