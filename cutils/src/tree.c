@@ -1,5 +1,6 @@
 #include "tree.h"
 
+#include "log.h"
 #include "mem.h"
 
 typedef struct header_s {
@@ -199,6 +200,11 @@ void tree_it_next(tree_it *it)
 	const tnode_t child = tree_get_child(it->tree, node);
 
 	if (child < it->tree->cnt) {
+		if (it->top >= TREE_MAX_DEPTH) {
+			log_error("cutils", "tree", NULL, "exceeded max depth of %d", TREE_MAX_DEPTH);
+			it->stack[it->top] = TREE_END;
+			return;
+		}
 		it->stack[it->top++] = child;
 	} else {
 		do {

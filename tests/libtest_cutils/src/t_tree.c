@@ -1136,6 +1136,34 @@ TEST(t_tree_print)
 	END;
 }
 
+static int print_tree_depth(void *data, print_dst_t dst, const void *priv)
+{
+	(void)priv;
+	return 0;
+}
+
+TEST(t_tree_print_depth)
+{
+	START;
+
+	tree_t tree = { 0 };
+	tree_init(&tree, 1, sizeof(int));
+
+	tnode_t root  = tree_add(&tree);
+	tnode_t child = root;
+
+	for (int i = 0; i < TREE_MAX_DEPTH; i++) {
+		child = tree_add_child(&tree, child);
+	}
+
+	char buf[32000] = { 0 };
+	EXPECT_EQ(tree_print(&tree, root, print_tree_depth, PRINT_DST_BUF(buf, sizeof(buf), 0), NULL), 16764);
+
+	tree_free(&tree);
+
+	END;
+}
+
 STEST(t_tree)
 {
 	SSTART;
@@ -1148,6 +1176,7 @@ STEST(t_tree)
 	RUN(t_tree_iterate);
 	RUN(t_tree_foreach);
 	RUN(t_tree_print);
+	RUN(t_tree_print_depth);
 
 	SEND;
 }

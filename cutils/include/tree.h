@@ -6,6 +6,7 @@
 #include "type.h"
 
 #define TREE_END LIST_END
+#define TREE_MAX_DEPTH 128
 
 typedef lnode_t tnode_t;
 typedef list_t tree_t;
@@ -38,7 +39,7 @@ int tree_print(const tree_t *tree, tnode_t node, tree_print_cb cb, print_dst_t d
 
 typedef struct tree_it {
 	const tree_t *tree;
-	tnode_t stack[64];
+	tnode_t stack[TREE_MAX_DEPTH];
 	int top;
 } tree_it;
 
