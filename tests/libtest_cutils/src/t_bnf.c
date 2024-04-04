@@ -147,7 +147,7 @@ STEST(t_bnf)
 
 	RUN(t_bnf_init_free);
 	RUN(t_bnf_get_stx);
-	//RUN(t_stx_from_bnf);
+	RUN(t_stx_from_bnf);
 	RUN(t_stx_from_bnf_custom);
 
 	SEND;

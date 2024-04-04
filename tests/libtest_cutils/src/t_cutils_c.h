@@ -11,6 +11,8 @@ STEST(t_cstr);
 STEST(t_cplatform);
 STEST(t_cutils);
 STEST(t_dict);
+STEST(t_ebnf);
+STEST(t_esyntax);
 STEST(t_file);
 STEST(t_json);
 STEST(t_lexer);

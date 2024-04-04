@@ -16,6 +16,8 @@ TEST(tests)
 	RUN(t_cstr);
 	RUN(t_cutils);
 	RUN(t_dict);
+	RUN(t_ebnf);
+	RUN(t_esyntax);
 	RUN(t_file);
 	RUN(t_json);
 	RUN(t_lexer);

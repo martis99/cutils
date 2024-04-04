@@ -2,6 +2,8 @@
 #include "arr.h"
 #include "bnf.h"
 #include "cutils.h"
+#include "ebnf.h"
+#include "esyntax.h"
 #include "json.h"
 #include "lexer.h"
 #include "list.h"
@@ -129,6 +131,52 @@ static void example_bnf()
 	lex_free(&lex);
 	prs_free(&prs);
 	bnf_free(&bnf);
+}
+
+static void example_ebnf()
+{
+	c_printf(SEP, __func__);
+
+	ebnf_t ebnf = { 0 };
+	ebnf_get_stx(&ebnf);
+
+	str_t sbnf = STR("file    = ebnf EOF\n"
+			 "ebnf    = rule+\n"
+			 "rule    = rname spaces '= ' alt NL\n"
+			 "rname   = LOWER (LOWER | '_')*\n"
+			 "alt     = concat (' | ' concat)*\n"
+			 "concat  = factor (' ' factor)*\n"
+			 "factor  = term (opt | rep | opt_rep)?\n"
+			 "opt     = '?'\n"
+			 "rep     = '+'\n"
+			 "opt_rep = '*'\n"
+			 "term    = literal | token | rname | group\n"
+			 "literal = \"'\" (char | '\"')+ \"'\" | '\"' (char | \"'\")+ '\"'\n"
+			 "token   = UPPER+\n"
+			 "group   = '(' alt ')'\n"
+			 "char    = ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "spaces  = ' '+\n");
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 100);
+	lex_tokenize(&lex, sbnf);
+
+	prs_t prs = { 0 };
+	prs_init(&prs, 100);
+
+	prs_node_t prs_root = prs_parse(&prs, &ebnf.stx, ebnf.file, &lex);
+
+	estx_t new_stx = { 0 };
+	estx_init(&new_stx, 10, 10);
+	estx_from_ebnf(&ebnf, &prs, prs_root, &new_stx);
+
+	estx_print(&new_stx, PRINT_DST_STD());
+	estx_print_tree(&new_stx, PRINT_DST_STD());
+
+	estx_free(&new_stx);
+	lex_free(&lex);
+	prs_free(&prs);
+	ebnf_free(&ebnf);
 }
 
 static void example_json()
@@ -478,6 +526,7 @@ int main(int argc, char **argv)
 	example_args();
 	example_arr();
 	example_bnf();
+	example_ebnf();
 	example_json();
 	example_lexer();
 	example_list();
