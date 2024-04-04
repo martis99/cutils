@@ -30,15 +30,12 @@ jobs:
           submodules: recursive
 
       - name: Build
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: ./build-linux
 
       - name: Make
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: make CONFIG=${{matrix.configuration}} PLATFORM=${{matrix.platform}}
 
       - name: Run
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: ./bin/${{matrix.configuration}}-${{matrix.platform}}/tests/test_cutils/test_cutils
 
   Windows-MSBuild:
@@ -54,20 +51,16 @@ jobs:
           submodules: recursive
 
       - name: Build
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: .\build-win-x64.exe
 
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v2
 
       - name: Restore NuGet packages
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: nuget restore .
 
       - name: MSBuild
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: msbuild /m /p:Configuration=${{matrix.configuration}} /p:Platform=${{matrix.platform}} .
 
       - name: Run
-        working-directory: ${{env.GITHUB_WORKSPACE}}
         run: .\bin\${{matrix.configuration}}-${{matrix.platform}}\tests\test_cutils\test_cutils.exe
