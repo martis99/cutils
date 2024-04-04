@@ -25,6 +25,6 @@ void bnf_free(bnf_t *bnf);
 
 const stx_t *bnf_get_stx(bnf_t *bnf);
 
-stx_t *stx_from_bnf(const bnf_t *bnf, const prs_t *prs, stx_t *stx);
+stx_t *stx_from_bnf(const bnf_t *bnf, const prs_t *prs, prs_node_t root, stx_t *stx);
 
 #endif

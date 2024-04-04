@@ -30,7 +30,6 @@ typedef struct prs_s {
 	const stx_t *stx;
 	const lex_t *lex;
 	tree_t nodes;
-	prs_node_t root;
 } prs_t;
 
 prs_t *prs_init(prs_t *prs, uint nodes_cap);
@@ -45,10 +44,9 @@ int prs_remove_node(prs_t *prs, prs_node_t node);
 prs_node_t prs_get_rule(const prs_t *prs, prs_node_t parent, stx_rule_t rule);
 int prs_get_str(const prs_t *prs, prs_node_t parent, str_t *out);
 
-int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex);
+prs_node_t prs_parse(prs_t *prs, const stx_t *stx, stx_rule_t rule, const lex_t *lex);
 
-int prs_print_node(const prs_t *prs, prs_node_t node, print_dst_t dst);
-int prs_print(const prs_t *prs, print_dst_t dst);
+int prs_print(const prs_t *prs, prs_node_t node, print_dst_t dst);
 
 #define PRS_NODE_RULE(_rule)                              \
 	(prs_node_data_t)                                 \

@@ -252,12 +252,12 @@ TEST(t_stx_print_tree)
 
 	char buf[1024] = { 0 };
 
-	EXPECT_EQ(stx_print_tree(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
+	EXPECT_EQ(stx_print_tree(NULL, STX_RULE_END, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+	EXPECT_EQ(stx_print_tree(&stx, file, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
 
 	stx_rule_add_term(&stx, file, stx_create_term(&stx, (stx_term_data_t){ .type = -1 }));
-	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+	EXPECT_EQ(stx_print_tree(&stx, file, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
 
 	stx_free(&stx);
 

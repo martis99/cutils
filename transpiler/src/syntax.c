@@ -20,8 +20,6 @@ stx_t *stx_init(stx_t *stx, uint rules_cap, uint terms_cap)
 		return NULL;
 	}
 
-	stx->root = STX_RULE_END;
-
 	return stx;
 }
 
@@ -48,8 +46,6 @@ void stx_free(stx_t *stx)
 	}
 
 	list_free(&stx->terms);
-
-	stx->root = STX_RULE_END;
 }
 
 stx_rule_t stx_add_rule(stx_t *stx, str_t name)
@@ -59,9 +55,6 @@ stx_rule_t stx_add_rule(stx_t *stx, str_t name)
 	}
 
 	const stx_rule_t rule = arr_add(&stx->rules);
-	if (stx->root == STX_RULE_END) {
-		stx->root = rule;
-	}
 
 	stx_rule_data_t *data = arr_get(&stx->rules, rule);
 	if (data == NULL) {
@@ -439,7 +432,7 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 	return dst.off - off;
 }
 
-int stx_print_tree(const stx_t *stx, print_dst_t dst)
+int stx_print_tree(const stx_t *stx, stx_rule_t rule, print_dst_t dst)
 {
 	if (stx == NULL) {
 		return 0;
@@ -447,8 +440,8 @@ int stx_print_tree(const stx_t *stx, print_dst_t dst)
 
 	int off = dst.off;
 
-	stx_rule_data_t *rule = stx_get_rule_data(stx, stx->root);
-	dst.off += stx_rule_print_tree(stx, rule, dst, 0);
+	stx_rule_data_t *data = stx_get_rule_data(stx, rule);
+	dst.off += stx_rule_print_tree(stx, data, dst, 0);
 
 	return dst.off - off;
 }

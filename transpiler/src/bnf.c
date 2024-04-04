@@ -92,13 +92,13 @@ const stx_t *bnf_get_stx(bnf_t *bnf)
 	stx_term_add_term(stx, term_rule, STX_TERM_LITERAL(stx, STR(">")));
 	stx_rule_add_or(stx, bnf->term, 3, STX_TERM_RULE(stx, bnf->literal), STX_TERM_RULE(stx, bnf->token), term_rule);
 
-	const stx_term_t literal_single = STX_TERM_LITERAL(stx, STR("'"));
-	stx_term_add_term(stx, literal_single, STX_TERM_RULE(stx, bnf->tdouble));
-	stx_term_add_term(stx, literal_single, STX_TERM_LITERAL(stx, STR("'")));
-	const stx_term_t literal_double = STX_TERM_LITERAL(stx, STR("\""));
-	stx_term_add_term(stx, literal_double, STX_TERM_RULE(stx, bnf->tsingle));
-	stx_term_add_term(stx, literal_double, STX_TERM_LITERAL(stx, STR("\"")));
-	stx_rule_add_term(stx, bnf->literal, STX_TERM_OR(stx, literal_single, literal_double));
+	const stx_term_t lsingle = STX_TERM_LITERAL(stx, STR("'"));
+	stx_term_add_term(stx, lsingle, STX_TERM_RULE(stx, bnf->tdouble));
+	stx_term_add_term(stx, lsingle, STX_TERM_LITERAL(stx, STR("'")));
+	const stx_term_t ldouble = STX_TERM_LITERAL(stx, STR("\""));
+	stx_term_add_term(stx, ldouble, STX_TERM_RULE(stx, bnf->tsingle));
+	stx_term_add_term(stx, ldouble, STX_TERM_LITERAL(stx, STR("\"")));
+	stx_rule_add_term(stx, bnf->literal, STX_TERM_OR(stx, lsingle, ldouble));
 
 	stx_rule_add_arr(stx, bnf->token, STX_TERM_TOKEN(stx, TOKEN_UPPER), STX_TERM_NONE(stx));
 
@@ -199,16 +199,16 @@ static stx_term_t exprs_from_bnf(const bnf_t *bnf, const prs_t *prs, prs_node_t 
 
 static void rules_from_bnf(const bnf_t *bnf, const prs_t *prs, prs_node_t parent, stx_t *stx)
 {
-	const prs_node_t prs_rule      = prs_get_rule(prs, parent, bnf->rule);
-	const prs_node_t prs_rule_name = prs_get_rule(prs, prs_rule, bnf->rname);
+	const prs_node_t prs_rule  = prs_get_rule(prs, parent, bnf->rule);
+	const prs_node_t prs_rname = prs_get_rule(prs, prs_rule, bnf->rname);
 
-	str_t rule_name = strz(16);
-	prs_get_str(prs, prs_rule_name, &rule_name);
-	stx_rule_t rule = stx_get_rule(stx, rule_name);
+	str_t rname = strz(16);
+	prs_get_str(prs, prs_rname, &rname);
+	stx_rule_t rule = stx_get_rule(stx, rname);
 	if (rule >= stx->rules.cnt) {
-		rule = stx_add_rule(stx, rule_name);
+		rule = stx_add_rule(stx, rname);
 	} else {
-		str_free(&rule_name);
+		str_free(&rname);
 	}
 
 	const prs_node_t prs_expr = prs_get_rule(prs, prs_rule, bnf->expr);
@@ -223,11 +223,9 @@ static void rules_from_bnf(const bnf_t *bnf, const prs_t *prs, prs_node_t parent
 	rules_from_bnf(bnf, prs, rules, stx);
 }
 
-stx_t *stx_from_bnf(const bnf_t *bnf, const prs_t *prs, stx_t *stx)
+stx_t *stx_from_bnf(const bnf_t *bnf, const prs_t *prs, prs_node_t root, stx_t *stx)
 {
-	prs_node_t file = prs->root;
-
-	prs_node_t fbnf	 = prs_get_rule(prs, file, bnf->bnf);
+	prs_node_t fbnf	 = prs_get_rule(prs, root, bnf->bnf);
 	prs_node_t rules = prs_get_rule(prs, fbnf, bnf->rules);
 
 	rules_from_bnf(bnf, prs, rules, stx);

@@ -87,8 +87,8 @@ static void example_bnf()
 {
 	c_printf(SEP, __func__);
 
-	bnf_t bnf	 = { 0 };
-	const stx_t *stx = bnf_get_stx(&bnf);
+	bnf_t bnf = { 0 };
+	bnf_get_stx(&bnf);
 
 	str_t sbnf = STR("<file>    ::= <bnf> EOF\n"
 			 "<bnf>     ::= <rules>\n"
@@ -117,11 +117,11 @@ static void example_bnf()
 	prs_t prs = { 0 };
 	prs_init(&prs, 100);
 
-	prs_parse(&prs, stx, &lex);
+	prs_node_t prs_root = prs_parse(&prs, &bnf.stx, bnf.file, &lex);
 
 	stx_t new_stx = { 0 };
 	stx_init(&new_stx, 10, 10);
-	stx_from_bnf(&bnf, &prs, &new_stx);
+	stx_from_bnf(&bnf, &prs, prs_root, &new_stx);
 
 	stx_print(&new_stx, PRINT_DST_STD());
 
@@ -317,13 +317,13 @@ static void example_parser()
 
 	stx_rule_t file_rule = stx_add_rule(&stx, STR("file"));
 
-	prs.root	  = prs_add_node(&prs, prs.root, PRS_NODE_RULE(file_rule));
-	prs_node_t alt0	  = prs_add_node(&prs, prs.root, PRS_NODE_ALT(0));
+	prs_node_t root	  = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(file_rule));
+	prs_node_t alt0	  = prs_add_node(&prs, root, PRS_NODE_ALT(0));
 	prs_node_t child0 = prs_add_node(&prs, alt0, PRS_NODE_TOKEN(a));
 	prs_node_t alt1	  = prs_add_node(&prs, child0, PRS_NODE_ALT(1));
 	prs_add_node(&prs, alt1, PRS_NODE_TOKEN(b));
 
-	prs_print(&prs, PRINT_DST_STD());
+	prs_print(&prs, root, PRINT_DST_STD());
 
 	prs_free(&prs);
 	lex_free(&lex);
@@ -384,7 +384,7 @@ static void example_syntax()
 
 	printf("\n");
 
-	stx_print_tree(&stx, PRINT_DST_STD());
+	stx_print_tree(&stx, file, PRINT_DST_STD());
 
 	stx_free(&stx);
 }
@@ -475,9 +475,9 @@ int main(int argc, char **argv)
 	cutils_t cutils = { 0 };
 	c_init(&cutils);
 
-	example_bnf();
 	example_args();
 	example_arr();
+	example_bnf();
 	example_json();
 	example_lexer();
 	example_list();

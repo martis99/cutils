@@ -35,8 +35,6 @@ prs_t *prs_init(prs_t *prs, uint nodes_cap)
 		return NULL;
 	}
 
-	prs->root = PRS_NODE_END;
-
 	return prs;
 }
 
@@ -315,10 +313,10 @@ static lex_token_t prs_parse_rule(prs_t *prs, const stx_rule_t rule_id, lex_toke
 	return app;
 }
 
-int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
+prs_node_t prs_parse(prs_t *prs, const stx_t *stx, stx_rule_t rule, const lex_t *lex)
 {
 	if (prs == NULL || stx == NULL || lex == NULL) {
-		return 1;
+		return PRS_NODE_END;
 	}
 
 	prs->stx = stx;
@@ -327,12 +325,12 @@ int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
 	lex_token_t err = LEX_TOKEN_END;
 	stx_term_t exp	= STX_TERM_END;
 
-	prs->root = prs_add_node(prs, prs->root, PRS_NODE_RULE(stx->root));
+	prs_node_t root = prs_add_node(prs, PRS_NODE_END, PRS_NODE_RULE(rule));
 
-	lex_token_t ret = prs_parse_rule(prs, stx->root, lex->root, prs->root, &err, &exp);
+	lex_token_t ret = prs_parse_rule(prs, rule, lex->root, root, &err, &exp);
 	if (ret == lex->tokens.cnt) {
 		log_trace("cutils", "parser", NULL, "success");
-		return 0;
+		return root;
 	} else {
 		if (exp != STX_TERM_END) {
 			const stx_term_data_t *term = stx_get_term_data(stx, exp);
@@ -360,7 +358,7 @@ int prs_parse(prs_t *prs, const stx_t *stx, const lex_t *lex)
 		}
 	}
 
-	return 1;
+	return PRS_NODE_END;
 }
 
 static int print_nodes(void *data, print_dst_t dst, const void *priv)
@@ -400,18 +398,10 @@ static int print_nodes(void *data, print_dst_t dst, const void *priv)
 	return dst.off - off;
 }
 
-int prs_print_node(const prs_t *prs, prs_node_t node, print_dst_t dst)
+int prs_print(const prs_t *prs, prs_node_t node, print_dst_t dst)
 {
 	if (prs == NULL) {
 		return 0;
 	}
 	return tree_print(&prs->nodes, node, print_nodes, dst, prs);
-}
-
-int prs_print(const prs_t *prs, print_dst_t dst)
-{
-	if (prs == NULL) {
-		return 0;
-	}
-	return prs_print_node(prs, prs->root, dst);
 }
