@@ -397,10 +397,6 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 			} else {
 				state[top - 1] = 0;
 				top--;
-				stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
-				if (term->type != STX_TERM_OR) {
-					stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
-				}
 			}
 			break;
 		default:
