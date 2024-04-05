@@ -171,7 +171,6 @@ static void example_ebnf()
 	estx_from_ebnf(&ebnf, &prs, prs_root, &new_stx);
 
 	estx_print(&new_stx, PRINT_DST_STD());
-	estx_print_tree(&new_stx, PRINT_DST_STD());
 
 	estx_free(&new_stx);
 	lex_free(&lex);

@@ -96,7 +96,7 @@ TEST(t_stx_from_bnf)
 
 	stx_t new_stx = { 0 };
 	stx_init(&new_stx, 10, 10);
-	stx_from_bnf(&bnf, &prs, prs_root, &new_stx);
+	EXPECT_EQ(stx_from_bnf(&bnf, &prs, prs_root, &new_stx), 0);
 
 	lex_free(&lex);
 	prs_free(&prs);
@@ -132,7 +132,7 @@ TEST(t_stx_from_bnf_custom)
 	prs_node_t terms1  = prs_add_node(&prs, terms0, PRS_NODE_RULE(bnf.terms));
 	prs_node_t term1   = prs_add_node(&prs, terms1, PRS_NODE_RULE(bnf.term));
 
-	stx_from_bnf(&bnf, &prs, file, &new_stx);
+	EXPECT_EQ(stx_from_bnf(&bnf, &prs, file, &new_stx), 0);
 
 	prs_free(&prs);
 	stx_free(&new_stx);

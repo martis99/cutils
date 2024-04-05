@@ -98,7 +98,7 @@ TEST(t_stx_from_ebnf)
 
 	estx_t new_stx = { 0 };
 	estx_init(&new_stx, 10, 10);
-	estx_from_ebnf(&ebnf, &prs, prs_root, &new_stx);
+	EXPECT_EQ(estx_from_ebnf(&ebnf, &prs, prs_root, &new_stx), 0);
 
 	estx_free(&new_stx);
 	lex_free(&lex);
@@ -143,7 +143,7 @@ TEST(t_stx_from_ebnf_custom)
 
 	prs_add_node(&prs, f_grp, PRS_NODE_RULE(ebnf.opt_rep));
 
-	estx_from_ebnf(&ebnf, &prs, file, &new_stx);
+	EXPECT_EQ(estx_from_ebnf(&ebnf, &prs, file, &new_stx), 0);
 
 	estx_free(&new_stx);
 	prs_free(&prs);
