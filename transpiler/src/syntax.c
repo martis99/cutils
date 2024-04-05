@@ -172,6 +172,15 @@ stx_term_t stx_term_add_term(stx_t *stx, stx_term_t term, stx_term_t next)
 	return list_set_next_node(&stx->terms, term, next);
 }
 
+static stx_term_t stx_rule_add_orv(stx_t *stx, stx_rule_t rule, size_t n, va_list args)
+{
+	if (n < 2) {
+		return va_arg(args, stx_term_t);
+	}
+
+	return STX_TERM_OR(stx, va_arg(args, stx_term_t), stx_rule_add_orv(stx, rule, n - 1, args));
+}
+
 stx_term_t stx_rule_add_or(stx_t *stx, stx_rule_t rule, size_t n, ...)
 {
 	if (n < 1) {
@@ -181,11 +190,7 @@ stx_term_t stx_rule_add_or(stx_t *stx, stx_rule_t rule, size_t n, ...)
 	va_list args;
 	va_start(args, n);
 
-	stx_term_t term = va_arg(args, stx_term_t);
-
-	for (size_t i = 1; i < n; i++) {
-		term = STX_TERM_OR(stx, term, va_arg(args, stx_term_t));
-	}
+	const stx_term_t term = n < 2 ? va_arg(args, stx_term_t) : STX_TERM_OR(stx, va_arg(args, stx_term_t), stx_rule_add_orv(stx, rule, n - 1, args));
 
 	va_end(args);
 
@@ -294,6 +299,16 @@ static int print_header(const stx_t *stx, stx_term_t *stack, int *state, int top
 	stx_term_data_t *term;
 	stx_term_data_t *parent;
 
+	int last_or = -1;
+	if (top > 1 && state[top - 2] == 1) {
+		for (int i = 0; i < top - 2; i++) {
+			// if 'or' column
+			if ((term = stx_get_term_data(stx, stack[i]))->type == STX_TERM_OR) {
+				last_or = i;
+			}
+		}
+	}
+
 	for (int i = 0; i < top - 1; i++) {
 		// if 'or' column
 		if ((term = stx_get_term_data(stx, stack[i]))->type == STX_TERM_OR) {
@@ -304,27 +319,19 @@ static int print_header(const stx_t *stx, stx_term_t *stack, int *state, int top
 				str = "└─";
 			} else if (state[i] == 1) { // if left branch row
 				str = "│ ";
+			} else if (last_or == i) {
+				str = "└─";
 			}
 
 			dst.off += dprintf(dst, str);
-			continue;
 		}
-
-		// │ until last child
-		dst.off += dprintf(dst, list_get_next(&stx->terms, stack[i]) < stx->terms.cnt ? "│ " : "  ");
 	}
 
 	// if 'or' row
 	if (top > 1 && (parent = stx_get_term_data(stx, stack[top - 2]))->type == STX_TERM_OR) {
-		const char *str = NULL;
-		if (stack[top - 1] == parent->val.orv.l) { // if left branch row
+		if (stack[top - 1] == parent->val.orv.l || stack[top - 1] == parent->val.orv.r) { // if left or right branch row
 			// ── if last, ┬─ otherwise
-			str = list_get_next(&stx->terms, stack[top - 1]) < stx->terms.cnt ? "┬─" : "──";
-		} else if (stack[top - 1] == parent->val.orv.r) { // if right branch row
-			str = "──";
-		}
-		if (str != NULL) {
-			return dst.off + dprintf(dst, str) - off;
+			return dst.off + dprintf(dst, list_get_next(&stx->terms, stack[top - 1]) < stx->terms.cnt ? "┬─" : "──") - off;
 		}
 	}
 
@@ -336,8 +343,7 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 {
 	int off = dst.off;
 
-	dst.off += str_print(rule->name, dst);
-	dst.off += dprintf(dst, "\n");
+	dst.off += dprintf(dst, "<%.*s>\n", rule->name.len, rule->name.data);
 
 	stx_term_t stack[64] = { 0 };
 	int state[64]	     = { 0 };
@@ -350,11 +356,6 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 			if (top <= 0) {
 				break;
 			}
-			stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
-			if (term->type != STX_TERM_OR) {
-				stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
-				continue;
-			}
 		}
 
 		stx_term_data_t *term = stx_get_term_data(stx, stack[top - 1]);
@@ -362,31 +363,11 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 		switch (term->type) {
 		case STX_TERM_RULE: {
 			stx_rule_data_t *rule = stx_get_rule_data(stx, term->val.rule);
-
-			int same = 0;
-			for (int i = 0; i < top - 1; i++) {
-				stx_term_data_t *term = stx_get_term_data(stx, stack[i]);
-				if (term->type != STX_TERM_RULE) {
-					continue;
-				}
-
-				stx_rule_data_t *prev = stx_get_rule_data(stx, stx_get_term_data(stx, stack[i])->val.rule);
-				if (str_eq(rule->name, prev->name)) {
-					same = 1;
-					break;
-				}
-			}
 			dst.off += print_header(stx, stack, state, top, dst);
-			if (same) {
-				dst.off += dprintf(dst, "<");
-				dst.off += str_print(rule->name, dst);
-				dst.off += dprintf(dst, ">\n");
-				stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
-				break;
-			}
+			dst.off += dprintf(dst, "<");
 			dst.off += str_print(rule->name, dst);
-			dst.off += dprintf(dst, "\n");
-			stack[top++] = rule->terms;
+			dst.off += dprintf(dst, ">\n");
+			stack[top - 1] = list_get_next(&stx->terms, stack[top - 1]);
 			break;
 		}
 		case STX_TERM_TOKEN: {
@@ -432,7 +413,7 @@ static int stx_rule_print_tree(const stx_t *stx, stx_rule_data_t *rule, print_ds
 	return dst.off - off;
 }
 
-int stx_print_tree(const stx_t *stx, stx_rule_t rule, print_dst_t dst)
+int stx_print_tree(const stx_t *stx, print_dst_t dst)
 {
 	if (stx == NULL) {
 		return 0;
@@ -440,8 +421,16 @@ int stx_print_tree(const stx_t *stx, stx_rule_t rule, print_dst_t dst)
 
 	int off = dst.off;
 
-	stx_rule_data_t *data = stx_get_rule_data(stx, rule);
-	dst.off += stx_rule_print_tree(stx, data, dst, 0);
+	stx_rule_data_t *data;
+	int first = 1;
+	arr_foreach(&stx->rules, data)
+	{
+		if (!first) {
+			dst.off += dprintf(dst, "\n");
+		}
+		dst.off += stx_rule_print_tree(stx, data, dst, 0);
+		first = 0;
+	}
 
 	return dst.off - off;
 }

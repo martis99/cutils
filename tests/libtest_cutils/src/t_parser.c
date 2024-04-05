@@ -323,7 +323,7 @@ TEST(t_prs_parse_bnf)
 		prs_node_t root = prs_parse(&prs, &bnf.stx, bnf.file, &lex);
 		EXPECT_EQ(root, 0);
 		char *buf = malloc(320000);
-		EXPECT_EQ(prs_print(&prs, root, PRINT_DST_BUF(buf, 320000, 0)), 223672);
+		EXPECT_EQ(prs_print(&prs, root, PRINT_DST_BUF(buf, 320000, 0)), 228436);
 		free(buf);
 
 		lex_free(&lex);

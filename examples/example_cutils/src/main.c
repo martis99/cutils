@@ -178,6 +178,55 @@ static void example_ebnf()
 	ebnf_free(&ebnf);
 }
 
+static void example_esyntax()
+{
+	c_printf(SEP, __func__);
+
+	estx_t estx = { 0 };
+
+	estx_init(&estx, 10, 10);
+
+	const stx_rule_t file	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("file")), ESTX_TERM_CON(&estx));
+	const stx_rule_t function    = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("function")), ESTX_TERM_CON(&estx));
+	const stx_rule_t c	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("c")), ESTX_TERM_RULE(&estx, function, ESTX_TERM_OCC_REP));
+	const stx_rule_t type	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("type")), ESTX_TERM_LITERAL(&estx, STR("int"), 0));
+	const stx_rule_t chars	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("chars")), ESTX_TERM_ALT(&estx));
+	const stx_rule_t identifier  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("identifier")), ESTX_TERM_RULE(&estx, chars, ESTX_TERM_OCC_REP));
+	const stx_rule_t name	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("name")), ESTX_TERM_RULE(&estx, identifier, 0));
+	const stx_rule_t expressions = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expressions")), ESTX_TERM_ALT(&estx));
+	const stx_rule_t expression  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expression")), ESTX_TERM_CON(&estx));
+
+	estx_term_add_term(&estx, file, ESTX_TERM_RULE(&estx, c, 0));
+	estx_term_add_term(&estx, file, ESTX_TERM_TOKEN(&estx, TOKEN_EOF, 0));
+
+	estx_term_add_term(&estx, function, ESTX_TERM_RULE(&estx, type, 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_RULE(&estx, name, 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_LITERAL(&estx, STR("("), 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_LITERAL(&estx, STR(")"), 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_TOKEN(&estx, TOKEN_WS, 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_LITERAL(&estx, STR("{"), 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_TOKEN(&estx, TOKEN_NL, 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_RULE(&estx, expressions, 0));
+	estx_term_add_term(&estx, function, ESTX_TERM_LITERAL(&estx, STR("}"), 0));
+
+	estx_term_add_term(&estx, chars, ESTX_TERM_TOKEN(&estx, TOKEN_ALPHA, 0));
+	estx_term_add_term(&estx, chars, ESTX_TERM_TOKEN(&estx, TOKEN_DIGIT, 0));
+	estx_term_add_term(&estx, chars, ESTX_TERM_LITERAL(&estx, STR("_"), 0));
+
+	estx_term_add_term(&estx, expressions, ESTX_TERM_RULE(&estx, expression, 0));
+	stx_term_t group = estx_term_add_term(&estx, expressions, ESTX_TERM_GROUP(&estx, ESTX_TERM_OCC_OPT | ESTX_TERM_OCC_REP));
+	estx_term_add_term(&estx, group, ESTX_TERM_TOKEN(&estx, TOKEN_NL, 0));
+	estx_term_add_term(&estx, group, ESTX_TERM_RULE(&estx, expression, 0));
+
+	estx_term_add_term(&estx, expression, ESTX_TERM_LITERAL(&estx, STR("return 0;"), 0));
+	
+	estx_compile(&estx);
+
+	estx_print_tree(&estx, PRINT_DST_STD());
+
+	estx_free(&estx);
+}
+
 static void example_json()
 {
 	c_printf(SEP, __func__);
@@ -427,14 +476,11 @@ static void example_syntax()
 
 	stx_compile(&stx);
 
-	stx_print(&stx, PRINT_DST_STD());
-
-	printf("\n");
-
-	stx_print_tree(&stx, file, PRINT_DST_STD());
+	stx_print_tree(&stx, PRINT_DST_STD());
 
 	stx_free(&stx);
 }
+
 static int print_tree(void *data, print_dst_t dst, const void *priv)
 {
 	(void)priv;
@@ -526,6 +572,7 @@ int main(int argc, char **argv)
 	example_arr();
 	example_bnf();
 	example_ebnf();
+	example_esyntax();
 	example_json();
 	example_lexer();
 	example_list();

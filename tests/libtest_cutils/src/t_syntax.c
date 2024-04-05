@@ -245,19 +245,41 @@ TEST(t_stx_print_tree)
 
 	stx_rule_add_arr(&stx, identifier, STX_TERM_RULE(&stx, chars), STX_TERM_NONE(&stx));
 
-	stx_rule_add_or(&stx, chars, 4, STX_TERM_TOKEN(&stx, TOKEN_ALPHA), STX_TERM_TOKEN(&stx, TOKEN_DIGIT), STX_TERM_LITERAL(&stx, STR("_")),
-			STX_TERM_LITERAL(&stx, STR("'")));
+	const stx_term_t or = stx_rule_add_or(&stx, chars, 4, STX_TERM_TOKEN(&stx, TOKEN_ALPHA), STX_TERM_TOKEN(&stx, TOKEN_DIGIT), STX_TERM_LITERAL(&stx, STR("_")),
+					      STX_TERM_LITERAL(&stx, STR("'")));
 
 	stx_compile(&stx);
 
-	char buf[1024] = { 0 };
+	char buf[512] = { 0 };
 
-	EXPECT_EQ(stx_print_tree(NULL, STX_RULE_END, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
+	EXPECT_EQ(stx_print_tree(NULL, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	EXPECT_EQ(stx_print_tree(&stx, file, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 299);
+	EXPECT_STR(buf, "<file>\n"
+			"├─<functions>\n"
+			"└─EOF\n"
+			"\n"
+			"<functions>\n"
+			"or┬─<function>\n"
+			"│ └─<functions>\n"
+			"└───<function>\n"
+			"\n"
+			"<function>\n"
+			"└─<identifier>\n"
+			"\n"
+			"<identifier>\n"
+			"or┬─<chars>\n"
+			"│ └─<identifier>\n"
+			"└───<chars>\n"
+			"\n"
+			"<chars>\n"
+			"or──ALPHA\n"
+			"└─or──DIGIT\n"
+			"  └─or──'_'\n"
+			"    └───\"'\"\n");
 
 	stx_rule_add_term(&stx, file, stx_create_term(&stx, (stx_term_data_t){ .type = -1 }));
-	EXPECT_EQ(stx_print_tree(&stx, file, PRINT_DST_BUF(buf, sizeof(buf), 0)), 963);
+	EXPECT_EQ(stx_print_tree(&stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 299);
 
 	stx_free(&stx);
 

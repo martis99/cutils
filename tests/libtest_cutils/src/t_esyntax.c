@@ -154,7 +154,23 @@ TEST(t_estx_compile_print)
 	EXPECT_EQ(estx_print(&estx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 58);
 	EXPECT_STR(buf, "file = line\n"
 			"line = UNKNOWN? ALPHA+ ';'* \"'\" ( 'A' | 'B' )\n");
+
 	EXPECT_EQ(estx_print_tree(&estx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 144);
+	EXPECT_STR(buf, "<file>\n"
+			"con\n"
+			"├─\n"
+			"└─<line>\n"
+			"\n"
+			"<line>\n"
+			"con\n"
+			"├─UNKNOWN?\n"
+			"├─ALPHA+\n"
+			"├─';'*\n"
+			"├─\"'\"\n"
+			"└─group\n"
+			"  └─alt\n"
+			"    ├─'A'\n"
+			"    └─'B'\n");
 
 	estx_term_add_term(&estx, line, estx_create_term(&estx, (estx_term_data_t){ .type = -1 }));
 	//estx_rule_add_term(&estx, line, ESTX_TERM_OR(-1, -1)); //TODO
