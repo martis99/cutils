@@ -413,11 +413,11 @@ static void example_parser()
 
 	stx_rule_t file_rule = stx_add_rule(&stx, STR("file"));
 
-	prs_node_t root	  = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(file_rule));
-	prs_node_t alt0	  = prs_add_node(&prs, root, PRS_NODE_ALT(0));
-	prs_node_t child0 = prs_add_node(&prs, alt0, PRS_NODE_TOKEN(a));
-	prs_node_t alt1	  = prs_add_node(&prs, child0, PRS_NODE_ALT(1));
-	prs_add_node(&prs, alt1, PRS_NODE_TOKEN(b));
+	prs_node_t root	  = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, file_rule));
+	prs_node_t alt0	  = prs_add_node(&prs, root, PRS_NODE_ALT(&prs, 0));
+	prs_node_t child0 = prs_add_node(&prs, alt0, PRS_NODE_TOKEN(&prs, a));
+	prs_node_t alt1	  = prs_add_node(&prs, child0, PRS_NODE_ALT(&prs, 1));
+	prs_add_node(&prs, alt1, PRS_NODE_TOKEN(&prs, b));
 
 	prs_print(&prs, root, PRINT_DST_STD());
 

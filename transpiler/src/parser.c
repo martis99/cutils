@@ -66,18 +66,13 @@ prs_node_t prs_add(prs_t *prs, prs_node_data_t node)
 	return child;
 }
 
-prs_node_t prs_add_node(prs_t *prs, prs_node_t parent, prs_node_data_t node)
-{
-	return prs_set_node(prs, parent, prs_add(prs, node));
-}
-
-prs_node_t prs_set_node(prs_t *prs, prs_node_t parent, prs_node_t child)
+prs_node_t prs_add_node(prs_t *prs, prs_node_t parent, prs_node_t node)
 {
 	if (prs == NULL) {
 		return PRS_NODE_END;
 	}
 
-	return tree_set_child_node(&prs->nodes, parent, child);
+	return tree_set_child_node(&prs->nodes, parent, node);
 }
 
 int prs_remove_node(prs_t *prs, prs_node_t node)
@@ -163,10 +158,10 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 				*rule_cache = term->val.rule;
 			}
 		}
-		prs_node_t child = prs_add(prs, PRS_NODE_RULE(term->val.rule));
+		prs_node_t child = PRS_NODE_RULE(prs, term->val.rule);
 		lex_token_t app	 = prs_parse_rule(prs, term->val.rule, cur, child, err, exp);
 		if (app > 0) {
-			prs_set_node(prs, node, child);
+			prs_add_node(prs, node, child);
 		}
 		if (rule_app) {
 			*rule_app = app;
@@ -187,7 +182,7 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 
 		const token_t *token = lex_get_token(prs->lex, cur);
 		if (token->type & (1 << token_type)) {
-			prs_add_node(prs, node, PRS_NODE_TOKEN(cur));
+			prs_add_node(prs, node, PRS_NODE_TOKEN(prs, cur));
 			log_trace("cutils", "parser", NULL, "%.*s: success +%d", token_str.len, token_str.data, token->value.len);
 			return token->value.len;
 		}
@@ -228,7 +223,7 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 			}
 		}
 
-		prs_add_node(prs, node, PRS_NODE_LITERAL(literal));
+		prs_add_node(prs, node, PRS_NODE_LITERAL(prs, literal));
 		log_trace("cutils", "parser", NULL, "\'%*s\': success +%d", literal.len, literal.data, literal.len);
 		return literal.len;
 	}
@@ -237,11 +232,11 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 		lex_token_t cache_app = 0;
 		int from_cache	      = 0;
 
-		prs_node_t child0 = prs_add(prs, PRS_NODE_ALT(0));
+		prs_node_t child0 = PRS_NODE_ALT(prs, 0);
 		lex_token_t l	  = prs_parse_terms(prs, term->val.orv.l, cur, child0, err, exp, &cache_rule, &cache_app, NULL);
 		if (l == 0) {
 			log_trace("cutils", "parser", NULL, "left: failed");
-			prs_node_t child1 = prs_add(prs, PRS_NODE_ALT(1));
+			prs_node_t child1 = PRS_NODE_ALT(prs, 1);
 			lex_token_t r	  = prs_parse_terms(prs, term->val.orv.r, cur, child1, err, exp, &cache_rule, &cache_app, &from_cache);
 			if (r == 0) {
 				log_trace("cutils", "parser", NULL, "right: failed");
@@ -250,16 +245,16 @@ static lex_token_t prs_parse_term(prs_t *prs, stx_term_t term_id, lex_token_t cu
 				if (from_cache) {
 					prs_node_data_t *child0_data = tree_get_data(&prs->nodes, child0);
 					child0_data->val.alt	     = 1;
-					prs_set_node(prs, node, child0);
+					prs_add_node(prs, node, child0);
 					log_trace("cutils", "parser", NULL, "right: from cache");
 				} else {
-					prs_set_node(prs, node, child1);
+					prs_add_node(prs, node, child1);
 					log_trace("cutils", "parser", NULL, "right: success");
 				}
 				return r;
 			}
 		} else {
-			prs_set_node(prs, node, child0);
+			prs_add_node(prs, node, child0);
 			log_trace("cutils", "parser", NULL, "left: success");
 			return l;
 		}
@@ -325,7 +320,7 @@ prs_node_t prs_parse(prs_t *prs, const stx_t *stx, stx_rule_t rule, const lex_t 
 	lex_token_t err = LEX_TOKEN_END;
 	stx_term_t exp	= STX_TERM_END;
 
-	prs_node_t root = prs_add_node(prs, PRS_NODE_END, PRS_NODE_RULE(rule));
+	prs_node_t root = prs_add_node(prs, PRS_NODE_END, PRS_NODE_RULE(prs, rule));
 
 	lex_token_t ret = prs_parse_rule(prs, rule, lex->root, root, &err, &exp);
 	if (ret == lex->tokens.cnt) {

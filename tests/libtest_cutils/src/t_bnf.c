@@ -121,16 +121,16 @@ TEST(t_stx_from_bnf_custom)
 
 	prs.stx = &bnf.stx;
 
-	prs_node_t file	   = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(bnf.file));
-	prs_node_t pbnf	   = prs_add_node(&prs, file, PRS_NODE_RULE(bnf.bnf));
-	prs_node_t rules   = prs_add_node(&prs, pbnf, PRS_NODE_RULE(bnf.rules));
-	prs_node_t rule	   = prs_add_node(&prs, rules, PRS_NODE_RULE(bnf.rule));
-	prs_node_t expr	   = prs_add_node(&prs, rule, PRS_NODE_RULE(bnf.expr));
-	prs_node_t terms0  = prs_add_node(&prs, expr, PRS_NODE_RULE(bnf.terms));
-	prs_node_t term0   = prs_add_node(&prs, terms0, PRS_NODE_RULE(bnf.term));
-	prs_node_t literal = prs_add_node(&prs, term0, PRS_NODE_RULE(bnf.literal));
-	prs_node_t terms1  = prs_add_node(&prs, terms0, PRS_NODE_RULE(bnf.terms));
-	prs_node_t term1   = prs_add_node(&prs, terms1, PRS_NODE_RULE(bnf.term));
+	prs_node_t file	   = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, bnf.file));
+	prs_node_t pbnf	   = prs_add_node(&prs, file, PRS_NODE_RULE(&prs, bnf.bnf));
+	prs_node_t rules   = prs_add_node(&prs, pbnf, PRS_NODE_RULE(&prs, bnf.rules));
+	prs_node_t rule	   = prs_add_node(&prs, rules, PRS_NODE_RULE(&prs, bnf.rule));
+	prs_node_t expr	   = prs_add_node(&prs, rule, PRS_NODE_RULE(&prs, bnf.expr));
+	prs_node_t terms0  = prs_add_node(&prs, expr, PRS_NODE_RULE(&prs, bnf.terms));
+	prs_node_t term0   = prs_add_node(&prs, terms0, PRS_NODE_RULE(&prs, bnf.term));
+	prs_node_t literal = prs_add_node(&prs, term0, PRS_NODE_RULE(&prs, bnf.literal));
+	prs_node_t terms1  = prs_add_node(&prs, terms0, PRS_NODE_RULE(&prs, bnf.terms));
+	prs_node_t term1   = prs_add_node(&prs, terms1, PRS_NODE_RULE(&prs, bnf.term));
 
 	EXPECT_EQ(stx_from_bnf(&bnf, &prs, file, &new_stx), 0);
 

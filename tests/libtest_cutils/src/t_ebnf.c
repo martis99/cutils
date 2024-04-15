@@ -123,25 +123,25 @@ TEST(t_stx_from_ebnf_custom)
 
 	prs.stx = &ebnf.stx;
 
-	prs_node_t file	   = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(ebnf.file));
-	prs_node_t pebnf   = prs_add_node(&prs, file, PRS_NODE_RULE(ebnf.ebnf));
-	prs_node_t rs_lit  = prs_add_node(&prs, pebnf, PRS_NODE_RULE(ebnf.rules));
-	prs_node_t r_lit   = prs_add_node(&prs, rs_lit, PRS_NODE_RULE(ebnf.rule));
-	prs_node_t a_lit   = prs_add_node(&prs, r_lit, PRS_NODE_RULE(ebnf.alt));
-	prs_node_t c_lit   = prs_add_node(&prs, a_lit, PRS_NODE_RULE(ebnf.concat));
-	prs_node_t f_lit   = prs_add_node(&prs, c_lit, PRS_NODE_RULE(ebnf.factor));
-	prs_node_t t_lit   = prs_add_node(&prs, f_lit, PRS_NODE_RULE(ebnf.term));
-	prs_node_t literal = prs_add_node(&prs, t_lit, PRS_NODE_RULE(ebnf.literal));
+	prs_node_t file	   = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, ebnf.file));
+	prs_node_t pebnf   = prs_add_node(&prs, file, PRS_NODE_RULE(&prs, ebnf.ebnf));
+	prs_node_t rs_lit  = prs_add_node(&prs, pebnf, PRS_NODE_RULE(&prs, ebnf.rules));
+	prs_node_t r_lit   = prs_add_node(&prs, rs_lit, PRS_NODE_RULE(&prs, ebnf.rule));
+	prs_node_t a_lit   = prs_add_node(&prs, r_lit, PRS_NODE_RULE(&prs, ebnf.alt));
+	prs_node_t c_lit   = prs_add_node(&prs, a_lit, PRS_NODE_RULE(&prs, ebnf.concat));
+	prs_node_t f_lit   = prs_add_node(&prs, c_lit, PRS_NODE_RULE(&prs, ebnf.factor));
+	prs_node_t t_lit   = prs_add_node(&prs, f_lit, PRS_NODE_RULE(&prs, ebnf.term));
+	prs_node_t literal = prs_add_node(&prs, t_lit, PRS_NODE_RULE(&prs, ebnf.literal));
 
-	prs_node_t rs_grp = prs_add_node(&prs, rs_lit, PRS_NODE_RULE(ebnf.rules));
-	prs_node_t r_grp  = prs_add_node(&prs, rs_grp, PRS_NODE_RULE(ebnf.rule));
-	prs_node_t a_grp  = prs_add_node(&prs, r_grp, PRS_NODE_RULE(ebnf.alt));
-	prs_node_t c_grp  = prs_add_node(&prs, a_grp, PRS_NODE_RULE(ebnf.concat));
-	prs_node_t f_grp  = prs_add_node(&prs, c_grp, PRS_NODE_RULE(ebnf.factor));
-	prs_node_t t_grp  = prs_add_node(&prs, f_grp, PRS_NODE_RULE(ebnf.term));
-	prs_node_t group  = prs_add_node(&prs, t_grp, PRS_NODE_RULE(ebnf.group));
+	prs_node_t rs_grp = prs_add_node(&prs, rs_lit, PRS_NODE_RULE(&prs, ebnf.rules));
+	prs_node_t r_grp  = prs_add_node(&prs, rs_grp, PRS_NODE_RULE(&prs, ebnf.rule));
+	prs_node_t a_grp  = prs_add_node(&prs, r_grp, PRS_NODE_RULE(&prs, ebnf.alt));
+	prs_node_t c_grp  = prs_add_node(&prs, a_grp, PRS_NODE_RULE(&prs, ebnf.concat));
+	prs_node_t f_grp  = prs_add_node(&prs, c_grp, PRS_NODE_RULE(&prs, ebnf.factor));
+	prs_node_t t_grp  = prs_add_node(&prs, f_grp, PRS_NODE_RULE(&prs, ebnf.term));
+	prs_node_t group  = prs_add_node(&prs, t_grp, PRS_NODE_RULE(&prs, ebnf.group));
 
-	prs_add_node(&prs, f_grp, PRS_NODE_RULE(ebnf.opt_rep));
+	prs_add_node(&prs, f_grp, PRS_NODE_RULE(&prs, ebnf.opt_rep));
 
 	EXPECT_EQ(estx_from_ebnf(&ebnf, &prs, file, &new_stx), 0);
 

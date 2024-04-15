@@ -37,31 +37,13 @@ TEST(t_prs_add_node)
 	prs_t prs = { 0 };
 	prs_init(&prs, 0);
 
-	EXPECT_EQ(prs_add_node(NULL, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END)), PRS_NODE_END);
-	mem_oom(1);
-	EXPECT_EQ(prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END)), PRS_NODE_END);
-	mem_oom(0);
-	EXPECT_EQ(prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END)), 0);
+	prs_node_t parent = prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN });
+	prs_node_t child  = prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN });
 
-	prs_free(&prs);
-
-	END;
-}
-
-TEST(t_prs_set_node)
-{
-	START;
-
-	prs_t prs = { 0 };
-	prs_init(&prs, 0);
-
-	prs_node_t parent = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END));
-	prs_node_t child  = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END));
-
-	EXPECT_EQ(prs_set_node(NULL, PRS_NODE_END, PRS_NODE_END), PRS_NODE_END);
-	EXPECT_EQ(prs_set_node(&prs, PRS_NODE_END, PRS_NODE_END), PRS_NODE_END);
-	EXPECT_EQ(prs_set_node(&prs, parent, PRS_NODE_END), PRS_NODE_END);
-	EXPECT_EQ(prs_set_node(&prs, parent, child), child);
+	EXPECT_EQ(prs_add_node(NULL, PRS_NODE_END, PRS_NODE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_add_node(&prs, PRS_NODE_END, PRS_NODE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_add_node(&prs, parent, PRS_NODE_END), PRS_NODE_END);
+	EXPECT_EQ(prs_add_node(&prs, parent, child), child);
 
 	prs_free(&prs);
 
@@ -75,7 +57,7 @@ TEST(t_prs_remove_node)
 	prs_t prs = { 0 };
 	prs_init(&prs, 0);
 
-	prs_node_t node = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(STX_RULE_END));
+	prs_node_t node = prs_add_node(&prs, PRS_NODE_END, prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN }));
 
 	EXPECT_EQ(prs_remove_node(NULL, PRS_NODE_END), 1);
 	EXPECT_EQ(prs_remove_node(&prs, PRS_NODE_END), 1);
@@ -99,12 +81,12 @@ TEST(t_prs_get_rule)
 	stx_rule_t rule0 = stx_add_rule(&stx, STR("rule0"));
 	stx_rule_t rule1 = stx_add_rule(&stx, STR("rule1"));
 
-	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_LITERAL(""));
-	prs_node_t alt	= prs_add_node(&prs, root, PRS_NODE_ALT(0));
+	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_LITERAL(&prs, ""));
+	prs_node_t alt	= prs_add_node(&prs, root, PRS_NODE_ALT(&prs, 0));
 
-	prs_add_node(&prs, alt, PRS_NODE_LITERAL(""));
-	prs_add_node(&prs, alt, PRS_NODE_RULE(rule0));
-	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(rule1));
+	prs_add_node(&prs, alt, PRS_NODE_LITERAL(&prs, ""));
+	prs_add_node(&prs, alt, PRS_NODE_RULE(&prs, rule0));
+	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(&prs, rule1));
 
 	EXPECT_EQ(prs_get_rule(NULL, PRS_NODE_END, STX_RULE_END), PRS_NODE_END);
 	EXPECT_EQ(prs_get_rule(&prs, PRS_NODE_END, STX_RULE_END), PRS_NODE_END);
@@ -142,12 +124,12 @@ TEST(t_prs_get_str)
 	stx_rule_t rule0 = stx_add_rule(&stx, STR("rule0"));
 	stx_rule_t rule1 = stx_add_rule(&stx, STR("rule1"));
 
-	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(rule0));
-	prs_node_t alt	= prs_add_node(&prs, root, PRS_NODE_ALT(0));
+	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, rule0));
+	prs_node_t alt	= prs_add_node(&prs, root, PRS_NODE_ALT(&prs, 0));
 
-	prs_add_node(&prs, alt, PRS_NODE_LITERAL(STR("a")));
-	prs_add_node(&prs, alt, PRS_NODE_TOKEN(token));
-	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(rule1));
+	prs_add_node(&prs, alt, PRS_NODE_LITERAL(&prs, STR("a")));
+	prs_add_node(&prs, alt, PRS_NODE_TOKEN(&prs, token));
+	prs_node_t node = prs_add_node(&prs, alt, PRS_NODE_RULE(&prs, rule1));
 
 	str_t str = strz(16);
 
@@ -371,11 +353,11 @@ TEST(t_prs_print)
 	prs.stx = &stx;
 	prs.lex = &lex;
 
-	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(rule));
-	prs_add_node(&prs, root, PRS_NODE_TOKEN(token));
-	prs_add_node(&prs, root, PRS_NODE_LITERAL(STR("L")));
-	prs_add_node(&prs, root, PRS_NODE_ALT(0));
-	prs_add_node(&prs, root, (prs_node_data_t){ .type = -1 });
+	prs_node_t root = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, rule));
+	prs_add_node(&prs, root, PRS_NODE_TOKEN(&prs, token));
+	prs_add_node(&prs, root, PRS_NODE_LITERAL(&prs, STR("L")));
+	prs_add_node(&prs, root, PRS_NODE_ALT(&prs, 0));
+	prs_add_node(&prs, root, prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN }));
 
 	char buf[64] = { 0 };
 	EXPECT_EQ(prs_print(NULL, PRS_NODE_END, PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
@@ -400,7 +382,6 @@ STEST(t_parser)
 
 	RUN(t_prs_init_free);
 	RUN(t_prs_add_node);
-	RUN(t_prs_set_node);
 	RUN(t_prs_remove_node);
 	RUN(t_prs_get_rule);
 	RUN(t_prs_get_str);
