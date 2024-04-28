@@ -88,7 +88,7 @@ const stx_t *ebnf_get_stx(ebnf_t *ebnf)
 	ebnf->group   = stx_get_rule(&ebnf->stx, STR("group"));
 	ebnf->opt     = stx_get_rule(&ebnf->stx, STR("opt"));
 	ebnf->rep     = stx_get_rule(&ebnf->stx, STR("rep"));
-	ebnf->opt_rep = stx_get_rule(&ebnf->stx, STR("opt_rep"));
+	ebnf->opt_rep = stx_get_rule(&ebnf->stx, STR("opt-rep"));
 
 	prs_free(&prs);
 	lex_free(&lex);
@@ -96,7 +96,7 @@ const stx_t *ebnf_get_stx(ebnf_t *ebnf)
 	return &ebnf->stx;
 }
 
-static void alt_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule);
+static void alt_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule, int recursive);
 
 static void term_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_term_occ_t occ, estx_rule_t rule)
 {
@@ -162,8 +162,7 @@ static void term_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node
 		const estx_term_t group	 = rule == ESTX_RULE_END ? estx_term_add_term(estx, parent, ESTX_TERM_GROUP(estx, occ)) :
 								   estx_rule_set_term(estx, rule, ESTX_TERM_GROUP(estx, occ));
 		const prs_node_t prs_alt = prs_get_rule(prs, prs_group, ebnf->alt);
-		const estx_term_t alt	 = estx_term_add_term(estx, group, ESTX_TERM_ALT(estx));
-		alt_from_ebnf(ebnf, prs, prs_alt, estx, alt, ESTX_RULE_END);
+		alt_from_ebnf(ebnf, prs, prs_alt, estx, group, ESTX_RULE_END, 0);
 	}
 }
 
@@ -190,7 +189,7 @@ static void factor_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t no
 	term_from_ebnf(ebnf, prs, prs_term, estx, parent, occ, rule);
 }
 
-static void concat_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule)
+static void concat_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule, int recursive)
 {
 	const prs_node_t prs_factor = prs_get_rule(prs, node, ebnf->factor);
 
@@ -199,15 +198,17 @@ static void concat_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t no
 		estx_term_t concat = parent;
 		if (rule != ESTX_RULE_END) {
 			concat = estx_rule_set_term(estx, rule, ESTX_TERM_CON(estx));
+		} else if (!recursive) {
+			concat = estx_term_add_term(estx, parent, ESTX_TERM_CON(estx));
 		}
 		factor_from_ebnf(ebnf, prs, prs_factor, estx, concat, STX_RULE_END);
-		concat_from_ebnf(ebnf, prs, prs_concat, estx, concat, STX_RULE_END);
+		concat_from_ebnf(ebnf, prs, prs_concat, estx, concat, STX_RULE_END, 1);
 	} else {
 		factor_from_ebnf(ebnf, prs, prs_factor, estx, parent, rule);
 	}
 }
 
-static void alt_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule)
+static void alt_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node, estx_t *estx, estx_term_t parent, estx_rule_t rule, int recursive)
 {
 	const prs_node_t prs_concat = prs_get_rule(prs, node, ebnf->concat);
 
@@ -216,11 +217,13 @@ static void alt_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t node,
 		estx_term_t alt = parent;
 		if (rule != ESTX_RULE_END) {
 			alt = estx_rule_set_term(estx, rule, ESTX_TERM_ALT(estx));
+		} else if (!recursive) {
+			alt = estx_term_add_term(estx, parent, ESTX_TERM_ALT(estx));
 		}
-		concat_from_ebnf(ebnf, prs, prs_concat, estx, alt, STX_RULE_END);
-		alt_from_ebnf(ebnf, prs, prs_alt, estx, alt, STX_RULE_END);
+		concat_from_ebnf(ebnf, prs, prs_concat, estx, alt, STX_RULE_END, 0);
+		alt_from_ebnf(ebnf, prs, prs_alt, estx, alt, STX_RULE_END, 1);
 	} else {
-		concat_from_ebnf(ebnf, prs, prs_concat, estx, parent, rule);
+		concat_from_ebnf(ebnf, prs, prs_concat, estx, parent, rule, 0);
 	}
 }
 
@@ -239,7 +242,7 @@ static estx_rule_t rules_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_nod
 	}
 
 	const prs_node_t prs_alt = prs_get_rule(prs, prs_rule, ebnf->alt);
-	alt_from_ebnf(ebnf, prs, prs_alt, estx, STX_TERM_END, rule);
+	alt_from_ebnf(ebnf, prs, prs_alt, estx, STX_TERM_END, rule, 0);
 
 	const prs_node_t rules = prs_get_rule(prs, node, ebnf->rules);
 	if (rules >= prs->nodes.cnt) {

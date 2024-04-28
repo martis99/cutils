@@ -17,6 +17,7 @@ TEST(tests)
 	RUN(t_cutils);
 	RUN(t_dict);
 	RUN(t_ebnf);
+	RUN(t_eparser);
 	RUN(t_esyntax);
 	RUN(t_file);
 	RUN(t_json);

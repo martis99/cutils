@@ -77,4 +77,6 @@ int estx_print_tree(const estx_t *estx, print_dst_t dst);
 #define ESTX_TERM_CON(_estx)			 estx_create_term(_estx, (estx_term_data_t){ .type = ESTX_TERM_CON })
 #define ESTX_TERM_GROUP(_estx, _occ)		 estx_create_term(_estx, (estx_term_data_t){ .type = ESTX_TERM_GROUP, .occ = _occ })
 
+#define estx_rule_foreach arr_foreach
+
 #endif

@@ -119,6 +119,7 @@ int prs_get_str(const prs_t *prs, prs_node_t parent, str_t *out)
 	{
 		prs_node_data_t *data = tree_get_data(&prs->nodes, child);
 		switch (data->type) {
+		case PRS_NODE_RULE:
 		case PRS_NODE_ALT: prs_get_str(prs, child, out); break;
 		case PRS_NODE_TOKEN: {
 			const token_t *token = lex_get_token(prs->lex, data->token);
@@ -131,12 +132,12 @@ int prs_get_str(const prs_t *prs, prs_node_t parent, str_t *out)
 			break;
 		}
 		case PRS_NODE_LITERAL: str_cat(out, data->val.literal); break;
-		case PRS_NODE_RULE: prs_get_str(prs, child, out); break;
 		}
 	}
 
 	return 0;
 }
+
 static lex_token_t prs_parse_rule(prs_t *prs, stx_rule_t rule_id, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp);
 static lex_token_t prs_parse_terms(prs_t *prs, stx_term_t terms, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp, stx_rule_t *rule_cache,
 				   lex_token_t *rule_app, int *from_cache);
@@ -287,9 +288,6 @@ static lex_token_t prs_parse_terms(prs_t *prs, stx_term_t terms, lex_token_t cur
 
 static lex_token_t prs_parse_rule(prs_t *prs, const stx_rule_t rule_id, lex_token_t cur, prs_node_t node, lex_token_t *err, stx_term_t *exp)
 {
-	(void)cur;
-	(void)err;
-	(void)exp;
 	const stx_rule_data_t *rule = stx_get_rule_data(prs->stx, rule_id);
 	if (rule == NULL) {
 		log_error("cutils", "parser", NULL, "rule not found: %d", rule_id);
