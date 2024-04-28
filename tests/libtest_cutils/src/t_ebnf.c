@@ -26,9 +26,13 @@ TEST(t_ebnf_get_stx)
 	ebnf_t ebnf = { 0 };
 
 	EXPECT_EQ(ebnf_get_stx(NULL), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(ebnf_get_stx(&ebnf), NULL);
-	mem_oom(0);
+	mem_soom(48000);
+	EXPECT_EQ(ebnf_get_stx(&ebnf), NULL);
+	mem_soom((size_t)48000 + 0);
+	EXPECT_EQ(ebnf_get_stx(&ebnf), NULL);
+	mem_eoom();
 	EXPECT_NE(ebnf_get_stx(&ebnf), NULL);
 
 	char buf[1024] = { 0 };

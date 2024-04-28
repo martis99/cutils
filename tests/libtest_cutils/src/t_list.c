@@ -11,9 +11,9 @@ TEST(t_list_init_free)
 	list_t list = { 0 };
 
 	EXPECT_EQ(list_init(NULL, 0, sizeof(int)), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(list_init(&list, 1, sizeof(int)), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(list_init(&list, 1, sizeof(int)), &list);
 
 	EXPECT_NE(list.data, NULL);

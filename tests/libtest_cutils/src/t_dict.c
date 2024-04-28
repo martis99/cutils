@@ -10,9 +10,9 @@ TEST(t_dict_init_free)
 	dict_t dict = { 0 };
 
 	EXPECT_EQ(dict_init(NULL, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(dict_init(&dict, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(dict_init(&dict, 1), &dict);
 
 	dict_free(NULL);

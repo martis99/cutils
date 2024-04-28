@@ -8,6 +8,7 @@
 
 static mem_t *s_mem;
 static int s_oom;
+static size_t s_fmem;
 
 mem_t *mem_init(mem_t *mem)
 {
@@ -76,7 +77,13 @@ void *mem_alloc(size_t size)
 		log_warn("cutils", "mem", NULL, "malloc 0 bytes");
 	}
 
-	void *ptr = size > 0 && s_oom ? NULL : malloc(size);
+	void *ptr;
+	if (size > 0 && s_oom && size > s_fmem) {
+		ptr = NULL;
+	} else {
+		ptr = malloc(size);
+		s_fmem -= size;
+	}
 
 	if (ptr == NULL) {
 		log_error("cutils", "mem", NULL, "out of memory");
@@ -98,7 +105,13 @@ void *mem_calloc(size_t count, size_t size)
 		log_warn("cutils", "mem", NULL, "calloc 0 bytes");
 	}
 
-	void *ptr = count * size > 0 && s_oom ? NULL : calloc(count, size);
+	void *ptr;
+	if (count * size > 0 && s_oom && count * size > s_fmem) {
+		ptr = NULL;
+	} else {
+		ptr = calloc(count, size);
+		s_fmem -= count * size;
+	}
 
 	if (ptr == NULL) {
 		log_error("cutils", "mem", NULL, "out of memory");
@@ -135,7 +148,13 @@ void *mem_realloc(void *memory, size_t new_size, size_t old_size)
 		return mem_alloc(new_size);
 	}
 
-	void *ptr = new_size > old_size && s_oom ? NULL : realloc(memory, new_size);
+	void *ptr;
+	if (new_size > old_size && s_oom && new_size - old_size > s_fmem) {
+		ptr = NULL;
+	} else {
+		ptr = realloc(memory, new_size);
+		s_fmem -= new_size - old_size;
+	}
 
 	if (ptr == NULL) {
 		log_error("cutils", "mem", NULL, "out of memory");
@@ -211,7 +230,14 @@ void mem_free(void *memory, size_t size)
 	free(memory);
 }
 
-void mem_oom(int oom)
+void mem_soom(size_t fmem)
 {
-	s_oom = oom;
+	s_oom  = 1;
+	s_fmem = fmem;
+}
+
+void mem_eoom()
+{
+	s_oom  = 0;
+	s_fmem = 0;
 }

@@ -26,9 +26,9 @@ TEST(t_bnf_get_stx)
 	bnf_t bnf = { 0 };
 
 	EXPECT_EQ(bnf_get_stx(NULL), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(bnf_get_stx(&bnf), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_NE(bnf_get_stx(&bnf), NULL);
 
 	char buf[1024] = { 0 };

@@ -12,9 +12,9 @@ TEST(t_arr_init_free)
 	arr_t arr = { 0 };
 
 	EXPECT_EQ(arr_init(NULL, 0, sizeof(int)), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(arr_init(&arr, 1, sizeof(int)), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(arr_init(&arr, 1, sizeof(int)), &arr);
 
 	EXPECT_NE(arr.data, NULL);
@@ -41,9 +41,9 @@ TEST(t_arr_add)
 	arr_init(&arr, 0, sizeof(int));
 
 	EXPECT_EQ(arr_add(NULL), ARR_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(arr_add(&arr), ARR_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(arr_add(&arr), 0);
 	EXPECT_EQ(arr_add(&arr), 1);
 	EXPECT_EQ(arr.cnt, 2);
@@ -108,9 +108,9 @@ TEST(t_arr_app)
 
 	EXPECT_EQ(arr_app(NULL, NULL), ARR_END);
 	EXPECT_EQ(arr_app(&arr, NULL), ARR_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(arr_app(&arr, &v0), ARR_END);
-	mem_oom(0);
+	mem_eoom();
 
 	EXPECT_EQ(arr_app(&arr, &v0), 0);
 	EXPECT_EQ(arr_app(&arr, &v1), 1);

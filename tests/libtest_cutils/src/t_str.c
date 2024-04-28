@@ -58,9 +58,9 @@ TEST(t_strf)
 
 	strf(NULL);
 
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(strf("%s", "a").data, NULL);
-	mem_oom(0);
+	mem_eoom();
 
 	str_t str = strf("%s", "a");
 
@@ -166,9 +166,9 @@ TEST(t_str_resize)
 
 	EXPECT_EQ(str_resize(NULL, 0), 1);
 	EXPECT_EQ(str_resize(&str, 8), 0);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(str_resize(&str, 32), 1);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(str_resize(&str, 32), 0);
 
 	str_free(&str);
@@ -186,9 +186,9 @@ TEST(t_str_catc)
 	EXPECT_EQ(str_catc(NULL, "", 0), NULL);
 	EXPECT_EQ(str_catc(&str, NULL, 0), NULL);
 	EXPECT_EQ(str_catc(&ref, "def", 2), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(str_catc(&str, "def", 2), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(str_catc(&str, "def", 2), &str);
 
 	EXPECT_STR(str.data, "abcde");
@@ -504,9 +504,9 @@ TEST(t_str_split_own)
 	str_t l	  = strz(0);
 	str_t r	  = strz(0);
 
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(str_split(str, ' ', &l, &r), 1);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(str_split(str, ' ', &l, &r), 0);
 
 	EXPECT_STRN(l.data, "abc", 3);

@@ -179,8 +179,8 @@ TEST(t_mem_oom)
 {
 	START;
 
-	mem_oom(1);
-	mem_oom(0);
+	mem_soom(0);
+	mem_eoom();
 
 	END;
 }

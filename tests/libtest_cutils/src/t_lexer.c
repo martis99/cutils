@@ -11,9 +11,9 @@ TEST(t_lex_init_free)
 	lex_t lex = { 0 };
 
 	EXPECT_EQ(lex_init(NULL, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(lex_init(&lex, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(lex_init(&lex, 0), &lex);
 
 	EXPECT_NE(lex.tokens.data, NULL);
@@ -34,9 +34,9 @@ TEST(t_lex_add_token)
 	lex_init(&lex, 0);
 
 	EXPECT_EQ(lex_add_token(NULL), LEX_TOKEN_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(lex_add_token(&lex), LEX_TOKEN_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(lex_add_token(&lex), 0);
 
 	lex_free(&lex);
@@ -79,9 +79,9 @@ TEST(t_lex_tokenize)
 			"\treturn 0;\n"
 			"}\n\0");
 
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(lex_tokenize(&lex, str), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(lex_tokenize(&lex, str), &lex);
 
 	lex_free(&lex);

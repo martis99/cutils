@@ -15,9 +15,9 @@ TEST(t_prs_init_free)
 	prs_t prs = { 0 };
 
 	EXPECT_EQ(prs_init(NULL, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(prs_init(&prs, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(prs_init(&prs, 0), &prs);
 
 	EXPECT_NE(prs.nodes.data, NULL);

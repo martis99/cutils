@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 
 	t_init(80);
 
-	int level = log_set_level(LOG_FATAL);
+	int level = log_set_level(LOG_WARN);
 
 	t_run(test_cutils, 1);
 

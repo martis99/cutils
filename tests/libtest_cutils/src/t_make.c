@@ -10,11 +10,11 @@ TEST(t_make_init_free)
 	make_t make = { 0 };
 
 	EXPECT_EQ(make_init(NULL, 0, 0, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_init(&make, 1, 0, 0), NULL);
 	EXPECT_EQ(make_init(&make, 0, 1, 0), NULL);
 	EXPECT_EQ(make_init(&make, 0, 0, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_init(&make, 1, 1, 1), &make);
 
 	EXPECT_NE(make.acts.data, NULL);
@@ -39,9 +39,9 @@ TEST(t_make_create_empty)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_empty(NULL), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_empty(&make), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_empty(&make), 0);
 
 	make_free(&make);
@@ -56,9 +56,9 @@ TEST(t_make_create_var)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_var(NULL, STR(""), -1), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_var(&make, STR(""), -1), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_var(&make, STRH(""), -1), 0);
 	EXPECT_EQ(make_create_var(&make, STRH(""), MAKE_VAR_INST), 1);
 	EXPECT_EQ(make_create_var(&make, STRH(""), MAKE_VAR_APP), 2);
@@ -76,9 +76,9 @@ TEST(t_make_create_var_ext)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_var_ext(NULL, STR(""), -1), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_var(&make, STR(""), -1), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_var_ext(&make, STRH(""), -1), 0);
 	EXPECT_EQ(make_create_var_ext(&make, STRH(""), MAKE_VAR_INST), 1);
 	EXPECT_EQ(make_create_var_ext(&make, STRH(""), MAKE_VAR_APP), 2);
@@ -99,9 +99,9 @@ TEST(t_make_create_rule)
 	make_str_data_t str = (make_str_data_t){ .type = -1 };
 	EXPECT_EQ(make_create_rule(&make, MRULE(str), 0), 0);
 	EXPECT_EQ(make_create_rule(&make, MRULE(MVAR(MAKE_END)), 0), 1);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_rule(&make, MRULE(MSTR(STRH(""))), 0), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_rule(&make, MRULE(MSTR(STRH(""))), 0), 2);
 
 	make_free(&make);
@@ -117,9 +117,9 @@ TEST(t_make_create_phony)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_phony(NULL), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_phony(&make), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_phony(&make), 0);
 
 	make_free(&make);
@@ -135,9 +135,9 @@ TEST(t_make_create_cmd)
 	make_init(&make, 0, 0, 0);
 
 	EXPECT_EQ(make_create_cmd(NULL, MCMD(STR(""))), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_cmd(&make, MCMD(STR(""))), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_cmd(&make, MCMD(STRH(""))), 0);
 
 	make_free(&make);
@@ -154,9 +154,9 @@ TEST(t_make_create_if)
 
 	EXPECT_EQ(make_create_if(NULL, MVAR(MAKE_END), MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_create_if(&make, MVAR(MAKE_END), MVAR(MAKE_END)), 0);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_create_if(&make, MSTR(STR("")), MSTR(STR(""))), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_create_if(&make, MSTR(STRH("")), MSTR(STRH(""))), 1);
 
 	make_free(&make);
@@ -209,9 +209,9 @@ TEST(t_make_var_add_val)
 	EXPECT_EQ(make_var_add_val(&make, empty, MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_var_add_val(&make, make_create_var_ext(&make, STRH(""), MAKE_VAR_INST), MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_var_add_val(&make, var, MVAR(MAKE_END)), 1);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_var_add_val(&make, var, MSTR(STRH(""))), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_var_add_val(&make, var, MSTR(STRH(""))), 1);
 
 	make_free(&make);
@@ -233,9 +233,9 @@ TEST(t_make_rule_add_depend)
 	EXPECT_EQ(make_rule_add_depend(&make, MAKE_END, MRULE(MVAR(MAKE_END))), MAKE_END);
 	EXPECT_EQ(make_rule_add_depend(&make, empty, MRULE(MVAR(MAKE_END))), MAKE_END);
 	EXPECT_EQ(make_rule_add_depend(&make, rule, MRULE(MVAR(MAKE_END))), 0);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("")))), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("")))), 1);
 
 	make_free(&make);
@@ -352,9 +352,9 @@ TEST(t_make_ext_set_val)
 
 	EXPECT_EQ(make_ext_set_val(NULL, STR(""), MVAR(MAKE_END)), MAKE_END);
 	EXPECT_EQ(make_ext_set_val(&make, STR(""), MVAR(MAKE_END)), MAKE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(make_ext_set_val(&make, STR("EXT"), MVAR(MAKE_END)), MAKE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(make_ext_set_val(&make, STR("EXT"), MVAR(MAKE_END)), 0);
 	EXPECT_EQ(make_ext_set_val(&make, STR("EXT"), MSTR(STR(""))), 0);
 

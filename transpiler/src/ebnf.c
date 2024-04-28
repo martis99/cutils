@@ -54,18 +54,27 @@ const stx_t *ebnf_get_stx(ebnf_t *ebnf)
 			 "<space>   ::= ' '\n");
 
 	lex_t lex = { 0 };
-	if (lex_init(&lex, 100) == NULL) {
-		log_error("cutils", "bnf", NULL, "failed to intialize lexer");
+	if (lex_init(&lex, 1000) == NULL) {
+		log_error("cutils", "ebnf", NULL, "failed to intialize lexer");
 		return NULL;
 	}
 
 	lex_tokenize(&lex, sbnf);
 
 	prs_t prs = { 0 };
-	prs_init(&prs, 100);
+	if (prs_init(&prs, 1000) == NULL) {
+		log_error("cutils", "ebnf", NULL, "failed to intialize parser");
+		lex_free(&lex);
+		return NULL;
+	}
 
 	bnf_t bnf = { 0 };
-	bnf_get_stx(&bnf);
+	if (bnf_get_stx(&bnf) == NULL) {
+		log_error("cutils", "ebnf", NULL, "failed to get bnf syntax");
+		prs_free(&prs);
+		lex_free(&lex);
+		return NULL;
+	}
 	prs_node_t prs_root = prs_parse(&prs, &bnf.stx, bnf.file, &lex);
 	bnf_free(&bnf);
 

@@ -11,9 +11,9 @@ TEST(t_json_init_free)
 	json_t json = { 0 };
 
 	EXPECT_EQ(json_init(NULL, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(json_init(&json, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(json_init(&json, 0), &json);
 
 	EXPECT_NE(json.values.data, NULL);
@@ -34,9 +34,9 @@ TEST(t_json_add_val)
 	json_init(&json, 0);
 
 	EXPECT_EQ(json_add_val(NULL, JSON_END, str_null(), JSON_INT(0)), JSON_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(json_add_val(&json, JSON_END, str_null(), JSON_INT(0)), JSON_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_NE(json_add_val(&json, JSON_END, STRH(""), JSON_INT(0)), JSON_END);
 	EXPECT_EQ(json_add_val(&json, 5, str_null(), JSON_INT(0)), JSON_END);
 	EXPECT_EQ(json_add_val(&json, 0, str_null(), JSON_INT(0)), JSON_END);

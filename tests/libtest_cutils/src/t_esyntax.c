@@ -11,10 +11,10 @@ TEST(t_estx_init_free)
 	estx_t estx = { 0 };
 
 	EXPECT_EQ(estx_init(NULL, 0, 0), NULL);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(estx_init(&estx, 1, 0), NULL);
 	EXPECT_EQ(estx_init(&estx, 0, 1), NULL);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(estx_init(&estx, 0, 0), &estx);
 
 	EXPECT_NE(estx.rules.data, NULL);
@@ -37,9 +37,9 @@ TEST(t_estx_add_rule)
 	estx_init(&estx, 0, 0);
 
 	EXPECT_EQ(estx_add_rule(NULL, str_null()), ESTX_RULE_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(estx_add_rule(&estx, str_null()), ESTX_RULE_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(estx_add_rule(&estx, STRH("")), 0);
 
 	estx_free(&estx);
@@ -74,9 +74,9 @@ TEST(t_estx_create_term)
 	estx_init(&estx, 0, 0);
 
 	EXPECT_EQ(ESTX_TERM_RULE(NULL, -1, 0), ESTX_TERM_END);
-	mem_oom(1);
+	mem_soom(0);
 	EXPECT_EQ(ESTX_TERM_RULE(&estx, -1, 0), ESTX_TERM_END);
-	mem_oom(0);
+	mem_eoom();
 	EXPECT_EQ(ESTX_TERM_RULE(&estx, -1, 0), 0);
 
 	estx_free(&estx);
