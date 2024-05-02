@@ -37,6 +37,11 @@ TEST(t_prs_add_node)
 	prs_t prs = { 0 };
 	prs_init(&prs, 0);
 
+	EXPECT_EQ(prs_add(NULL, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN }), PRS_NODE_END);
+	mem_oom(1);
+	EXPECT_EQ(prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN }), PRS_NODE_END);
+	mem_oom(0);
+
 	prs_node_t parent = prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN });
 	prs_node_t child  = prs_add(&prs, (prs_node_data_t){ .type = PRS_NODE_UNKNOWN });
 

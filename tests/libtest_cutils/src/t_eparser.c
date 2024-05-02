@@ -37,6 +37,11 @@ TEST(t_eprs_add_node)
 	eprs_t eprs = { 0 };
 	eprs_init(&eprs, 0);
 
+	EXPECT_EQ(eprs_add(NULL, (eprs_node_data_t){ .type = EPRS_NODE_UNKNOWN }), EPRS_NODE_END);
+	mem_oom(1);
+	EXPECT_EQ(eprs_add(&eprs, (eprs_node_data_t){ .type = EPRS_NODE_UNKNOWN }), EPRS_NODE_END);
+	mem_oom(0);
+
 	eprs_node_t parent = eprs_add(&eprs, (eprs_node_data_t){ .type = EPRS_NODE_UNKNOWN });
 	eprs_node_t child  = eprs_add(&eprs, (eprs_node_data_t){ .type = EPRS_NODE_UNKNOWN });
 
@@ -195,7 +200,6 @@ TEST(t_eprs_parse_cache)
 	END;
 }
 
-#include "log.h"
 TEST(t_eprs_parse_ebnf)
 {
 	START;
@@ -243,6 +247,25 @@ TEST(t_eprs_parse_ebnf)
 		lex_free(&lex);
 	}
 
+	{
+		str_t bnf = STR("::");
+
+		lex_t lex = { 0 };
+		lex_init(&lex, 1);
+		lex_tokenize(&lex, bnf);
+
+		estx_t estx = { 0 };
+		estx_init(&estx, 0, 0);
+
+		estx_rule_t rule = estx_add_rule(&estx, STRH(""));
+		estx_rule_set_term(&estx, rule, ESTX_TERM_LITERAL(&estx, STRH("::="), ESTX_TERM_OCC_ONE));
+
+		EXPECT_EQ(eprs_parse(&eprs, &estx, rule, &lex), EPRS_NODE_END);
+
+		estx_free(&estx);
+		lex_free(&lex);
+	}
+
 	estx_t estx = { 0 };
 	lex_t lex   = { 0 };
 	prs_t prs   = { 0 };
@@ -282,7 +305,7 @@ TEST(t_eprs_parse_ebnf)
 	}
 
 	{
-		str_t sbnf = STR("<file> ::= <");
+		str_t sbnf = STR("<file> ::= ");
 
 		lex_t lex = { 0 };
 		lex_init(&lex, 1);
@@ -295,7 +318,7 @@ TEST(t_eprs_parse_ebnf)
 	}
 
 	{
-		str_t sebnf = STR("<file> ::= ");
+		str_t sebnf = STR("");
 
 		lex_t lex = { 0 };
 		lex_init(&lex, 1);
