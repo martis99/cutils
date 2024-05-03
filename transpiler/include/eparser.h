@@ -57,4 +57,6 @@ int eprs_print(const eprs_t *eprs, eprs_node_t node, print_dst_t dst);
 #define EPRS_NODE_CON(_prs)		  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_CON })
 #define EPRS_NODE_GROUP(_prs)		  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_GROUP })
 
+#define eprs_node_foreach tree_foreach_child
+
 #endif

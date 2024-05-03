@@ -2,27 +2,17 @@
 
 #include "log.h"
 
-typedef struct sec_data_s {
-	str_t name;
-	ini_pair_t pairs;
-} sec_data_t;
-
-typedef struct pair_data_s {
-	str_t key;
-	ini_val_t vals;
-} pair_data_t;
-
 ini_t *ini_init(ini_t *ini, uint secs_cap, uint pairs_cap, uint vals_cap)
 {
 	if (ini == NULL) {
 		return NULL;
 	}
 
-	if (arr_init(&ini->secs, secs_cap, sizeof(sec_data_t)) == NULL) {
+	if (arr_init(&ini->secs, secs_cap, sizeof(ini_sec_data_t)) == NULL) {
 		return NULL;
 	}
 
-	if (list_init(&ini->pairs, pairs_cap, sizeof(pair_data_t)) == NULL) {
+	if (list_init(&ini->pairs, pairs_cap, sizeof(ini_pair_data_t)) == NULL) {
 		return NULL;
 	}
 
@@ -46,14 +36,14 @@ void ini_free(ini_t *ini)
 	}
 	list_free(&ini->vals);
 
-	pair_data_t *pair;
+	ini_pair_data_t *pair;
 	list_foreach_all(&ini->pairs, pair)
 	{
 		str_free(&pair->key);
 	}
 	list_free(&ini->pairs);
 
-	sec_data_t *sec;
+	ini_sec_data_t *sec;
 	arr_foreach(&ini->secs, sec)
 	{
 		str_free(&sec->name);
@@ -67,14 +57,14 @@ ini_sec_t ini_add_sec(ini_t *ini, str_t name)
 		return INI_SEC_END;
 	}
 
-	ini_sec_t sec	 = arr_add(&ini->secs);
-	sec_data_t *data = arr_get(&ini->secs, sec);
+	ini_sec_t sec	     = arr_add(&ini->secs);
+	ini_sec_data_t *data = arr_get(&ini->secs, sec);
 	if (data == NULL) {
 		log_error("cutils", "ini", NULL, "failed to add section");
 		return INI_SEC_END;
 	}
 
-	*data = (sec_data_t){
+	*data = (ini_sec_data_t){
 		.name  = name,
 		.pairs = INI_PAIR_END,
 	};
@@ -88,7 +78,7 @@ ini_pair_t ini_add_pair(ini_t *ini, ini_sec_t sec, str_t key)
 		return INI_PAIR_END;
 	}
 
-	sec_data_t *secd = arr_get(&ini->secs, sec);
+	ini_sec_data_t *secd = arr_get(&ini->secs, sec);
 	if (secd == NULL) {
 		log_error("cutils", "ini", NULL, "failed to get section");
 		return INI_PAIR_END;
@@ -97,13 +87,13 @@ ini_pair_t ini_add_pair(ini_t *ini, ini_sec_t sec, str_t key)
 	ini_pair_t pair;
 	list_add_next_node(&ini->pairs, secd->pairs, pair);
 
-	pair_data_t *data = list_get_data(&ini->pairs, pair);
+	ini_pair_data_t *data = list_get_data(&ini->pairs, pair);
 	if (data == NULL) {
 		log_error("cutils", "ini", NULL, "failed to add value");
 		return INI_PAIR_END;
 	}
 
-	*data = (pair_data_t){
+	*data = (ini_pair_data_t){
 		.key  = key,
 		.vals = INI_VAL_END,
 	};
@@ -117,7 +107,7 @@ ini_val_t ini_add_val(ini_t *ini, ini_pair_t pair, str_t val)
 		return INI_VAL_END;
 	}
 
-	pair_data_t *paird = list_get_data(&ini->pairs, pair);
+	ini_pair_data_t *paird = list_get_data(&ini->pairs, pair);
 	if (paird == NULL) {
 		log_error("cutils", "ini", NULL, "failed to get pair");
 		return INI_VAL_END;
@@ -145,7 +135,7 @@ int ini_print(const ini_t *ini, print_dst_t dst)
 
 	int off	  = dst.off;
 	int first = 1;
-	sec_data_t *sec;
+	ini_sec_data_t *sec;
 	arr_foreach(&ini->secs, sec)
 	{
 		if (!first) {
@@ -156,7 +146,7 @@ int ini_print(const ini_t *ini, print_dst_t dst)
 			dst.off += dprintf(dst, "[%.*s]\n", sec->name.len, sec->name.data);
 		}
 
-		pair_data_t *pair;
+		ini_pair_data_t *pair;
 		list_foreach(&ini->pairs, sec->pairs, pair)
 		{
 			if (pair->key.data) {

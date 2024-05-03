@@ -81,7 +81,7 @@ void ini_parse_pair(const ini_prs_t *ini_prs, eprs_t *eprs, eprs_node_t prs_pair
 
 	eprs_node_t prs_vals = eprs_get_rule(eprs, prs_pair, ini_prs->vals);
 	eprs_node_t child;
-	tree_foreach_child(&eprs->nodes, prs_vals, child)
+	eprs_node_foreach(&eprs->nodes, prs_vals, child)
 	{
 		eprs_node_t prs_val = eprs_get_rule(eprs, child, ini_prs->val);
 		if (prs_val < eprs->nodes.cnt) {
@@ -99,7 +99,7 @@ void ini_parse_file(const ini_prs_t *ini_prs, eprs_t *eprs, eprs_node_t file, in
 	ini_sec_t sec = INI_SEC_END;
 
 	eprs_node_t child;
-	tree_foreach_child(&eprs->nodes, prs_ini, child)
+	eprs_node_foreach(&eprs->nodes, prs_ini, child)
 	{
 		eprs_node_t prs_sec = eprs_get_rule(eprs, child, ini_prs->sec);
 		if (prs_sec < eprs->nodes.cnt) {
