@@ -394,6 +394,10 @@ int str_rreplaces(str_t *str, const str_t *from, const str_t *to, size_t cnt)
 
 int str_print(str_t str, print_dst_t dst)
 {
+	if (str.data == NULL) {
+		return 0;
+	}
+
 	int off = dst.off;
 
 	for (size_t i = 0; i < str.len; i++) {

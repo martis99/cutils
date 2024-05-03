@@ -97,7 +97,13 @@ eprs_node_t eprs_get_rule(const eprs_t *eprs, eprs_node_t parent, estx_rule_t ru
 		switch (cdata->type) {
 		case EPRS_NODE_ALT:
 		case EPRS_NODE_CON:
-		case EPRS_NODE_GROUP: return eprs_get_rule(eprs, child, rule);
+		case EPRS_NODE_GROUP: {
+			eprs_node_t ret = eprs_get_rule(eprs, child, rule);
+			if (ret < eprs->nodes.cnt) {
+				return ret;
+			}
+			break;
+		}
 		case EPRS_NODE_RULE:
 			if (cdata->val.rule == rule) {
 				return child;
@@ -319,6 +325,10 @@ static int eprs_parse_terms(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id,
 	}
 
 	while (ret == 0) {
+		if (cur == *off) {
+			log_warn("cutils", "eparser", NULL, "loop detected");
+			break;
+		}
 		cur = *off;
 		ret = eprs_parse_term(eprs, rule, term_id, off, node, err);
 	}

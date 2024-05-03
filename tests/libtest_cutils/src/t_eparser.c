@@ -200,6 +200,51 @@ TEST(t_eprs_parse_cache)
 	END;
 }
 
+TEST(t_eprs_parse_loop)
+{
+	START;
+
+	eprs_t eprs = { 0 };
+	eprs_init(&eprs, 100);
+
+	lex_t lex = { 0 };
+	lex_init(&lex, 100);
+
+	estx_t estx = { 0 };
+	estx_init(&estx, 10, 10);
+
+	const estx_rule_t file = estx_add_rule(&estx, STR("file"));
+	const estx_rule_t line = estx_add_rule(&estx, STR("line"));
+	const estx_rule_t val  = estx_add_rule(&estx, STR("val"));
+
+	estx_rule_set_term(&estx, file, ESTX_TERM_RULE(&estx, line, ESTX_TERM_OCC_OPT | ESTX_TERM_OCC_REP));
+	estx_term_add_term(&estx, file, ESTX_TERM_TOKEN(&estx, TOKEN_EOF, ESTX_TERM_OCC_ONE));
+	estx_rule_set_term(&estx, line, ESTX_TERM_RULE(&estx, val, ESTX_TERM_OCC_OPT));
+	estx_rule_set_term(&estx, val, ESTX_TERM_LITERAL(&estx, STR("a"), ESTX_TERM_OCC_ONE));
+
+	str_t bnf = STR("a");
+
+	lex_tokenize(&lex, bnf);
+	lex.tokens.cnt--; //Remove EOF
+
+	eprs_node_t root = eprs_parse(&eprs, &estx, file, &lex);
+	EXPECT_EQ(root, 0);
+
+	char buf[512] = { 0 };
+	EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, sizeof(buf), 0)), 57);
+	EXPECT_STR(buf, "file\n"
+			"├─line\n"
+			"│ └─val\n"
+			"│   └─'a'\n"
+			"└─line\n");
+
+	eprs_free(&eprs);
+	lex_free(&lex);
+	estx_free(&estx);
+
+	END;
+}
+
 TEST(t_eprs_parse_ebnf)
 {
 	START;
@@ -377,6 +422,7 @@ TEST(t_eprs_parse)
 	SSTART;
 
 	RUN(t_eprs_parse_cache);
+	RUN(t_eprs_parse_loop);
 	RUN(t_eprs_parse_ebnf);
 
 	SEND;

@@ -1,0 +1,6 @@
+NAME: ini
+TYPE: LIB
+SOURCE: src
+INCLUDE: include
+DEPENDS: cutils, transpiler
+INCLUDES: cutils, transpiler

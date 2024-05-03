@@ -263,5 +263,5 @@ estx_rule_t estx_from_ebnf(const ebnf_t *ebnf, const prs_t *prs, prs_node_t root
 
 	estx_compile(estx);
 
-	return root;
+	return estx_root;
 }

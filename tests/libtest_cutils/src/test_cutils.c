@@ -20,6 +20,8 @@ TEST(tests)
 	RUN(t_eparser);
 	RUN(t_esyntax);
 	RUN(t_file);
+	RUN(t_ini);
+	RUN(t_ini_parse);
 	RUN(t_json);
 	RUN(t_lexer);
 	RUN(t_list);

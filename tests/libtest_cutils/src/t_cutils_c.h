@@ -15,6 +15,8 @@ STEST(t_ebnf);
 STEST(t_eparser);
 STEST(t_esyntax);
 STEST(t_file);
+STEST(t_ini);
+STEST(t_ini_parse);
 STEST(t_json);
 STEST(t_lexer);
 STEST(t_list);

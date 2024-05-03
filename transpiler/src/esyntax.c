@@ -287,7 +287,11 @@ int estx_print(const estx_t *estx, print_dst_t dst)
 	arr_foreach(&estx->rules, rule)
 	{
 		dst.off += dprintf(dst, "%.*s%*s =", rule->name.len, rule->name.data, MAX(estx->max_rule_len - rule->name.len, 0), "");
-		dst.off += estx_term_print(estx, rule->terms, dst);
+		if (rule->terms >= estx->terms.cnt) {
+			log_error("cutils", "esyntax", NULL, "failed to get rule '%.*s' terms", rule->name.len, rule->name.data);
+		} else {
+			dst.off += estx_term_print(estx, rule->terms, dst);
+		}
 		dst.off += dprintf(dst, "\n");
 	}
 

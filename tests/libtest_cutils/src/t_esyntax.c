@@ -120,6 +120,24 @@ TEST(t_estx_term_add_term)
 	END;
 }
 
+TEST(t_estx_print_no_term)
+{
+	START;
+
+	estx_t estx = { 0 };
+	estx_init(&estx, 0, 0);
+
+	estx_add_rule(&estx, STRH("file"));
+
+	char buf[64] = { 0 };
+	EXPECT_EQ(estx_print(&estx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 11);
+	EXPECT_STR(buf, "file     =\n");
+
+	estx_free(&estx);
+
+	END;
+}
+
 TEST(t_estx_compile_print)
 {
 	START;
@@ -216,6 +234,7 @@ STEST(t_esyntax)
 	RUN(t_estx_create_term);
 	RUN(t_estx_rule_set_term);
 	RUN(t_estx_term_add_term);
+	RUN(t_estx_print_no_term);
 	RUN(t_estx_compile_print);
 	RUN(t_estx_print_tree);
 

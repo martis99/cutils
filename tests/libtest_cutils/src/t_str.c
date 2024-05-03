@@ -631,6 +631,7 @@ TEST(t_str_print)
 	str_t str = strc("abc", 3);
 
 	char buf[8] = {0};
+	EXPECT_EQ(str_print(str_null(), PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 	EXPECT_EQ(str_print(str, PRINT_DST_BUF(buf, sizeof(buf), 0)), 3);
 
 	EXPECT_STR(buf, "abc");
