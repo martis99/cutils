@@ -90,22 +90,18 @@ eprs_node_t eprs_get_rule(const eprs_t *eprs, eprs_node_t parent, estx_rule_t ru
 		return EPRS_NODE_END;
 	}
 
+	eprs_node_data_t *data = tree_get_data(&eprs->nodes, parent);
+	if (data && data->type == EPRS_NODE_RULE && data->val.rule == rule) {
+		return parent;
+	}
+
 	eprs_node_t child;
 	tree_foreach_child(&eprs->nodes, parent, child)
 	{
-		eprs_node_data_t *cdata = tree_get_data(&eprs->nodes, child);
-		switch (cdata->type) {
-		case EPRS_NODE_ALT:
-		case EPRS_NODE_CON:
-		case EPRS_NODE_GROUP: {
-			eprs_node_t ret = eprs_get_rule(eprs, child, rule);
-			if (ret < eprs->nodes.cnt) {
-				return ret;
-			}
-			break;
-		}
+		data = tree_get_data(&eprs->nodes, child);
+		switch (data->type) {
 		case EPRS_NODE_RULE:
-			if (cdata->val.rule == rule) {
+			if (data->val.rule == rule) {
 				return child;
 			}
 			break;
@@ -127,10 +123,7 @@ int eprs_get_str(const eprs_t *eprs, eprs_node_t parent, str_t *out)
 	{
 		eprs_node_data_t *data = tree_get_data(&eprs->nodes, child);
 		switch (data->type) {
-		case EPRS_NODE_RULE:
-		case EPRS_NODE_ALT:
-		case EPRS_NODE_CON:
-		case EPRS_NODE_GROUP: eprs_get_str(eprs, child, out); break;
+		case EPRS_NODE_RULE: eprs_get_str(eprs, child, out); break;
 		case EPRS_NODE_TOKEN: {
 			const token_t *token = lex_get_token(eprs->lex, data->token);
 			if (token == NULL) {
@@ -238,19 +231,16 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 		return 0;
 	}
 	case ESTX_TERM_ALT: {
-		uint node_cnt = eprs->nodes.cnt;
-
 		estx_term_t child_id;
 		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
 		{
-			eprs_node_t child0 = EPRS_NODE_ALT(eprs, 0);
-			lex_token_t cur	   = *off;
-			if (eprs_parse_terms(eprs, rule, child_id, off, child0, err)) {
+			lex_token_t cur = *off;
+			uint nodes_cnt	= eprs->nodes.cnt;
+			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "alt: failed");
-				eprs->nodes.cnt = node_cnt;
+				eprs->nodes.cnt = nodes_cnt;
 				*off		= cur;
 			} else {
-				eprs_add_node(eprs, node, child0);
 				log_trace("cutils", "parser", NULL, "alt: success");
 				return 0;
 			}
@@ -262,13 +252,13 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 		estx_term_t child_id;
 		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
 		{
-			eprs_node_t child0 = EPRS_NODE_CON(eprs);
-			if (eprs_parse_terms(eprs, rule, child_id, off, child0, err)) {
+			uint nodes_cnt = eprs->nodes.cnt;
+			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "con: failed");
-				*off = cur;
+				eprs->nodes.cnt = nodes_cnt;
+				*off		= cur;
 				return 1;
 			} else {
-				eprs_add_node(eprs, node, child0);
 				log_trace("cutils", "parser", NULL, "con: success");
 			}
 		}
@@ -279,13 +269,13 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 		estx_term_t child_id;
 		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
 		{
-			eprs_node_t child0 = EPRS_NODE_GROUP(eprs);
-			if (eprs_parse_terms(eprs, rule, child_id, off, child0, err)) {
+			uint nodes_cnt = eprs->nodes.cnt;
+			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "group: failed");
-				*off = cur;
+				eprs->nodes.cnt = nodes_cnt;
+				*off		= cur;
 				return 1;
 			} else {
-				eprs_add_node(eprs, node, child0);
 				log_trace("cutils", "parser", NULL, "group: success");
 			}
 		}
@@ -436,18 +426,6 @@ static int print_nodes(void *data, print_dst_t dst, const void *priv)
 	case EPRS_NODE_LITERAL: {
 		const str_t literal = node->val.literal;
 		dst.off += dprintf(dst, "\'%.*s\'\n", literal.len, literal.data);
-		break;
-	}
-	case EPRS_NODE_ALT: {
-		dst.off += dprintf(dst, "alt\n");
-		break;
-	}
-	case EPRS_NODE_CON: {
-		dst.off += dprintf(dst, "con\n");
-		break;
-	}
-	case EPRS_NODE_GROUP: {
-		dst.off += dprintf(dst, "grp\n");
 		break;
 	}
 	default: break;

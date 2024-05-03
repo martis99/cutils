@@ -21,7 +21,7 @@ ini_prs_t *ini_prs_init(ini_prs_t *ini_prs)
 			 "key    = ALPHA (ALPHA | '_')*\n"
 			 "vals   = val (',' spaces val)*\n"
 			 "val    = char+\n"
-			 "char   = ALPHA | DIGIT | '/' | '\\' | ':' | '.' | ' '\n"
+			 "char   = ALPHA | DIGIT | '_' | '-' | '$' | '(' | ')' | '/' | '\\' | ':' | '.' | '=' | '+' | ' '\n"
 			 "spaces = ' '*\n");
 
 	lex_t lex = { 0 };

@@ -14,9 +14,6 @@ typedef enum eprs_node_type_e {
 	EPRS_NODE_RULE,
 	EPRS_NODE_TOKEN,
 	EPRS_NODE_LITERAL,
-	EPRS_NODE_ALT,
-	EPRS_NODE_CON,
-	EPRS_NODE_GROUP,
 } eprs_node_type_t;
 
 typedef struct eprs_node_data_s {
@@ -53,9 +50,6 @@ int eprs_print(const eprs_t *eprs, eprs_node_t node, print_dst_t dst);
 #define EPRS_NODE_RULE(_prs, _rule)	  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_RULE, .val.rule = _rule })
 #define EPRS_NODE_TOKEN(_prs, _token)	  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_TOKEN, .token = _token })
 #define EPRS_NODE_LITERAL(_prs, _literal) eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_LITERAL, .val.literal = _literal })
-#define EPRS_NODE_ALT(_prs, _alt)	  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_ALT, .val.alt = _alt })
-#define EPRS_NODE_CON(_prs)		  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_CON })
-#define EPRS_NODE_GROUP(_prs)		  eprs_add(_prs, (eprs_node_data_t){ .type = EPRS_NODE_GROUP })
 
 #define eprs_node_foreach tree_foreach_child
 
