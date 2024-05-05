@@ -156,10 +156,12 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 
 	switch (term->type) {
 	case ESTX_TERM_RULE: {
+		uint nodes_cnt	  = eprs->nodes.cnt;
 		eprs_node_t child = EPRS_NODE_RULE(eprs, term->val.rule);
 		lex_token_t cur	  = *off;
 		if (eprs_parse_rule(eprs, term->val.rule, off, child, err)) {
-			*off = cur;
+			eprs->nodes.cnt = nodes_cnt;
+			*off		= cur;
 			return 1;
 		}
 		eprs_add_node(eprs, node, child);
@@ -232,7 +234,7 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 	}
 	case ESTX_TERM_ALT: {
 		estx_term_t child_id;
-		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
+		estx_term_foreach(&eprs->estx->terms, term_id, child_id)
 		{
 			lex_token_t cur = *off;
 			uint nodes_cnt	= eprs->nodes.cnt;
@@ -250,7 +252,7 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 	case ESTX_TERM_CON: {
 		lex_token_t cur = *off;
 		estx_term_t child_id;
-		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
+		estx_term_foreach(&eprs->estx->terms, term_id, child_id)
 		{
 			uint nodes_cnt = eprs->nodes.cnt;
 			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
@@ -267,7 +269,7 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 	case ESTX_TERM_GROUP: {
 		lex_token_t cur = *off;
 		estx_term_t child_id;
-		tree_foreach_child(&eprs->estx->terms, term_id, child_id)
+		estx_term_foreach(&eprs->estx->terms, term_id, child_id)
 		{
 			uint nodes_cnt = eprs->nodes.cnt;
 			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {

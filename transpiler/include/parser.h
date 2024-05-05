@@ -14,7 +14,6 @@ typedef enum prs_node_type_e {
 	PRS_NODE_RULE,
 	PRS_NODE_TOKEN,
 	PRS_NODE_LITERAL,
-	PRS_NODE_ALT,
 } prs_node_type_t;
 
 typedef struct prs_node_data_s {
@@ -23,7 +22,6 @@ typedef struct prs_node_data_s {
 	union {
 		stx_rule_t rule;
 		str_t literal;
-		int alt;
 	} val;
 } prs_node_data_t;
 
@@ -51,6 +49,5 @@ int prs_print(const prs_t *prs, prs_node_t node, print_dst_t dst);
 #define PRS_NODE_RULE(_prs, _rule)	 prs_add(_prs, (prs_node_data_t){ .type = PRS_NODE_RULE, .val.rule = _rule })
 #define PRS_NODE_TOKEN(_prs, _token)	 prs_add(_prs, (prs_node_data_t){ .type = PRS_NODE_TOKEN, .token = _token })
 #define PRS_NODE_LITERAL(_prs, _literal) prs_add(_prs, (prs_node_data_t){ .type = PRS_NODE_LITERAL, .val.literal = _literal })
-#define PRS_NODE_ALT(_prs, _alt)	 prs_add(_prs, (prs_node_data_t){ .type = PRS_NODE_ALT, .val.alt = _alt })
 
 #endif

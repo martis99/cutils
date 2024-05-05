@@ -414,10 +414,8 @@ static void example_parser()
 	stx_rule_t file_rule = stx_add_rule(&stx, STR("file"));
 
 	prs_node_t root	  = prs_add_node(&prs, PRS_NODE_END, PRS_NODE_RULE(&prs, file_rule));
-	prs_node_t alt0	  = prs_add_node(&prs, root, PRS_NODE_ALT(&prs, 0));
-	prs_node_t child0 = prs_add_node(&prs, alt0, PRS_NODE_TOKEN(&prs, a));
-	prs_node_t alt1	  = prs_add_node(&prs, child0, PRS_NODE_ALT(&prs, 1));
-	prs_add_node(&prs, alt1, PRS_NODE_TOKEN(&prs, b));
+	prs_node_t child0 = prs_add_node(&prs, root, PRS_NODE_TOKEN(&prs, a));
+	prs_add_node(&prs, child0, PRS_NODE_TOKEN(&prs, b));
 
 	prs_print(&prs, root, PRINT_DST_STD());
 
@@ -450,7 +448,7 @@ static void example_syntax()
 
 	stx_rule_add_term(&stx, c, STX_TERM_RULE(&stx, functions));
 
-	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(&stx, function), STX_TERM_NONE());
+	stx_rule_add_arr(&stx, functions, STX_TERM_RULE(&stx, function), STX_TERM_NONE(&stx));
 
 	stx_rule_add_term(&stx, function, STX_TERM_RULE(&stx, type));
 	stx_rule_add_term(&stx, function, STX_TERM_RULE(&stx, name));
