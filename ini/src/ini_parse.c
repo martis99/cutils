@@ -51,10 +51,10 @@ ini_prs_t *ini_prs_init(ini_prs_t *ini_prs)
 	return ini_prs;
 }
 
-ini_prs_t *ini_prs_free(ini_prs_t *ini_prs)
+void ini_prs_free(ini_prs_t *ini_prs)
 {
 	if (ini_prs == NULL) {
-		return NULL;
+		return;
 	}
 
 	estx_free(&ini_prs->estx);

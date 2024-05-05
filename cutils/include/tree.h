@@ -26,6 +26,8 @@ tnode_t tree_add_next(tree_t *tree, tnode_t node);
 tnode_t tree_set_next(tree_t *tree, tnode_t node, tnode_t next);
 tnode_t tree_get_next(const tree_t *tree, tnode_t node);
 
+void tree_set_cnt(tree_t *tree, uint cnt);
+
 void *tree_get_data(const tree_t *tree, tnode_t node);
 
 typedef int (*tree_iterate_cb)(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv);

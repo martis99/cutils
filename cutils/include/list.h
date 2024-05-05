@@ -20,6 +20,8 @@ lnode_t list_add_next(list_t *list, lnode_t node);
 lnode_t list_set_next(list_t *list, lnode_t node, lnode_t next);
 lnode_t list_get_next(const list_t *list, lnode_t node);
 
+void list_set_cnt(list_t *list, uint cnt);
+
 void *list_get_data(const list_t *list, lnode_t node);
 
 typedef int (*list_print_cb)(void *value, print_dst_t dst, const void *priv);

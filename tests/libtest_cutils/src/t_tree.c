@@ -281,6 +281,23 @@ TEST(t_tree_set)
 	SEND;
 }
 
+TEST(t_tree_set_cnt)
+{
+	START;
+
+	tree_t tree = { 0 };
+	tree_init(&tree, 1, sizeof(int));
+
+	tree_add_child(&tree, tree_add(&tree));
+
+	tree_set_cnt(NULL, 0);
+	tree_set_cnt(&tree, 0);
+
+	tree_free(&tree);
+
+	END;
+}
+
 TEST(t_tree_get_data)
 {
 	START;
@@ -1170,6 +1187,7 @@ STEST(t_tree)
 
 	RUN(t_tree_init_free);
 	RUN(t_tree_adds);
+	RUN(t_tree_set_cnt);
 	RUN(t_tree_get);
 	RUN(t_tree_set);
 	RUN(t_tree_removes);

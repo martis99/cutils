@@ -238,8 +238,8 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 			uint nodes_cnt	= eprs->nodes.cnt;
 			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "alt: failed");
-				eprs->nodes.cnt = nodes_cnt;
-				*off		= cur;
+				tree_set_cnt(&eprs->nodes, nodes_cnt);
+				*off = cur;
 			} else {
 				log_trace("cutils", "parser", NULL, "alt: success");
 				return 0;
@@ -255,8 +255,8 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 			uint nodes_cnt = eprs->nodes.cnt;
 			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "con: failed");
-				eprs->nodes.cnt = nodes_cnt;
-				*off		= cur;
+				tree_set_cnt(&eprs->nodes, nodes_cnt);
+				*off = cur;
 				return 1;
 			} else {
 				log_trace("cutils", "parser", NULL, "con: success");
@@ -272,8 +272,8 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 			uint nodes_cnt = eprs->nodes.cnt;
 			if (eprs_parse_terms(eprs, rule, child_id, off, node, err)) {
 				log_trace("cutils", "eparser", NULL, "group: failed");
-				eprs->nodes.cnt = nodes_cnt;
-				*off		= cur;
+				tree_set_cnt(&eprs->nodes, nodes_cnt);
+				*off = cur;
 				return 1;
 			} else {
 				log_trace("cutils", "parser", NULL, "group: success");

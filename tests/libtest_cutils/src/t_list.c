@@ -254,6 +254,23 @@ TEST(t_list_next)
 	SEND;
 }
 
+TEST(t_list_set_cnt)
+{
+	START;
+
+	list_t list = { 0 };
+	list_init(&list, 1, sizeof(int));
+
+	list_add_next(&list, list_add(&list));
+
+	list_set_cnt(NULL, 0);
+	list_set_cnt(&list, 0);
+
+	list_free(&list);
+
+	END;
+}
+
 TEST(t_list_get_data)
 {
 	START;
@@ -383,6 +400,7 @@ STEST(t_list)
 	RUN(t_list_init_free);
 	RUN(t_list_add_remove);
 	RUN(t_list_next);
+	RUN(t_list_set_cnt);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);
 	RUN(t_list_print);

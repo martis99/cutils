@@ -16,7 +16,7 @@ typedef struct ini_prs_s {
 } ini_prs_t;
 
 ini_prs_t *ini_prs_init(ini_prs_t *ini_prs);
-ini_prs_t *ini_prs_free(ini_prs_t *ini_prs);
+void ini_prs_free(ini_prs_t *ini_prs);
 
 ini_t *ini_prs_parse(const ini_prs_t *ini_prs, str_t str, ini_t *ini);
 

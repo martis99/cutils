@@ -104,6 +104,24 @@ tnode_t tree_get_next(const tree_t *tree, tnode_t node)
 	return list_get_next(tree, node);
 }
 
+void tree_set_cnt(tree_t *tree, uint cnt)
+{
+	if (tree == NULL) {
+		return;
+	}
+
+	tnode_t node;
+	tree_foreach_all(tree, node)
+	{
+		header_t *header = tree_get_data(tree, node);
+		if (header->child >= cnt) {
+			header->child = TREE_END;
+		}
+	}
+
+	list_set_cnt(tree, cnt);
+}
+
 void *tree_get_data(const tree_t *tree, tnode_t node)
 {
 	header_t *header = get_node(tree, node);
@@ -202,7 +220,7 @@ void tree_it_next(tree_it *it)
 	if (child < it->tree->cnt) {
 		if (it->top >= TREE_MAX_DEPTH) {
 			log_error("cutils", "tree", NULL, "exceeded max depth of %d", TREE_MAX_DEPTH);
-			it->stack[it->top] = TREE_END;
+			it->stack[it->top - 1] = TREE_END;
 			return;
 		}
 		it->stack[it->top++] = child;

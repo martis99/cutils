@@ -95,6 +95,22 @@ lnode_t list_get_next(const list_t *list, lnode_t node)
 	return header->next;
 }
 
+void list_set_cnt(list_t *list, uint cnt)
+{
+	if (list == NULL) {
+		return;
+	}
+
+	header_t *val;
+	list_foreach_all(list, val)
+	{
+		if (val->next >= cnt) {
+			val->next = LIST_END;
+		}
+	}
+	list->cnt = cnt;
+}
+
 void *list_get_data(const list_t *list, lnode_t node)
 {
 	header_t *header = arr_get(list, node);
