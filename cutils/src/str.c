@@ -33,6 +33,11 @@ str_t strc(const char *cstr, size_t len)
 	};
 }
 
+str_t strs(str_t str)
+{
+	return strc(str.data, str.len);
+}
+
 str_t strn(const char *cstr, size_t len, size_t size)
 {
 	if (cstr == NULL) {

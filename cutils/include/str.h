@@ -16,6 +16,7 @@ typedef struct str_s {
 str_t str_null();
 str_t strz(size_t size);
 str_t strc(const char *cstr, size_t len);
+str_t strs(str_t str);
 str_t strn(const char *cstr, size_t len, size_t size);
 str_t strv(const char *fmt, va_list args);
 str_t strf(const char *fmt, ...);

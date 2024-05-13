@@ -33,6 +33,15 @@ TEST(t_strc)
 	END;
 }
 
+TEST(t_strs)
+{
+	START;
+
+	strs(STR(NULL));
+
+	END;
+}
+
 TEST(t_strn)
 {
 	START;
@@ -630,7 +639,7 @@ TEST(t_str_print)
 
 	str_t str = strc("abc", 3);
 
-	char buf[8] = {0};
+	char buf[8] = { 0 };
 	EXPECT_EQ(str_print(str_null(), PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 	EXPECT_EQ(str_print(str, PRINT_DST_BUF(buf, sizeof(buf), 0)), 3);
 
@@ -647,6 +656,7 @@ STEST(t_str)
 	RUN(t_str_null);
 	RUN(t_strz);
 	RUN(t_strc);
+	RUN(t_strs);
 	RUN(t_strn);
 	RUN(t_strf);
 	RUN(t_strb);
