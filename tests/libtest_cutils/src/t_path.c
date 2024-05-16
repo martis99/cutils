@@ -106,18 +106,61 @@ TEST(t_path_calc_rel)
 	EXPECT_EQ(path_calc_rel(NULL, 0, NULL, 0, NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), NULL, 0, NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), CSTR("a/b/c/d/"), NULL), 1);
-	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), CSTR("a/b/c/d/"), &path), 0);
+
 #if defined(C_WIN)
-	EXPECT_STR(path.path, "\\d/");
+	#define SEP "\\"
 #else
-	EXPECT_STR(path.path, "/d/");
+	#define SEP "/"
 #endif
-	EXPECT_EQ(path_calc_rel(CSTR("a/b/c"), CSTR("a/d/e/f"), &path), 0);
-#if defined(C_WIN)
-	EXPECT_STR(path.path, "..\\..\\d/e/f");
-#else
-	EXPECT_STR(path.path, "../../d/e/f");
-#endif
+
+	EXPECT_EQ(path_calc_rel(CSTR("a"), CSTR("a"), &path), 0);
+	EXPECT_STR(path.path, "");
+
+	EXPECT_EQ(path_calc_rel(CSTR("/a"), CSTR("/a"), &path), 0);
+	EXPECT_STR(path.path, "");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a"), CSTR("b"), &path), 0);
+	EXPECT_STR(path.path, "b");
+
+	EXPECT_EQ(path_calc_rel(CSTR("/a"), CSTR("/b"), &path), 0);
+	EXPECT_STR(path.path, "b");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/"), CSTR("a/"), &path), 0);
+	EXPECT_STR(path.path, "");
+
+	EXPECT_EQ(path_calc_rel(CSTR("/a/"), CSTR("/a/"), &path), 0);
+	EXPECT_STR(path.path, "");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/"), CSTR("b/"), &path), 0);
+	EXPECT_STR(path.path, ".." SEP "b/");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/"), CSTR("a/b/"), &path), 0);
+	EXPECT_STR(path.path, "b/");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/b"), CSTR("a/"), &path), 0);
+	EXPECT_STR(path.path, "");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/b"), CSTR("a"), &path), 0);
+	EXPECT_STR(path.path, ".." SEP "a");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/b/"), CSTR("a/"), &path), 0);
+	EXPECT_STR(path.path, ".." SEP);
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/b/"), CSTR("a"), &path), 0);
+	EXPECT_STR(path.path, ".." SEP ".." SEP "a");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/b"), CSTR("a/bc"), &path), 0);
+	EXPECT_STR(path.path, "bc");
+
+	EXPECT_EQ(path_calc_rel(CSTR("a/bc"), CSTR("a/b"), &path), 0);
+	EXPECT_STR(path.path, "b");
+
+	EXPECT_EQ(path_calc_rel(CSTR("/"), CSTR("/a"), &path), 0);
+	EXPECT_STR(path.path, "a");
+
+	EXPECT_EQ(path_calc_rel(CSTR("/a"), CSTR("/"), &path), 0);
+	EXPECT_STR(path.path, "");
+
 	END;
 }
 

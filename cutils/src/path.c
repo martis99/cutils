@@ -30,7 +30,7 @@ path_t *path_child_s(path_t *path, const char *dir, size_t len, char s)
 		return NULL;
 	}
 
-	if (s != 0) {
+	if (s != '\0' && path->len > 0 && path->path[path->len - 1] != '/' && path->path[path->len - 1] != '\\') {
 		path->path[path->len++] = s;
 	}
 	mem_cpy(path->path + path->len, len, dir, len);
@@ -95,35 +95,36 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 		return 1;
 	}
 
-	size_t dif	  = 0;
-	size_t last_slash = 0;
+	int same = path_len == dest_len;
 
-	for (size_t i = 0; i < path_len; i++) {
-		if (dif == 0 && (path[i] == '\\' || path[i] == '/')) {
-			last_slash = i;
+	size_t prefix_len = -1;
+
+	for (int i = 0; i < path_len && i < dest_len; i++) {
+		if (path[i] != dest[i]) {
+			same = 0;
+			break;
 		}
 
-		if (dif && (path[i] == '\\' || path[i] == '/')) {
-			dif++;
-		}
-
-		if (dif == 0 && (i > dest_len || path[i] != dest[i])) {
-			dif = 1;
+		if (path[i] == '/' || path[i] == '\\') {
+			prefix_len = i;
 		}
 	}
 
 	out->len = 0;
-	for (size_t i = 0; i < dif; i++) {
-		out->path[out->len++] = '.';
-		out->path[out->len++] = '.';
-		out->path[out->len++] = SEP;
+	if (same) {
+		out->path[0] = '\0';
+		return 0;
 	}
 
-	if (out->len) {
-		out->len--;
+	for (int i = prefix_len + 1; i < path_len; i++) {
+		if (path[i] == '/' || path[i] == '\\') {
+			out->path[out->len++] = '.';
+			out->path[out->len++] = '.';
+			out->path[out->len++] = SEP;
+		}
 	}
 
-	path_child(out, &dest[last_slash + 1], dest_len - last_slash - 1);
+	path_child(out, &dest[prefix_len + 1], dest_len - prefix_len - 1);
 	return 0;
 }
 
