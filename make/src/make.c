@@ -905,7 +905,10 @@ static inline int make_rule_dbg(const make_t *make, const make_rule_data_t *rule
 {
 	int off = dst.off;
 	dst.off += dprintf(dst, "RULE\n"
-				"    DEPENDS:\n");
+				"    TARGET: ");
+	dst.off += make_rule_target_print(make, &rule->target, dst);
+
+	dst.off += dprintf(dst, "\n    DEPENDS:\n");
 	const make_rule_target_data_t *depend;
 	list_foreach(&make->targets, rule->depends, depend)
 	{

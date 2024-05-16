@@ -763,12 +763,12 @@ TEST(t_make_print_rule_empty)
 
 	make_add_act(&make, make_create_rule(&make, MRULE(MSTR(STRH("rule"))), 1));
 
-	char buf[32] = { 0 };
+	char buf[64] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 7);
 	EXPECT_STR(buf, "rule:\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 35);
 
 	make_free(&make);
 
@@ -784,12 +784,12 @@ TEST(t_make_print_rule_empty_var)
 
 	make_add_act(&make, make_create_rule(&make, MRULE(MVAR(MAKE_END)), 1));
 
-	char buf[32] = { 0 };
+	char buf[64] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 3);
 	EXPECT_STR(buf, ":\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 31);
 
 	make_free(&make);
 
@@ -805,12 +805,12 @@ TEST(t_make_print_rule_empty_action)
 
 	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("rule")), STRH("action")), 1));
 
-	char buf[32] = { 0 };
+	char buf[64] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 14);
 	EXPECT_STR(buf, "rule/action:\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 18);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 42);
 
 	make_free(&make);
 
@@ -832,7 +832,7 @@ TEST(t_make_print_rule_depend)
 	EXPECT_STR(buf, "rule: depend\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 33);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 50);
 
 	make_free(&make);
 
@@ -850,12 +850,12 @@ TEST(t_make_print_rule_depends)
 	make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("depend1"))));
 	make_rule_add_depend(&make, rule, MRULE(MSTR(STRH("depend2"))));
 
-	char buf[64] = { 0 };
+	char buf[128] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 23);
 	EXPECT_STR(buf, "rule: depend1 depend2\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 50);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 67);
 
 	make_free(&make);
 
@@ -877,7 +877,7 @@ TEST(t_make_print_rule_acts)
 	make_if_add_true_act(&make, if_rule, make_create_cmd(&make, MCMD(STRH("cmd3"))));
 	make_if_add_false_act(&make, if_rule, make_create_cmd(&make, MCMD(STRH("cmd4"))));
 
-	char buf[256] = { 0 };
+	char buf[512] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 54);
 	EXPECT_STR(buf, "rule:\n"
 			"\tcmd1\n"
@@ -889,7 +889,7 @@ TEST(t_make_print_rule_acts)
 			"endif\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 246);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 263);
 
 	make_free(&make);
 
@@ -918,7 +918,7 @@ TEST(t_make_print_cmd)
 			"\t$(error msg)\n"
 			"\n");
 
-	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 188);
+	EXPECT_EQ(make_dbg(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 205);
 
 	make_free(&make);
 
