@@ -99,7 +99,7 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 
 	size_t prefix_len = -1;
 
-	for (int i = 0; i < path_len && i < dest_len; i++) {
+	for (size_t i = 0; i < path_len && i < dest_len; i++) {
 		if (path[i] != dest[i]) {
 			same = 0;
 			break;
@@ -116,7 +116,7 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 		return 0;
 	}
 
-	for (int i = prefix_len + 1; i < path_len; i++) {
+	for (size_t i = prefix_len + 1; i < path_len; i++) {
 		if (path[i] == '/' || path[i] == '\\') {
 			out->path[out->len++] = '.';
 			out->path[out->len++] = '.';

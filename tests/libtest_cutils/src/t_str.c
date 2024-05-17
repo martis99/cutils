@@ -448,6 +448,24 @@ TEST(t_str_cpyd)
 	END;
 }
 
+TEST(t_str_to_upper)
+{
+	START;
+
+	str_t src = strc("abc;", 4);
+	str_t dst = strz(5);
+
+	EXPECT_EQ(str_to_upper(src, NULL), 1);
+	EXPECT_EQ(str_to_upper(src, &dst), 0);
+
+	EXPECT_STR(dst.data, "ABC;");
+	EXPECT_EQ(dst.len, 4);
+
+	str_free(&dst);
+
+	END;
+}
+
 TEST(t_str_split)
 {
 	START;
@@ -679,6 +697,7 @@ STEST(t_str)
 	RUN(t_str_cstr);
 	RUN(t_str_cpy);
 	RUN(t_str_cpyd);
+	RUN(t_str_to_upper);
 	RUN(t_str_split);
 	RUN(t_str_split_ref);
 	RUN(t_str_split_buf);

@@ -305,6 +305,23 @@ int str_cpyd(str_t src, str_t *dst)
 	return 0;
 }
 
+int str_to_upper(str_t str, str_t *dst)
+{
+	if (dst == NULL || dst->size < str.len + 1) {
+		return 1;
+	}
+
+	int d = 'a' - 'A';
+
+	char *data = (char *)dst->data;
+	for (size_t i = 0; i < str.len; i++) {
+		data[i] = str.data[i] - (str.data[i] >= 'a' && str.data[i] <= 'z') * d;
+	}
+	data[str.len] = '\0';
+	dst->len      = str.len;
+	return 0;
+}
+
 static int append(str_t *str, const char *cstr, size_t len)
 {
 	if (str->ref && str->size == 0) {
