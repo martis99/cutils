@@ -743,7 +743,7 @@ static int make_rule_target_print(const make_t *make, const make_rule_target_dat
 
 	dst.off += make_str_print(make, target->target, dst);
 	if (target->action.data != NULL) {
-		dst.off += dprintf(dst, "/%.*s", target->action.len, target->action.data);
+		dst.off += dprintf(dst, "%.*s", target->action.len, target->action.data);
 	}
 
 	return dst.off - off;

@@ -1,13 +1,15 @@
 #include "path.h"
 
+#include "log.h"
 #include "mem.h"
+#include "str.h"
 
 #include "platform.h"
 
 #if defined(C_WIN)
-	#define SEP '\\'
+	#define CSEP '\\'
 #else
-	#define SEP '/'
+	#define CSEP '/'
 #endif
 
 path_t *path_init(path_t *path, const char *dir, size_t len)
@@ -31,6 +33,9 @@ path_t *path_child_s(path_t *path, const char *dir, size_t len, char s)
 	}
 
 	if (s != '\0' && path->len > 0 && path->path[path->len - 1] != '/' && path->path[path->len - 1] != '\\') {
+		if (s == '/' || s == '\\') {
+			log_warn("cutils", "path", NULL, "directory does not end with separator: %.*s", path->len, path->path);
+		}
 		path->path[path->len++] = s;
 	}
 	mem_cpy(path->path + path->len, len, dir, len);
@@ -43,7 +48,52 @@ path_t *path_child_s(path_t *path, const char *dir, size_t len, char s)
 
 path_t *path_child(path_t *path, const char *dir, size_t len)
 {
-	return path_child_s(path, dir, len, SEP);
+	return path_child_s(path, dir, len, CSEP);
+}
+
+path_t *path_child_dir(path_t *path, const char *dir, size_t len)
+{
+	if (path == NULL || dir == NULL || path->len + len + 2 > P_MAX_PATH) {
+		return NULL;
+	}
+
+	if (path->len > 0 && path->path[path->len - 1] != '/' && path->path[path->len - 1] != '\\') {
+		log_warn("cutils", "path", NULL, "directory does not end with separator: %.*s", path->len, path->path);
+		path->path[path->len++] = CSEP;
+	}
+	mem_cpy(path->path + path->len, len, dir, len);
+	path->len += len;
+
+	if (path->len > 0 && path->path[path->len - 1] != '/' && path->path[path->len - 1] != '\\') {
+		log_warn("cutils", "path", NULL, "directory does not end with separator: %.*s", path->len, path->path);
+		path->path[path->len++] = CSEP;
+	}
+	path->path[path->len] = '\0';
+
+	return path;
+}
+
+path_t *path_child_folder(path_t *path, const char *folder, size_t len)
+{
+	if (path == NULL || folder == NULL || path->len + len + 2 > P_MAX_PATH) {
+		return NULL;
+	}
+
+	if (path->len > 0 && path->path[path->len - 1] != '/' && path->path[path->len - 1] != '\\') {
+		log_warn("cutils", "path", NULL, "directory does not end with separator: %.*s", path->len, path->path);
+		path->path[path->len++] = CSEP;
+	}
+	mem_cpy(path->path + path->len, len, folder, len);
+	path->len += len;
+
+	if (path->len > 0 && (path->path[path->len - 1] == '/' || path->path[path->len - 1] == '\\')) {
+		log_warn("cutils", "path", NULL, "folder ends with separator: %.*s", len, folder);
+	} else {
+		path->path[path->len++] = CSEP;
+	}
+	path->path[path->len] = '\0';
+
+	return path;
 }
 
 path_t *path_parent(path_t *path)
@@ -120,7 +170,7 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 		if (path[i] == '/' || path[i] == '\\') {
 			out->path[out->len++] = '.';
 			out->path[out->len++] = '.';
-			out->path[out->len++] = SEP;
+			out->path[out->len++] = CSEP;
 		}
 	}
 
@@ -128,44 +178,39 @@ int path_calc_rel(const char *path, size_t path_len, const char *dest, size_t de
 	return 0;
 }
 
-pathv_t *pathv_path(pathv_t *pathv, const path_t *path)
+pathv_t pathv_path(const path_t *path)
 {
-	if (pathv == NULL || path == NULL) {
-		return NULL;
+	if (path == NULL) {
+		return (pathv_t){ 0 };
 	}
 
-	*pathv = (pathv_t){ .path = path->path, .len = path->len };
-	return pathv;
+	return (pathv_t){ .path = path->path, .len = path->len };
 }
 
-pathv_t *pathv_sub(pathv_t *pathv, const path_t *l, const path_t *r)
+pathv_t pathv_get_dir(pathv_t pathv, str_t *child)
 {
-	if (pathv == NULL || l == NULL || r == NULL) {
-		return NULL;
+	if (pathv.path == NULL) {
+		return (pathv_t){ 0 };
 	}
 
-	*pathv = (pathv_t){
-		.path = l->path + r->len + 1,
-		.len  = l->len - r->len - 1,
+	pathv_t dir = {
+		.len  = pathv.len,
+		.path = pathv.path,
 	};
-	return pathv;
-}
 
-pathv_t *pathv_folder(pathv_t *pathv, const path_t *path)
-{
-	if (pathv == NULL || path == NULL) {
-		return NULL;
+	if (dir.len > 0 && (dir.path[dir.len - 1] == '\\' || dir.path[dir.len - 1] == '/')) {
+		dir.len--;
 	}
 
-	size_t len = path->len;
+	size_t child_end = dir.len;
 
-	while (len > 0 && path->path[len] != '\\' && path->path[len] != '/')
-		len--;
+	while (dir.len > 0 && dir.path[dir.len - 1] != '\\' && dir.path[dir.len - 1] != '/') {
+		dir.len--;
+	}
 
-	*pathv = (pathv_t){
-		.path = path->path + len + 1,
-		.len  = path->len - len - 1,
-	};
+	if (child != NULL) {
+		*child = strc(&dir.path[dir.len], child_end - dir.len);
+	}
 
-	return pathv;
+	return dir;
 }

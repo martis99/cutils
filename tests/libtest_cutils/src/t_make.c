@@ -329,7 +329,7 @@ TEST(t_make_rule_get_target)
 
 	make_add_act(&make, make_create_rule(&make, MRULE(MVAR(var)), 0));
 	make_add_act(&make, make_create_rule(&make, MRULE(MSTR(STRH("a"))), 0));
-	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("a")), STRH("action")), 0));
+	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("a")), STRH("/action")), 0));
 
 	EXPECT_EQ(make_rule_get_target(NULL, MRULE(MSTR(STR("")))), MAKE_END);
 	EXPECT_EQ(make_rule_get_target(&make, MRULE(MSTR(STR("")))), MAKE_END);
@@ -803,7 +803,7 @@ TEST(t_make_print_rule_empty_action)
 	make_t make = { 0 };
 	make_init(&make, 1, 1, 1);
 
-	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("rule")), STRH("action")), 1));
+	make_add_act(&make, make_create_rule(&make, MRULEACT(MSTR(STRH("rule")), STRH("/action")), 1));
 
 	char buf[64] = { 0 };
 	EXPECT_EQ(make_print(&make, PRINT_DST_BUF(buf, sizeof(buf), 0)), 14);

@@ -50,6 +50,56 @@ TEST(t_path_child)
 	END;
 }
 
+TEST(t_path_child_dir)
+{
+	START;
+
+	path_t path = { 0 };
+	path_init(&path, CSTR("a"));
+
+	EXPECT_EQ(path_child_dir(NULL, NULL, 0), NULL);
+	EXPECT_EQ(path_child_dir(&path, NULL, 0), NULL);
+
+	path_init(&path, CSTR("a"));
+	EXPECT_EQ(path_child_dir(&path, CSTR("b")), &path);
+	EXPECT_STRN(path.path, "a" SEP "b" SEP, path.len);
+
+	path_init(&path, CSTR("a/"));
+	EXPECT_EQ(path_child_dir(&path, CSTR("b")), &path);
+	EXPECT_STRN(path.path, "a/b" SEP, path.len);
+
+	path_init(&path, CSTR("a/"));
+	EXPECT_EQ(path_child_dir(&path, CSTR("b/")), &path);
+	EXPECT_STRN(path.path, "a/b/", path.len);
+
+	END;
+}
+
+TEST(t_path_child_folder)
+{
+	START;
+
+	path_t path = { 0 };
+	path_init(&path, CSTR("a"));
+
+	EXPECT_EQ(path_child_folder(NULL, NULL, 0), NULL);
+	EXPECT_EQ(path_child_folder(&path, NULL, 0), NULL);
+
+	path_init(&path, CSTR("a"));
+	EXPECT_EQ(path_child_folder(&path, CSTR("b")), &path);
+	EXPECT_STRN(path.path, "a" SEP "b" SEP, path.len);
+
+	path_init(&path, CSTR("a/"));
+	EXPECT_EQ(path_child_folder(&path, CSTR("b")), &path);
+	EXPECT_STRN(path.path, "a/b" SEP, path.len);
+
+	path_init(&path, CSTR("a/"));
+	EXPECT_EQ(path_child_folder(&path, CSTR("b/")), &path);
+	EXPECT_STRN(path.path, "a/b/", path.len);
+
+	END;
+}
+
 TEST(t_path_parent)
 {
 	START;
@@ -106,12 +156,6 @@ TEST(t_path_calc_rel)
 	EXPECT_EQ(path_calc_rel(NULL, 0, NULL, 0, NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), NULL, 0, NULL), 1);
 	EXPECT_EQ(path_calc_rel(CSTR("a/b/c/"), CSTR("a/b/c/d/"), NULL), 1);
-
-#if defined(C_WIN)
-	#define SEP "\\"
-#else
-	#define SEP "/"
-#endif
 
 	EXPECT_EQ(path_calc_rel(CSTR("a"), CSTR("a"), &path), 0);
 	EXPECT_STR(path.path, "");
@@ -173,49 +217,70 @@ TEST(t_pathv_path)
 
 	pathv_t pathv = { 0 };
 
-	EXPECT_EQ(pathv_path(NULL, NULL), NULL);
-	EXPECT_EQ(pathv_path(&pathv, NULL), NULL);
-	EXPECT_EQ(pathv_path(&pathv, &path), &pathv);
-	EXPECT_EQ(pathv.len, path.len);
-	EXPECT_EQ(pathv.path, path.path);
+	pathv = pathv_path(NULL);
+	EXPECT_EQ(pathv.path, NULL);
+	EXPECT_EQ(pathv.len, 0);
+
+	pathv = pathv_path(&path);
+	EXPECT_STRN(pathv.path, "a/b/c", pathv.len);
 
 	END;
 }
 
-TEST(t_pathv_sub)
+TEST(t_pathv_get_dir)
 {
 	START;
 
-	path_t l = { 0 };
-	path_init(&l, CSTR("a/b/c"));
-	path_t r = { 0 };
-	path_init(&r, CSTR("a"));
-
+	path_t path   = { 0 };
 	pathv_t pathv = { 0 };
 
-	EXPECT_EQ(pathv_sub(NULL, NULL, NULL), NULL);
-	EXPECT_EQ(pathv_sub(&pathv, NULL, NULL), NULL);
-	EXPECT_EQ(pathv_sub(&pathv, &l, NULL), NULL);
-	EXPECT_EQ(pathv_sub(&pathv, &l, &r), &pathv);
+	pathv_t dir = { 0 };
+	str_t child;
 
-	EXPECT_STR(pathv.path, "b/c");
-
-	END;
-}
-
-TEST(t_pathv_folder)
-{
-	START;
-
-	path_t path = { 0 };
 	path_init(&path, CSTR("a/b/c"));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir((pathv_t){ 0 }, NULL);
+	EXPECT_EQ(dir.path, NULL);
+	EXPECT_EQ(dir.len, 0);
 
-	pathv_t pathv = { 0 };
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, NULL);
+	EXPECT_STRN(dir.path, "a/b/", dir.len);
 
-	EXPECT_EQ(pathv_folder(NULL, NULL), NULL);
-	EXPECT_EQ(pathv_folder(&pathv, NULL), NULL);
-	EXPECT_EQ(pathv_folder(&pathv, &path), &pathv);
-	EXPECT_STR(pathv.path, "c");
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "a/b/", dir.len);
+	EXPECT_STRN(child.data, "c", child.len);
+
+	path_init(&path, CSTR("a/b/c/"));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "a/b/", dir.len);
+	EXPECT_STRN(child.data, "c", child.len);
+
+	path_init(&path, CSTR("/a"));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "/", dir.len);
+	EXPECT_STRN(child.data, "a", child.len);
+
+	path_init(&path, CSTR("/"));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "", dir.len);
+	EXPECT_STRN(child.data, "", child.len);
+
+	path_init(&path, CSTR("a"));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "", dir.len);
+	EXPECT_STRN(child.data, "a", child.len);
+
+	path_init(&path, CSTR(""));
+	pathv = pathv_path(&path);
+	dir   = pathv_get_dir(pathv, &child);
+	EXPECT_STRN(dir.path, "", dir.len);
+	EXPECT_STRN(child.data, "", child.len);
 
 	END;
 }
@@ -226,12 +291,13 @@ STEST(t_path)
 	RUN(t_path_init);
 	RUN(t_path_child_s);
 	RUN(t_path_child);
+	RUN(t_path_child_dir);
+	RUN(t_path_child_folder);
 	RUN(t_path_parent);
 	RUN(t_path_set_len);
 	RUN(t_path_ends);
 	RUN(t_path_calc_rel);
 	RUN(t_pathv_path);
-	RUN(t_pathv_sub);
-	RUN(t_pathv_folder);
+	RUN(t_pathv_get_dir);
 	SEND;
 }

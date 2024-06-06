@@ -15,7 +15,7 @@
 #include "tree.h"
 #include "xml.h"
 
-#define SEP "\n------%s------\n\n"
+#define SEC "\n------%s------\n\n"
 
 static int print_arr(void *data, print_dst_t dst, const void *priv)
 {
@@ -32,7 +32,7 @@ static int handle_dir(const char *param, void *ret)
 
 static void example_args()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	arg_t args[] = {
 		[0] = ARG('T', "test", PARAM_NONE, "", "Run tests", NULL),
@@ -69,7 +69,7 @@ static void example_args()
 
 static void example_arr()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	arr_t arr = { 0 };
 
@@ -87,7 +87,7 @@ static void example_arr()
 
 static void example_bnf()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	bnf_t bnf = { 0 };
 	bnf_get_stx(&bnf);
@@ -135,7 +135,7 @@ static void example_bnf()
 
 static void example_ebnf()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	ebnf_t ebnf = { 0 };
 	ebnf_get_stx(&ebnf);
@@ -180,7 +180,7 @@ static void example_ebnf()
 
 static void example_esyntax()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	estx_t estx = { 0 };
 
@@ -229,7 +229,7 @@ static void example_esyntax()
 
 static void example_json()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	json_t json = { 0 };
 	json_init(&json, 1);
@@ -260,7 +260,7 @@ static int print_list(void *data, print_dst_t dst, const void *priv)
 
 static void example_lexer()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	lex_t lex = { 0 };
 
@@ -283,7 +283,7 @@ static void example_lexer()
 
 static void example_list()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	list_t list = { 0 };
 
@@ -318,7 +318,7 @@ static void example_list()
 
 static void example_log()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	log_trace("example", "cutils", NULL, "trace");
 	log_debug("example", "cutils", NULL, "debug");
@@ -330,7 +330,7 @@ static void example_log()
 
 static void example_make()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	make_t make = { 0 };
 	make_init(&make, 8, 8, 8);
@@ -386,7 +386,7 @@ static void example_make()
 
 static void example_parser()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	prs_t prs = { 0 };
 	prs_init(&prs, 100);
@@ -426,7 +426,7 @@ static void example_parser()
 
 static void example_syntax()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	stx_t stx = { 0 };
 
@@ -487,7 +487,7 @@ static int print_tree(void *data, print_dst_t dst, const void *priv)
 
 static void example_tree()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	tree_t tree = { 0 };
 
@@ -531,7 +531,7 @@ static void example_tree()
 
 static void example_xml()
 {
-	c_printf(SEP, __func__);
+	c_printf(SEC, __func__);
 
 	xml_t xml = { 0 };
 	xml_init(&xml, 8, 8);
@@ -581,7 +581,7 @@ int main(int argc, char **argv)
 	example_tree();
 	example_xml();
 
-	c_printf(SEP, "----------");
+	c_printf(SEC, "----------");
 
 	c_free(&cutils, PRINT_DST_STD());
 
