@@ -164,12 +164,9 @@ TEST(t_eprs_parse_name)
 	estx_t estx = { 0 };
 	estx_init(&estx, 10, 10);
 
-	//const estx_rule_t f    = estx_add_rule(&estx, STR("f"));
 	const estx_rule_t file = estx_add_rule(&estx, STR("file"));
 	const estx_rule_t vala = estx_add_rule(&estx, STR("vala"));
 	const estx_rule_t valb = estx_add_rule(&estx, STR("valb"));
-
-	//estx_rule_set_term(&estx, f, ESTX_TERM_RULE(&estx, file, ESTX_TERM_OCC_ONE));
 
 	const estx_term_t file_alt = estx_rule_set_term(&estx, file, ESTX_TERM_ALT(&estx));
 	estx_term_add_term(&estx, file_alt, ESTX_TERM_RULE(&estx, vala, ESTX_TERM_OCC_ONE));
@@ -177,9 +174,6 @@ TEST(t_eprs_parse_name)
 
 	estx_rule_set_term(&estx, valb, ESTX_TERM_LITERAL(&estx, STR("b"), ESTX_TERM_OCC_ONE));
 	estx_rule_set_term(&estx, vala, ESTX_TERM_LITERAL(&estx, STR("a"), ESTX_TERM_OCC_ONE));
-
-	estx_print_tree(&estx, PRINT_DST_STD());
-	estx_print(&estx, PRINT_DST_STD());
 
 	str_t bnf = STR("b");
 
@@ -189,13 +183,11 @@ TEST(t_eprs_parse_name)
 	eprs_node_t root = eprs_parse(&eprs, &estx, file, &lex);
 	EXPECT_EQ(root, 0);
 
-	eprs_print(&eprs, root, PRINT_DST_STD());
-
-	char buf[512] = { 0 };
+	char buf[64] = { 0 };
 	EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, sizeof(buf), 0)), 28);
 	EXPECT_STR(buf, "file\n"
-			"└─vala\n"
-			"  └─'a'\n");
+			"└─valb\n"
+			"  └─'b'\n");
 
 	eprs_free(&eprs);
 	lex_free(&lex);
@@ -446,12 +438,12 @@ TEST(t_eprs_parse_ebnf)
 		lex_tokenize(&lex, sbnf);
 
 		eprs_free(&eprs);
-		eprs_init(&eprs, 20000);
+		eprs_init(&eprs, 1000);
 
 		eprs_node_t root = eprs_parse(&eprs, &estx, estx_root, &lex);
 		EXPECT_EQ(root, 0);
-		char *buf = malloc(80000);
-		EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, 80000, 0)), 38838);
+		char *buf = malloc(40000);
+		EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, 80000, 0)), 20116);
 		free(buf);
 
 		lex_free(&lex);

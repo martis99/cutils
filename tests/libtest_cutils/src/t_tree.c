@@ -286,12 +286,22 @@ TEST(t_tree_set_cnt)
 	START;
 
 	tree_t tree = { 0 };
-	tree_init(&tree, 1, sizeof(int));
+	tree_init(&tree, 1, sizeof(tnode_t));
 
-	tree_add_child(&tree, tree_add(&tree));
+	tnode_t root  = tree_add(&tree);
+	tnode_t *data = tree_get_data(&tree, root);
+
+	*data = 10;
+
+	tree_add_child(&tree, root);
 
 	tree_set_cnt(NULL, 0);
-	tree_set_cnt(&tree, 0);
+	tree_set_cnt(&tree, 1);
+
+	tnode_t *child = data - 1;
+
+	EXPECT_EQ(*child, TREE_END);
+	EXPECT_EQ(*data, 10);
 
 	tree_free(&tree);
 
