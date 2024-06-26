@@ -10,6 +10,7 @@ static str_t token_type_strs[] = {
 	[TOKEN_DIGIT]	     = STRS("DIGIT"),
 	[TOKEN_SINGLE_QUOTE] = STRS("SINGLE_QUOTE"),
 	[TOKEN_DOUBLE_QUOTE] = STRS("DOUBLE_QUOTE"),
+	[TOKEN_COMMA]	     = STRS("COMMA"),
 	[TOKEN_WS]	     = STRS("WS"),
 	[TOKEN_SPACE]	     = STRS("SPACE"),
 	[TOKEN_TAB]	     = STRS("TAB"),

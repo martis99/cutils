@@ -293,7 +293,7 @@ TEST(t_prs_parse_bnf)
 				 "<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 				 "<cdouble> ::= <char> | '\"'\n"
 				 "<csingle> ::= <char> | \"'\"\n"
-				 "<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+				 "<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | <space>\n"
 				 "<spaces>  ::= <space> <spaces> | <space>\n"
 				 "<space>   ::= ' '\n");
 
@@ -307,7 +307,7 @@ TEST(t_prs_parse_bnf)
 		prs_node_t root = prs_parse(&prs, &bnf.stx, bnf.file, &lex);
 		EXPECT_EQ(root, 0);
 		char *buf = malloc(160000);
-		EXPECT_EQ(prs_print(&prs, root, PRINT_DST_BUF(buf, 160000, 0)), 92080);
+		EXPECT_EQ(prs_print(&prs, root, PRINT_DST_BUF(buf, 160000, 0)), 93372);
 		free(buf);
 
 		lex_free(&lex);

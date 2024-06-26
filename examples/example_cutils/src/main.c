@@ -108,7 +108,7 @@ static void example_bnf()
 			 "<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 			 "<cdouble> ::= <char> | '\"'\n"
 			 "<csingle> ::= <char> | \"'\"\n"
-			 "<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+			 "<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | <space>\n"
 			 "<spaces>  ::= <space> <spaces> | <space>\n"
 			 "<space>   ::= ' '\n");
 
@@ -154,7 +154,7 @@ static void example_ebnf()
 			 "literal = \"'\" (char | '\"')+ \"'\" | '\"' (char | \"'\")+ '\"'\n"
 			 "token   = UPPER+\n"
 			 "group   = '(' alt ')'\n"
-			 "char    = ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "char    = ALPHA | DIGIT | SYMBOL | COMMA | ' '\n"
 			 "spaces  = ' '+\n");
 
 	lex_t lex = { 0 };
@@ -186,15 +186,15 @@ static void example_esyntax()
 
 	estx_init(&estx, 10, 10);
 
-	const stx_rule_t file	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("file")), ESTX_TERM_CON(&estx));
-	const stx_rule_t function    = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("function")), ESTX_TERM_CON(&estx));
-	const stx_rule_t c	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("c")), ESTX_TERM_RULE(&estx, function, ESTX_TERM_OCC_REP));
-	const stx_rule_t type	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("type")), ESTX_TERM_LITERAL(&estx, STR("int"), 0));
-	const stx_rule_t chars	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("chars")), ESTX_TERM_ALT(&estx));
-	const stx_rule_t identifier  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("identifier")), ESTX_TERM_RULE(&estx, chars, ESTX_TERM_OCC_REP));
-	const stx_rule_t name	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("name")), ESTX_TERM_RULE(&estx, identifier, 0));
-	const stx_rule_t expressions = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expressions")), ESTX_TERM_ALT(&estx));
-	const stx_rule_t expression  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expression")), ESTX_TERM_CON(&estx));
+	const stx_term_t file	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("file")), ESTX_TERM_CON(&estx));
+	const stx_term_t function    = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("function")), ESTX_TERM_CON(&estx));
+	const stx_term_t c	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("c")), ESTX_TERM_RULE(&estx, function, ESTX_TERM_OCC_REP));
+	const stx_term_t type	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("type")), ESTX_TERM_LITERAL(&estx, STR("int"), 0));
+	const stx_term_t chars	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("chars")), ESTX_TERM_ALT(&estx));
+	const stx_term_t identifier  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("identifier")), ESTX_TERM_RULE(&estx, chars, ESTX_TERM_OCC_REP));
+	const stx_term_t name	     = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("name")), ESTX_TERM_RULE(&estx, identifier, 0));
+	const stx_term_t expressions = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expressions")), ESTX_TERM_ALT(&estx));
+	const stx_term_t expression  = estx_rule_set_term(&estx, estx_add_rule(&estx, STR("expression")), ESTX_TERM_CON(&estx));
 
 	estx_term_add_term(&estx, file, ESTX_TERM_RULE(&estx, c, 0));
 	estx_term_add_term(&estx, file, ESTX_TERM_TOKEN(&estx, TOKEN_EOF, 0));
@@ -219,7 +219,7 @@ static void example_esyntax()
 	estx_term_add_term(&estx, group, ESTX_TERM_RULE(&estx, expression, 0));
 
 	estx_term_add_term(&estx, expression, ESTX_TERM_LITERAL(&estx, STR("return 0;"), 0));
-	
+
 	estx_compile(&estx);
 
 	estx_print_tree(&estx, PRINT_DST_STD());

@@ -14,15 +14,17 @@ ini_prs_t *ini_prs_init(ini_prs_t *ini_prs)
 		return NULL;
 	}
 
-	str_t sbnf = STR("file   = ini EOF\n"
-			 "ini    = ('[' sec ']' NL | pair | NL)*\n"
-			 "sec    = ALPHA (ALPHA | DIGIT | '_' | '.')*\n"
-			 "pair   = key spaces '=' spaces vals? NL | vals NL\n"
-			 "key    = ALPHA (ALPHA | '_')*\n"
-			 "vals   = val (',' spaces val)*\n"
-			 "val    = char+\n"
-			 "char   = ALPHA | DIGIT | '_' | '-' | '$' | '(' | ')' | '/' | '\\' | ':' | '.' | '=' | '+' | ' '\n"
-			 "spaces = ' '*\n");
+	str_t sbnf = STR("file  = ini EOF\n"
+			 "ini   = ('[' sec ']' NL | pair | NL)*\n"
+			 "sec   = ALPHA (ALPHA | DIGIT | '_' | '.')*\n"
+			 "pair  = key ws '=' ws vals? NL | vals NL\n"
+			 "key   = ALPHA (ALPHA | '_')*\n"
+			 "vals  = vala (',' ws vala)+ | val\n"
+			 "val   = char+\n"
+			 "vala  = chara+\n"
+			 "char  = chara | COMMA\n"
+			 "chara = ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "ws    = ' '+\n");
 
 	lex_t lex = { 0 };
 	lex_init(&lex, 100);
@@ -43,6 +45,7 @@ ini_prs_t *ini_prs_init(ini_prs_t *ini_prs)
 	ini_prs->pair = estx_get_rule(&ini_prs->estx, STR("pair"));
 	ini_prs->key  = estx_get_rule(&ini_prs->estx, STR("key"));
 	ini_prs->vals = estx_get_rule(&ini_prs->estx, STR("vals"));
+	ini_prs->vala = estx_get_rule(&ini_prs->estx, STR("vala"));
 	ini_prs->val  = estx_get_rule(&ini_prs->estx, STR("val"));
 
 	lex_free(&lex);
@@ -83,6 +86,13 @@ void ini_parse_pair(const ini_prs_t *ini_prs, eprs_t *eprs, eprs_node_t prs_pair
 	eprs_node_t child;
 	eprs_node_foreach(&eprs->nodes, prs_vals, child)
 	{
+		eprs_node_t prs_vala = eprs_get_rule(eprs, child, ini_prs->vala);
+		if (prs_vala < eprs->nodes.cnt) {
+			str_t val = strz(16);
+			eprs_get_str(eprs, prs_vala, &val);
+			ini_add_val(ini, pair, val);
+		}
+
 		eprs_node_t prs_val = eprs_get_rule(eprs, child, ini_prs->val);
 		if (prs_val < eprs->nodes.cnt) {
 			str_t val = strz(16);

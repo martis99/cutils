@@ -95,6 +95,8 @@ lex_t *lex_tokenize(lex_t *lex, str_t str)
 				type |= 1 << TOKEN_SINGLE_QUOTE;
 			} else if (c == '"') {
 				type |= 1 << TOKEN_DOUBLE_QUOTE;
+			} else if (c == ',') {
+				type |= 1 << TOKEN_COMMA;
 			} else if (c == ' ') {
 				type |= 1 << TOKEN_WS;
 				type |= 1 << TOKEN_SPACE;
