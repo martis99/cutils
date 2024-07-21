@@ -1,10 +1,38 @@
 #include "test_cutils.h"
 
-#include "t_cutils_c.h"
-
 #include "cutils.h"
-
+#include "test.h"
 #include "test_test.h"
+
+STEST(t_args);
+STEST(t_arr);
+STEST(t_bnf);
+STEST(t_cstr);
+STEST(t_cplatform);
+STEST(t_cutils);
+STEST(t_dict);
+STEST(t_ebnf);
+STEST(t_eparser);
+STEST(t_esyntax);
+STEST(t_file);
+STEST(t_ini);
+STEST(t_ini_parse);
+STEST(t_json);
+STEST(t_lexer);
+STEST(t_list);
+STEST(t_log);
+STEST(t_md5);
+STEST(t_mem);
+STEST(t_parser);
+STEST(t_path);
+STEST(t_print);
+STEST(t_str);
+STEST(t_syntax);
+STEST(t_time);
+STEST(t_token);
+STEST(t_tree);
+STEST(t_type);
+STEST(t_xml);
 
 TEST(tests)
 {
@@ -26,7 +54,6 @@ TEST(tests)
 	RUN(t_lexer);
 	RUN(t_list);
 	RUN(t_log);
-	RUN(t_make);
 	RUN(t_md5);
 	RUN(t_mem);
 	RUN(t_parser);

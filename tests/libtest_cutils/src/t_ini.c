@@ -1,7 +1,7 @@
-#include "t_cutils_c.h"
-
 #include "ini.h"
+
 #include "mem.h"
+#include "test.h"
 
 TEST(t_ini_init_free)
 {

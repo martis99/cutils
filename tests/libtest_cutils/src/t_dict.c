@@ -1,7 +1,7 @@
-#include "t_cutils_c.h"
-
 #include "dict.h"
+
 #include "mem.h"
+#include "test.h"
 
 TEST(t_dict_init_free)
 {

@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "syntax.h"
 
 #include "cstr.h"
 #include "mem.h"
-#include "syntax.h"
+#include "test.h"
 
 TEST(t_stx_init_free)
 {

@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "args.h"
+
+#include "test.h"
 
 #define NAME "test_cutils"
 #define DESC "cutils tests"

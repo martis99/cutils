@@ -1,7 +1,7 @@
-#include "t_cutils_c.h"
+#include "token.h"
 
 #include "cstr.h"
-#include "token.h"
+#include "test.h"
 
 TEST(t_token_type_str)
 {

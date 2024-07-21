@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "cutils.h"
+
+#include "test.h"
 
 TEST(t_c_init)
 {

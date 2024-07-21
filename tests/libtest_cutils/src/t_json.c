@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "json.h"
 
 #include "cstr.h"
-#include "json.h"
 #include "mem.h"
+#include "test.h"
 
 TEST(t_json_init_free)
 {

@@ -4,7 +4,7 @@
 #include "print.h"
 #include "type.h"
 
-#define ARR_END ((uint)-1)
+#define ARR_END ((uint) - 1)
 
 typedef struct arr_s {
 	void *data;
@@ -44,5 +44,13 @@ int arr_print(const arr_t *arr, arr_print_cb cb, print_dst_t dst, const void *pr
 
 #define arr_foreach(_arr, _val)	      for (uint _i = 0; _i < (_arr)->cnt && (_val = arr_get(_arr, _i)); _i++)
 #define arr_foreach_i(_arr, _val, _i) for (; _i < (_arr)->cnt && (_val = arr_get(_arr, _i)); _i++)
+
+#define arr_add_t(_type, _arr, _val, _id) \
+	uint _id     = arr_add(_arr);     \
+	_type *_data = arr_get(_arr, id); \
+	if (_data == NULL) {              \
+		return ARR_END;           \
+	}                                 \
+	*_data = _val;
 
 #endif

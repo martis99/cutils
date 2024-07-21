@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "path.h"
 
 #include "cstr.h"
-#include "path.h"
 #include "platform.h"
+#include "test.h"
 
 TEST(t_path_init)
 {

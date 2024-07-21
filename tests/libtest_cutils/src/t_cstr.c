@@ -1,7 +1,7 @@
-#include "t_cutils_c.h"
-
 #include "cstr.h"
+
 #include "platform.h"
+#include "test.h"
 
 #include <wchar.h>
 

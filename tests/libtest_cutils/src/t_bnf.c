@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
-
 #include "bnf.h"
+
 #include "cstr.h"
 #include "mem.h"
+#include "test.h"
 
 TEST(t_bnf_init_free)
 {
