@@ -97,6 +97,10 @@ lnode_t list_get_next(const list_t *list, lnode_t node)
 
 lnode_t list_get_at(const list_t *list, lnode_t start, lnode_t index)
 {
+	if (list == NULL) {
+		return LIST_END;
+	}
+
 	lnode_t i   = 0;
 	lnode_t cur = start;
 	while (cur < list->cnt && i < index) {
