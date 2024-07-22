@@ -7,7 +7,6 @@ cutils_t *c_init(cutils_t *cutils)
 	}
 
 	cplatform_init(&cutils->cplatform);
-	mem_init(&cutils->mem);
 
 	return cutils;
 }

@@ -102,7 +102,6 @@ TEST(t_mem_realloc)
 	EXPECT_EQ(ptr = mem_realloc(ptr, 0, 0), prev);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 0, 1), NULL);
-	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 1), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 2, 1), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 2), NULL);

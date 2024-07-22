@@ -6,7 +6,6 @@
 
 typedef struct cutils_s {
 	cplatform_t cplatform;
-	mem_t mem;
 } cutils_t;
 
 cutils_t *c_init(cutils_t *cutils);
