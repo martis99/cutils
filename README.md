@@ -28,7 +28,6 @@ cross-platform utitilities and basic data structures implementation in C
 ### File Formats
 - [ ] bnf
 - [x] json
-- [x] makefile
 - [x] xml
 
 ## Build

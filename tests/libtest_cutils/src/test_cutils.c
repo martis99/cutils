@@ -26,7 +26,6 @@ TEST(tests)
 	RUN(t_lexer);
 	RUN(t_list);
 	RUN(t_log);
-	RUN(t_make);
 	RUN(t_md5);
 	RUN(t_mem);
 	RUN(t_parser);

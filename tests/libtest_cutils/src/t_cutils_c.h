@@ -21,7 +21,6 @@ STEST(t_json);
 STEST(t_lexer);
 STEST(t_list);
 STEST(t_log);
-STEST(t_make);
 STEST(t_md5);
 STEST(t_mem);
 STEST(t_parser);

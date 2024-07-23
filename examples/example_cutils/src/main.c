@@ -8,7 +8,6 @@
 #include "lexer.h"
 #include "list.h"
 #include "log.h"
-#include "make.h"
 #include "parser.h"
 #include "print.h"
 #include "syntax.h"
@@ -328,62 +327,6 @@ static void example_log()
 	log_fatal("example", "cutils", NULL, "fatal");
 }
 
-static void example_make()
-{
-	c_printf(SEC, __func__);
-
-	make_t make = { 0 };
-	make_init(&make, 8, 8, 8);
-
-	make_add_act(&make, make_create_var_ext(&make, STR("SLNDIR"), MAKE_VAR_INST));
-	make_add_act(&make, make_create_var_ext(&make, STR("CONFIG"), MAKE_VAR_INST));
-
-	make_var_t platform = make_add_act(&make, make_create_var_ext(&make, STR("PLATFORM"), MAKE_VAR_INST));
-	make_var_t tool	    = make_add_act(&make, make_create_var_ext(&make, STR("TOOL"), MAKE_VAR_INST));
-
-	make_var_t outdir = make_add_act(&make, make_create_var(&make, STR("OUTDIR"), MAKE_VAR_INST));
-	make_var_add_val(&make, outdir, MSTR(STR("$(SLNDIR)bin/$(CONFIG)-$(PLATFORM)/test/")));
-
-	make_if_t if_bits = make_add_act(&make, make_create_if(&make, MVAR(platform), MSTR(STR("x64"))));
-
-	make_var_t bits64 = make_if_add_true_act(&make, if_bits, make_create_var(&make, STR("BITS"), MAKE_VAR_INST));
-	make_var_add_val(&make, bits64, MSTR(STR("64")));
-
-	make_var_t bits32 = make_if_add_false_act(&make, if_bits, make_create_var(&make, STR("BITS"), MAKE_VAR_INST));
-	make_var_add_val(&make, bits32, MSTR(STR("32")));
-
-	make_var_t target = make_add_act(&make, make_create_var(&make, STR("TARGET"), MAKE_VAR_INST));
-	make_var_add_val(&make, target, MSTR(STR("$(OUTDIR)test$(BITS)")));
-
-	make_rule_t compile = make_add_act(&make, make_create_rule(&make, MRULE(MVAR(target)), 1));
-	make_rule_add_depend(&make, compile, MRULE(MSTR(STR("depend"))));
-
-	make_rule_add_act(&make, compile, make_create_cmd(&make, MCMD(STR("prepare"))));
-
-	make_rule_t if_gcc = make_rule_add_act(&make, compile, make_create_if(&make, MVAR(tool), MSTR(STR("gcc"))));
-
-	make_if_add_true_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("gcc"))));
-
-	make_if_add_false_act(&make, if_gcc, make_create_cmd(&make, MCMD(STR("clang"))));
-
-	make_rule_add_act(&make, compile, make_create_cmd(&make, MCMD(STR("cleanup"))));
-
-	make_print(&make, PRINT_DST_STD());
-
-	make_ext_set_val(&make, STR("SLNDIR"), MSTR(STR("./")));
-	make_ext_set_val(&make, STR("CONFIG"), MSTR(STR("Debug")));
-	make_ext_set_val(&make, STR("PLATFORM"), MSTR(STR("x64")));
-	make_ext_set_val(&make, STR("TOOL"), MSTR(STR("cland")));
-
-	make_expand(&make);
-
-	str_t target_path = make_var_get_expanded(&make, STR("TARGET"));
-
-	printf("TARGET: %.*s\n", (int)target_path.len, target_path.data);
-
-	make_free(&make);
-}
-
 static void example_parser()
 {
 	c_printf(SEC, __func__);
@@ -575,7 +518,6 @@ int main(int argc, char **argv)
 	example_lexer();
 	example_list();
 	example_log();
-	example_make();
 	example_parser();
 	example_syntax();
 	example_tree();
