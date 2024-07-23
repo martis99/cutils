@@ -32,7 +32,7 @@ TEST(t_ebnf_get_stx)
 	EXPECT_NE(ebnf_get_stx(&ebnf), NULL);
 
 	char buf[1024] = { 0 };
-	EXPECT_EQ(stx_print(&ebnf.stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 894);
+	EXPECT_EQ(stx_print(&ebnf.stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 902);
 	EXPECT_STR(buf, "<file>    ::= <ebnf> EOF\n"
 			"<ebnf>    ::= <rules>\n"
 			"<rules>   ::= <rule> <rules> | <rule>\n"
@@ -56,7 +56,7 @@ TEST(t_ebnf_get_stx)
 			"<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 			"<cdouble> ::= <char> | '\"'\n"
 			"<csingle> ::= <char> | \"'\"\n"
-			"<char>    ::= ALPHA | DIGIT | SYMBOL | ' '\n");
+			"<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | ' '\n");
 
 	ebnf_free(&ebnf);
 
@@ -84,7 +84,7 @@ TEST(t_stx_from_ebnf)
 			 "literal = \"'\" (char | '\"')+ \"'\" | '\"' (char | \"'\")+ '\"'\n"
 			 "token   = UPPER+\n"
 			 "group   = '(' alt ')'\n"
-			 "char    = ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "char    = ALPHA | DIGIT | SYMBOL | COMMA | ' '\n"
 			 "spaces  = ' '+\n");
 
 	lex_t lex = { 0 };

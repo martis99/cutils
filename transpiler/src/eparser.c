@@ -160,8 +160,8 @@ static int eprs_parse_term(eprs_t *eprs, estx_rule_t rule, estx_term_t term_id, 
 		eprs_node_t child = EPRS_NODE_RULE(eprs, term->val.rule);
 		lex_token_t cur	  = *off;
 		if (eprs_parse_rule(eprs, term->val.rule, off, child, err)) {
-			eprs->nodes.cnt = nodes_cnt;
-			*off		= cur;
+			tree_set_cnt(&eprs->nodes, nodes_cnt);
+			*off = cur;
 			return 1;
 		}
 		eprs_add_node(eprs, node, child);

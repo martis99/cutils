@@ -12,6 +12,7 @@ typedef struct ini_prs_s {
 	estx_rule_t pair;
 	estx_rule_t key;
 	estx_rule_t vals;
+	estx_rule_t valc;
 	estx_rule_t val;
 } ini_prs_t;
 

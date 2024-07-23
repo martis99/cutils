@@ -49,7 +49,7 @@ const stx_t *ebnf_get_stx(ebnf_t *ebnf)
 			 "<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 			 "<cdouble> ::= <char> | '\"'\n"
 			 "<csingle> ::= <char> | \"'\"\n"
-			 "<char>    ::= ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | ' '\n"
 			 "<spaces>  ::= <space> <spaces> | <space>\n"
 			 "<space>   ::= ' '\n");
 

@@ -110,16 +110,16 @@ void tree_set_cnt(tree_t *tree, uint cnt)
 		return;
 	}
 
+	list_set_cnt(tree, cnt);
+
 	tnode_t node;
 	tree_foreach_all(tree, node)
 	{
-		header_t *header = tree_get_data(tree, node);
+		header_t *header = get_node(tree, node);
 		if (header->child >= cnt) {
 			header->child = TREE_END;
 		}
 	}
-
-	list_set_cnt(tree, cnt);
 }
 
 void *tree_get_data(const tree_t *tree, tnode_t node)

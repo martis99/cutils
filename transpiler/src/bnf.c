@@ -108,8 +108,8 @@ const stx_t *bnf_get_stx(bnf_t *bnf)
 	stx_rule_add_term(stx, cdouble, STX_TERM_OR(stx, STX_TERM_RULE(stx, character), STX_TERM_LITERAL(stx, STR("\""))));
 	stx_rule_add_term(stx, csingle, STX_TERM_OR(stx, STX_TERM_RULE(stx, character), STX_TERM_LITERAL(stx, STR("'"))));
 
-	stx_rule_add_or(stx, character, 4, STX_TERM_TOKEN(stx, TOKEN_ALPHA), STX_TERM_TOKEN(stx, TOKEN_DIGIT), STX_TERM_TOKEN(stx, TOKEN_SYMBOL),
-			STX_TERM_RULE(stx, space));
+	stx_rule_add_or(stx, character, 5, STX_TERM_TOKEN(stx, TOKEN_ALPHA), STX_TERM_TOKEN(stx, TOKEN_DIGIT), STX_TERM_TOKEN(stx, TOKEN_SYMBOL),
+			STX_TERM_TOKEN(stx, TOKEN_COMMA), STX_TERM_RULE(stx, space));
 
 	stx_rule_add_arr(stx, spaces, STX_TERM_RULE(stx, space), STX_TERM_NONE(stx));
 

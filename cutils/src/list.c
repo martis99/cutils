@@ -117,14 +117,15 @@ void list_set_cnt(list_t *list, uint cnt)
 		return;
 	}
 
+	list->cnt = cnt;
+
 	header_t *val;
-	list_foreach_all(list, val)
+	arr_foreach(list, val)
 	{
 		if (val->next >= cnt) {
 			val->next = LIST_END;
 		}
 	}
-	list->cnt = cnt;
 }
 
 void *list_get_data(const list_t *list, lnode_t node)

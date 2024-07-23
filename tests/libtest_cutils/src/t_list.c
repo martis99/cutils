@@ -279,12 +279,22 @@ TEST(t_list_set_cnt)
 	START;
 
 	list_t list = { 0 };
-	list_init(&list, 1, sizeof(int));
+	list_init(&list, 1, sizeof(lnode_t));
 
-	list_add_next(&list, list_add(&list));
+	lnode_t root  = list_add(&list);
+	lnode_t *data = list_get_data(&list, root);
+
+	*data = 10;
+
+	list_add_next(&list, root);
 
 	list_set_cnt(NULL, 0);
-	list_set_cnt(&list, 0);
+	list_set_cnt(&list, 1);
+
+	lnode_t *next = data - 1;
+
+	EXPECT_EQ(*next, LIST_END);
+	EXPECT_EQ(*data, 10);
 
 	list_free(&list);
 

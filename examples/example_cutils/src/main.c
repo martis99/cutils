@@ -107,7 +107,7 @@ static void example_bnf()
 			 "<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 			 "<cdouble> ::= <char> | '\"'\n"
 			 "<csingle> ::= <char> | \"'\"\n"
-			 "<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+			 "<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | <space>\n"
 			 "<spaces>  ::= <space> <spaces> | <space>\n"
 			 "<space>   ::= ' '\n");
 
@@ -153,7 +153,7 @@ static void example_ebnf()
 			 "literal = \"'\" (char | '\"')+ \"'\" | '\"' (char | \"'\")+ '\"'\n"
 			 "token   = UPPER+\n"
 			 "group   = '(' alt ')'\n"
-			 "char    = ALPHA | DIGIT | SYMBOL | ' '\n"
+			 "char    = ALPHA | DIGIT | SYMBOL | COMMA | ' '\n"
 			 "spaces  = ' '+\n");
 
 	lex_t lex = { 0 };
@@ -218,7 +218,7 @@ static void example_esyntax()
 	estx_term_add_term(&estx, group, ESTX_TERM_RULE(&estx, expression, 0));
 
 	estx_term_add_term(&estx, expression, ESTX_TERM_LITERAL(&estx, STR("return 0;"), 0));
-	
+
 	estx_compile(&estx);
 
 	estx_print_tree(&estx, PRINT_DST_STD());

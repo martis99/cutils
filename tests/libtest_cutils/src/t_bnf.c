@@ -32,7 +32,7 @@ TEST(t_bnf_get_stx)
 	EXPECT_NE(bnf_get_stx(&bnf), NULL);
 
 	char buf[1024] = { 0 };
-	EXPECT_EQ(stx_print(&bnf.stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 748);
+	EXPECT_EQ(stx_print(&bnf.stx, PRINT_DST_BUF(buf, sizeof(buf), 0)), 756);
 	EXPECT_STR(buf, "<file>    ::= <bnf> EOF\n"
 			"<bnf>     ::= <rules>\n"
 			"<rules>   ::= <rule> <rules> | <rule>\n"
@@ -49,7 +49,7 @@ TEST(t_bnf_get_stx)
 			"<tsingle> ::= <csingle> <tsingle> | <csingle>\n"
 			"<cdouble> ::= <char> | '\"'\n"
 			"<csingle> ::= <char> | \"'\"\n"
-			"<char>    ::= ALPHA | DIGIT | SYMBOL | <space>\n"
+			"<char>    ::= ALPHA | DIGIT | SYMBOL | COMMA | <space>\n"
 			"<spaces>  ::= <space> <spaces> | <space>\n"
 			"<space>   ::= ' '\n");
 
@@ -81,7 +81,7 @@ TEST(t_stx_from_bnf)
 			 "<text-single> ::= <char-single> <text-single> | <char-single>\n"
 			 "<char-double> ::= <character> | '\"'\n"
 			 "<char-single> ::= <character> | \"'\"\n"
-			 "<character>   ::= ALPHA | DIGIT | SYMBOL\n"
+			 "<character>   ::= ALPHA | DIGIT | SYMBOL | COMMA\n"
 			 "<spaces>      ::= <space> <spaces> | <space>\n"
 			 "<space>       ::= ' '\n");
 
