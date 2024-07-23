@@ -15,8 +15,6 @@ typedef enum token_type_e {
 
 	TOKEN_SINGLE_QUOTE,
 	TOKEN_DOUBLE_QUOTE,
-	
-	TOKEN_COMMA,
 
 	TOKEN_COMMA,
 
