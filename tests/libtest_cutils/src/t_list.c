@@ -254,6 +254,26 @@ TEST(t_list_next)
 	SEND;
 }
 
+TEST(t_list_get_at)
+{
+	START;
+
+	list_t list = { 0 };
+	list_init(&list, 1, sizeof(int));
+
+	const lnode_t node = list_add(&list);
+	const lnode_t next = list_add_next(&list, node);
+
+	EXPECT_EQ(list_get_at(NULL, LIST_END, LIST_END), LIST_END);
+	EXPECT_EQ(list_get_at(&list, LIST_END, LIST_END), LIST_END);
+	EXPECT_EQ(list_get_at(&list, node, 0), node);
+	EXPECT_EQ(list_get_at(&list, node, 1), next);
+
+	list_free(&list);
+
+	END;
+}
+
 TEST(t_list_set_cnt)
 {
 	START;
@@ -400,6 +420,7 @@ STEST(t_list)
 	RUN(t_list_init_free);
 	RUN(t_list_add_remove);
 	RUN(t_list_next);
+	RUN(t_list_get_at);
 	RUN(t_list_set_cnt);
 	RUN(t_list_get_data);
 	RUN(t_list_foreachs);

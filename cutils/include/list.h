@@ -19,6 +19,7 @@ int list_remove(list_t *list, lnode_t node);
 lnode_t list_add_next(list_t *list, lnode_t node);
 lnode_t list_set_next(list_t *list, lnode_t node, lnode_t next);
 lnode_t list_get_next(const list_t *list, lnode_t node);
+lnode_t list_get_at(const list_t *list, lnode_t start, lnode_t index);
 
 void list_set_cnt(list_t *list, uint cnt);
 
