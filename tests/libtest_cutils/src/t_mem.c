@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "mem.h"
+
+#include "test.h"
 
 TESTP(t_mem_init, mem_t *mem)
 {

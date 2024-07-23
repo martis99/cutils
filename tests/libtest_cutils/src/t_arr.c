@@ -1,9 +1,9 @@
-#include "t_cutils_c.h"
-
 #include "arr.h"
+
 #include "cstr.h"
 #include "mem.h"
 #include "print.h"
+#include "test.h"
 
 TEST(t_arr_init_free)
 {

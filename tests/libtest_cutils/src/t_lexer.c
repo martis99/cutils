@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "lexer.h"
 
 #include "cstr.h"
-#include "lexer.h"
 #include "mem.h"
+#include "test.h"
 
 TEST(t_lex_init_free)
 {

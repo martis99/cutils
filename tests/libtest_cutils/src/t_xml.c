@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "xml.h"
 
 #include "cstr.h"
 #include "mem.h"
-#include "xml.h"
+#include "test.h"
 
 TEST(t_xml_init_free)
 {

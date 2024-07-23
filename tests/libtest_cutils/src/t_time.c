@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "c_time.h"
+
+#include "test.h"
 
 TEST(time_int)
 {

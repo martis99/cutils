@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
-
 #include "list.h"
+
 #include "mem.h"
 #include "print.h"
+#include "test.h"
 
 TEST(t_list_init_free)
 {

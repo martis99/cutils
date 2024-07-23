@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "cplatform.h"
+
+#include "test.h"
 
 TEST(t_cplatform_init)
 {

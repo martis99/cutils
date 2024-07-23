@@ -1,6 +1,6 @@
-#include "t_cutils_c.h"
-
 #include "log.h"
+
+#include "test.h"
 
 TEST(t_log_init)
 {

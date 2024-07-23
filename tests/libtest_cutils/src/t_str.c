@@ -1,7 +1,7 @@
-#include "t_cutils_c.h"
+#include "str.h"
 
 #include "mem.h"
-#include "str.h"
+#include "test.h"
 
 TEST(t_str_null)
 {

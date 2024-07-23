@@ -1,8 +1,8 @@
-#include "t_cutils_c.h"
+#include "ebnf.h"
 
 #include "cstr.h"
-#include "ebnf.h"
 #include "mem.h"
+#include "test.h"
 
 TEST(t_ebnf_init_free)
 {
