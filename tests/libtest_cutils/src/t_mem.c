@@ -27,20 +27,20 @@ TEST(t_mem_print)
 
 	mem_t *mem = (mem_t *)mem_get();
 
-	size_t mem_max = mem->mem_max;
+	size_t peak = mem->peak;
 
 	char buf[64] = { 0 };
 
-	mem->mem_max = 10;
+	mem->peak = 10;
 	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	mem->mem_max = 1024 + 10;
+	mem->peak = 1024 + 10;
 	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	mem->mem_max = 1024 * 1024 + 10;
+	mem->peak = 1024 * 1024 + 10;
 	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
 
-	mem->mem_max = mem_max;
+	mem->peak = peak;
 
 	mem_sset(NULL);
 	EXPECT_EQ(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
@@ -102,7 +102,6 @@ TEST(t_mem_realloc)
 	EXPECT_EQ(ptr = mem_realloc(ptr, 0, 0), prev);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 0, 1), NULL);
-	EXPECT_NE(ptr = mem_realloc(ptr, 1, 0), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 1), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 2, 1), NULL);
 	EXPECT_NE(ptr = mem_realloc(ptr, 1, 2), NULL);

@@ -29,11 +29,13 @@ STEST(t_cplatform)
 	SSTART;
 
 	const log_t *log = log_get();
+	const mem_t *mem = mem_get();
 
 	RUN(t_cplatform_init);
 	RUN(t_cplatform_free);
 
 	log_set((log_t *)log);
+	mem_sset((mem_t *)mem);
 
 	SEND;
 }

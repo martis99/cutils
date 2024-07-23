@@ -486,7 +486,7 @@ TEST(t_tree_removes)
 
 static int iterate_pre_root_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -497,7 +497,7 @@ static int iterate_pre_root_cb(const tree_t *tree, tnode_t node, void *value, in
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_pre_root)
@@ -525,7 +525,7 @@ TEST(t_tree_iterate_pre_root)
 
 static int iterate_pre_child_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -543,7 +543,7 @@ static int iterate_pre_child_cb(const tree_t *tree, tnode_t node, void *value, i
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_pre_child)
@@ -570,7 +570,7 @@ TEST(t_tree_iterate_pre_child)
 
 static int iterate_pre_childs_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -592,7 +592,7 @@ static int iterate_pre_childs_cb(const tree_t *tree, tnode_t node, void *value, 
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_pre_childs)
@@ -621,7 +621,7 @@ TEST(t_tree_iterate_pre_childs)
 
 static int iterate_pre_grand_child_cb(const tree_t *tree, tnode_t node, void *value, int ret, int depth, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -643,7 +643,7 @@ static int iterate_pre_grand_child_cb(const tree_t *tree, tnode_t node, void *va
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_pre_grand_child)
@@ -672,7 +672,7 @@ TEST(t_tree_iterate_pre_grand_child)
 
 static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	START;
+	int _passed;
 
 	(void)tree;
 	(void)value;
@@ -682,7 +682,7 @@ static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, void *value,
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_childs_root)
@@ -708,7 +708,7 @@ TEST(t_tree_iterate_childs_root)
 
 static int iterate_childs_child_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -718,7 +718,7 @@ static int iterate_childs_child_cb(const tree_t *tree, tnode_t node, void *value
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_childs_child)
@@ -745,7 +745,7 @@ TEST(t_tree_iterate_childs_child)
 
 static int iterate_childs_childs_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	START;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -757,7 +757,7 @@ static int iterate_childs_childs_cb(const tree_t *tree, tnode_t node, void *valu
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_childs_childs)
@@ -786,7 +786,7 @@ TEST(t_tree_iterate_childs_childs)
 
 static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	START;
+	int _passed;
 
 	(void)tree;
 	(void)value;
@@ -798,7 +798,7 @@ static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, void 
 
 	*(int *)priv += 1;
 
-	return ret + RES;
+	return ret + !_passed;
 }
 
 TEST(t_tree_iterate_childs_grand_child)

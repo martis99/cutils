@@ -7,7 +7,6 @@ cutils_t *c_init(cutils_t *cutils)
 	}
 
 	cplatform_init(&cutils->cplatform);
-	mem_init(&cutils->mem);
 
 	return cutils;
 }
@@ -18,7 +17,7 @@ int c_free(cutils_t *cutils, print_dst_t dst)
 		return 1;
 	}
 
-	 mem_print(dst);
+	mem_print(dst);
 
 	if (mem_check()) {
 		return 1;
