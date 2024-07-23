@@ -18,6 +18,8 @@ typedef enum token_type_e {
 	
 	TOKEN_COMMA,
 
+	TOKEN_COMMA,
+
 	TOKEN_WS,
 	TOKEN_SPACE,
 	TOKEN_TAB,
