@@ -672,7 +672,7 @@ TEST(t_tree_iterate_pre_grand_child)
 
 static int iterate_childs_root_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	int _passed;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;
@@ -786,7 +786,7 @@ TEST(t_tree_iterate_childs_childs)
 
 static int iterate_childs_grand_child_cb(const tree_t *tree, tnode_t node, void *value, int ret, int last, void *priv)
 {
-	int _passed;
+	int _passed = 1;
 
 	(void)tree;
 	(void)value;

@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "test.h"
 
+#include <memory.h>
 #include <stdlib.h>
 
 TEST(t_eprs_init_free)
@@ -442,8 +443,8 @@ TEST(t_eprs_parse_ebnf)
 
 		eprs_node_t root = eprs_parse(&eprs, &estx, estx_root, &lex);
 		EXPECT_EQ(root, 0);
-		char *buf = malloc(40000);
-		EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, 80000, 0)), 20116);
+		char *buf = malloc(30000);
+		EXPECT_EQ(eprs_print(&eprs, root, PRINT_DST_BUF(buf, 30000, 0)), 20116);
 		free(buf);
 
 		lex_free(&lex);

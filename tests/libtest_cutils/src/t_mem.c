@@ -29,7 +29,7 @@ TEST(t_mem_print)
 
 	size_t peak = mem->peak;
 
-	char buf[64] = { 0 };
+	char buf[256] = { 0 };
 
 	mem->peak = 10;
 	EXPECT_GT(mem_print(PRINT_DST_BUF(buf, sizeof(buf), 0)), 0);
