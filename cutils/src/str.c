@@ -298,8 +298,15 @@ int str_cpyd(str_t src, str_t *dst)
 		return 1;
 	}
 
-	cstr_cpy((char *)dst->data, dst->size, src.data, src.len);
-	dst->len		      = src.len;
+	void *data = cstr_cpy((char *)dst->data, dst->size, src.data, src.len);
+
+	if (data == NULL) {
+		return 1;
+	}
+
+	dst->data = data;
+	dst->len  = src.len;
+
 	((char *)dst->data)[dst->len] = '\0';
 
 	return 0;

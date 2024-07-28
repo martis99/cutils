@@ -438,6 +438,7 @@ TEST(t_str_cpyd)
 
 	EXPECT_EQ(str_cpyd(src, NULL), 1);
 	EXPECT_EQ(str_cpyd(dst, &src), 1);
+	EXPECT_EQ(str_cpyd(str_null(), &dst), 1);
 	EXPECT_EQ(str_cpyd(src, &dst), 0);
 
 	EXPECT_STR(dst.data, "abc");
